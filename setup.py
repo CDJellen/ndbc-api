@@ -13,21 +13,21 @@ def get_requrements():
 
 
 setup(name='ndbc-api',
-      version='0.1',
+      version='0.0.1',
       description='Python National Data Buoy Center (NDBC) API.',
       long_description=get_readme(),
       classifiers=[
         'Programming Language :: Python :: 3.7',
       ],
       keywords='ndbc',
-      url='http://github.com/cdjellen/pyndbc',
+      url='http://github.com/cdjellen/ndbc-api',
       author='Chris Jellen',
       author_email='cdjellen@gmail.com',
       license='MIT',
       packages=find_packages(),
       install_requires=["requests", "pandas"],
       entry_points={
-          'console_scripts': ['pyndbc=pyndbc.pyndbc:main'],
+          'console_scripts': ['nsbc-api=ndbc_api.ndbc_api:main'],
       },
       include_package_data=True,
       zip_safe=False)

@@ -1,0 +1,1 @@
+LOGGER_NAME: str = 'NDBC-API'
