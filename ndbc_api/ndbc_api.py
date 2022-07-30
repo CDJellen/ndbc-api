@@ -20,8 +20,6 @@ class NdbcApi:
         self,
         logging_level: int = logging.WARNING,
         cache_limit: int = DEFAULT_CACHE_LIMIT,
-        *args,
-        **kwargs
         ):
         self.log.setLevel(logging_level)
         self.cache_limit = cache_limit
@@ -67,7 +65,7 @@ class NdbcApi:
                 lat-lon information.')
         if not station_id and (lat and lon):
             station_id = self.get_station_id_from_lat_lon(lat=lat, lon=lon)
-  
+
         return self._modes[mode](station_id=station_id,
                                    start_time=start_time,
                                    end_time=end_time,
