@@ -1,10 +1,16 @@
-from api.requests._core import CoreRequest
+from typing import List
+
+import pandas as pd
+
+from api.parsers._html import HtmlParser
 
 
-class Stations(CoreRequest):
+class StationMetaParser(HtmlParser):
 
-    STATION_PREFIX = 'station_page.php?station='
+    INDEX_COL = None  # TODO
 
     @classmethod
-    def build_request(cls, station_id: str) -> str:
-        return f'{cls.BASE_URL}{cls.STATION_PREFIX}{station_id}'
+    def df_from_responses(cls, responses: List[dict]) -> pd.DataFrame:
+        dfs = super(StationMetaParser, cls).dfs_from_responses(responses)
+        df = pd.DataFrame()  # TODO
+        return df

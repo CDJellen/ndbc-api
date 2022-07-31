@@ -8,7 +8,7 @@ from api.parsers._base import BaseParser
 class AdcpParser(BaseParser):
 
     INDEX_COL = 0
-    NAN_VALUES = [99.0, 999, 9999]
+    NAN_VALUES = None
 
     @classmethod
     def df_from_responses(cls, responses: List[dict]) -> pd.DataFrame:
