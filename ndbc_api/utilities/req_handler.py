@@ -9,6 +9,7 @@ from .req_cache import RequestCache
 class RequestHandler(metaclass=Singleton):
 
     class Station:
+
         __slots__ = 'id', 'reqs'
 
         def __init__(self, station_id: str, cache_limit: int) -> None:
@@ -17,12 +18,21 @@ class RequestHandler(metaclass=Singleton):
 
     def __init__(self, cache_limit, log) -> None:
         self._cache_limit = cache_limit
+        self._request_headers = {}
         self.log = log
         self.stations = []
-        self.request_headers = {}
 
-    def update_cache_limit(self, cache_limit: int) -> None:
+    def get_cache_limit(self) -> int:
+        return self._cache_limit
+
+    def set_cache_limit(self, cache_limit: int) -> None:
         self._cache_limit = cache_limit
+
+    def update_headers(self, new: dict) -> None:
+        self._request_headers.update(new)
+
+    def set_headers(self, request_headers: dict) -> None:
+        self._request_headers = request_headers
 
     def has_station(self, station_id: Union[str, int]) -> bool:
         for s in self.stations:
@@ -65,7 +75,7 @@ class RequestHandler(metaclass=Singleton):
     def handle_request(self, station_id: Union[str, int], req: str) -> dict:
         stn = self.get_station(station_id=station_id)
         if req not in stn.reqs.cache:
-            resp = self.execute_request(url=req, headers=self.request_headers)
+            resp = self.execute_request(url=req, headers=self._request_headers)
             stn.reqs.put(request=req, reponse=resp)
         return stn.reqs.get(request=req)
 
