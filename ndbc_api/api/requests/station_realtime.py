@@ -1,0 +1,11 @@
+from api.requests._core import CoreRequest
+
+
+class StationMeasurementsRequest(CoreRequest):
+
+    STATION_REALTIME_PREFIX = 'station_realtime.php?station='
+
+    @classmethod
+    def build_request(cls, station_id: str) -> str:
+        return f'{cls.BASE_URL}{cls.STATION_REALTIME_PREFIX}{station_id}'
+    
