@@ -1,4 +1,4 @@
-from api.requests._core import CoreRequest
+from ndbc_api.api.requests._core import CoreRequest
 
 
 class StationsRequest(CoreRequest):

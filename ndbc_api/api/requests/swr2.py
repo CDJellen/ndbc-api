@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import List
 
-from api.requests._base import BaseRequest
+from ndbc_api.api.requests._base import BaseRequest
 
 
 class Swr2Request(BaseRequest):

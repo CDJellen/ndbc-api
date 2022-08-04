@@ -2,7 +2,7 @@ from typing import List
 
 import pandas as pd
 
-from api.parsers._base import BaseParser
+from ndbc_api.api.parsers._base import BaseParser
 
 
 class SuplParser(BaseParser):

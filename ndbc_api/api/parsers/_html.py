@@ -3,7 +3,7 @@ from typing import List
 import pandas as pd
 from bs4 import BeautifulSoup
 
-from api.parsers._base import BaseParser
+from ndbc_api.api.parsers._base import BaseParser
 
 
 class HtmlParser(BaseParser):

@@ -2,7 +2,7 @@ from calendar import month_abbr
 from datetime import datetime, timedelta
 from typing import List
 
-from api.requests._core import CoreRequest
+from ndbc_api.api.requests._core import CoreRequest
 
 
 class BaseRequest(CoreRequest):

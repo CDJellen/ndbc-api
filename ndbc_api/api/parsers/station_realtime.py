@@ -1,6 +1,6 @@
 import bs4
 
-from api.parsers._station import StationParser
+from ndbc_api.api.parsers._station import StationParser
 
 
 class StationRealtimeParser(StationParser):
