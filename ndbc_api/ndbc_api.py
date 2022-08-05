@@ -5,14 +5,14 @@ from datetime import datetime, timedelta
 
 import pandas as pd
 
-from utilities.req_handler import RequestHandler
-from api.requests.stations import StationsRequest
-from api.requests.adcp import AdcpRequest
-from api.requests.stdmet import StdmetRequest
-from api.parsers.stations import StationsParser
-from api.parsers.adcp import AdcpParser
-from api.parsers.stdmet import StdmetParser
-from config import LOGGER_NAME
+from .utilities.req_handler import RequestHandler
+from .api.requests.stations import StationsRequest
+from .api.requests.adcp import AdcpRequest
+from .api.requests.stdmet import StdmetRequest
+from .api.parsers.stations import StationsParser
+from .api.parsers.adcp import AdcpParser
+from .api.parsers.stdmet import StdmetParser
+from .config import LOGGER_NAME
 
 
 DEFAULT_CACHE_LIMIT = 36
@@ -76,6 +76,8 @@ class NdbcApi:
             raise NotImplementedError('Supported data requests are ' +
                 ['\"'+r+'\"'+'\n' for r in self._handlers]
             )
+        station_id = str(station_id)
+        station_id = station_id.lower()
         return self._handlers[mode](
             station_id=station_id,
             start_time=start_time,
