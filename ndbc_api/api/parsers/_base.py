@@ -51,11 +51,13 @@ class BaseParser():
         data = []
         header = []
 
-        while (line := buf.readline()):
+        line = buf.readline()
+        while line:
             if line.startswith('#'):
                 header.append(line)
             else:
                 data.append(line)
+            line = buf.readline()
 
         return header, data
 
