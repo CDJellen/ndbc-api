@@ -5,7 +5,7 @@ import bs4
 from ndbc_api.api.parsers._station import StationParser
 
 
-class StationHistoricalParser(StationParser):
+class HistoricalParser(StationParser):
 
     LIST_IDENTIFIER = re.compile('Available historical data for station .{5} include:')
 

@@ -3,7 +3,7 @@ import bs4
 from ndbc_api.api.parsers._station import StationParser
 
 
-class StationRealtimeParser(StationParser):
+class RealtimeParser(StationParser):
 
     @classmethod
     def available_measurments(cls, response: dict) -> dict:

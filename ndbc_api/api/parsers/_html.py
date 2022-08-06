@@ -14,7 +14,8 @@ class HtmlParser(BaseParser):
     def dfs_from_responses(cls, responses: List[dict]) -> List[pd.DataFrame]:
         components = []
         for response in responses:
-            soup = BeautifulSoup(response, 'html.parser')
-            tables = soup.find_all('table')
-            components.extend(pd.read_html(str(tables), flavor='bs4'))
+            if response.get('status') == 200:
+                soup = BeautifulSoup(response.get('body'), 'html.parser')
+                tables = soup.find_all('table')
+                components.extend(pd.read_html(str(tables), flavor='bs4'))
         return components

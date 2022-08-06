@@ -1,15 +1,19 @@
+from datetime import datetime
 from typing import List
 
-import pandas as pd
-
-from ndbc_api.api.parsers._base import BaseParser
+from ndbc_api.api.requests._base import BaseRequest
 
 
-class Swden(BaseParser):
+class SwdirRequest(BaseRequest):
 
-    INDEX_COL = 0
-    NAN_VALUES = None
+    FORMAT = 'swdir'
+    FILE_FORMAT = '.swdir'
 
     @classmethod
-    def df_from_responses(cls, responses: List[dict]) -> pd.DataFrame:
-        return super(Swden, cls).df_from_responses(responses)
+    def build_request(
+        cls,
+        station_id: str,
+        start_time: datetime,
+        end_time: datetime
+        ) -> List[str]:
+        return super(SwdirRequest, cls).build_request(station_id, start_time, end_time)

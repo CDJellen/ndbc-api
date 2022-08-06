@@ -6,7 +6,7 @@ import bs4
 from ndbc_api.api.parsers._station import StationParser
 
 
-class StationMetadataParser(StationParser):
+class MetadataParser(StationParser):
 
     @classmethod
     def metadata(cls, response: dict) -> dict:

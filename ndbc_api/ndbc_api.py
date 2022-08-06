@@ -5,20 +5,16 @@ from datetime import datetime, timedelta
 
 import pandas as pd
 
+from .utilities.singleton import Singleton
 from .utilities.req_handler import RequestHandler
-from .api.requests.stations import StationsRequest
-from .api.requests.adcp import AdcpRequest
-from .api.requests.stdmet import StdmetRequest
-from .api.parsers.stations import StationsParser
-from .api.parsers.adcp import AdcpParser
-from .api.parsers.stdmet import StdmetParser
+from .api.handlers.stations import StaitonsHandler
 from .config import LOGGER_NAME
 
 
 DEFAULT_CACHE_LIMIT = 36
 
 
-class NdbcApi:
+class NdbcApi(metaclass=Singleton):
 
     log = logging.getLogger(LOGGER_NAME)
 
@@ -29,32 +25,44 @@ class NdbcApi:
         ):
         self.log.setLevel(logging_level)
         self.cache_limit = cache_limit
-        self.handler = self._get_request_handler(cache_limit=cache_limit)
-        self._handlers = self._register_handlers()
+        self._handler = self._get_request_handler(cache_limit=cache_limit)
+        self._stations_api = StaitonsHandler
+        self._data_api = None  # TODO
 
     def dump_cache(self, dest_fp: str) -> None:
         with open(dest_fp, 'wb') as f:
-            pickle.dump(self.handler, f)
+            pickle.dump(self._handler, f)
 
     def clear_cache(self) -> None:
-        self.handler = self._get_request_handler(cache_limit=self.cache_limit)
-    
+        self._handler = self._get_request_handler(cache_limit=self.cache_limit)
+
     def update_cache_limit(self, new_limit: int) -> None:
-        self.handler.update_cache_limit(cache_limit=new_limit)
+        self._handler.update_cache_limit(cache_limit=new_limit)
 
     def stations(self, as_df: bool = True) -> Union[pd.DataFrame, dict]:
         """Get all stations from NDBC."""
-        req = StationsRequest.build_request()
-        resp = self.handler.handle_request('stn', req)
-        data = StationsParser.df_from_responses([resp])
-        if as_df:
-            return data
-        else:
-            return data.to_records()
+        return self._stations_api.stations(handler=self._handler, as_df=as_df)
 
-    def nearest_station(self, lat, lon) -> str:
+    def nearest_station(self, lat: Union[str, float] = None, lon: Union[str, float] = None, as_df: bool = False) -> str:
         """Get nearest station."""
-        pass
+        if not (lat and lon):
+            raise ValueError('lat and lon must be specified.')
+        return self._stations_api.nearest_station(handler=self._handler, lat=lat, lon=lon, as_df=as_df)
+
+    def station(self, station_id: Union[str, int], as_df: bool = False) -> Union[pd.DataFrame, dict]:
+        """Get all stations from NDBC."""
+        station_id = self._parse_station_id(station_id)
+        return self._stations_api.metadata(handler=self._handler, station_id=station_id, as_df=as_df)
+
+    def available_realtime(self, station_id: Union[str, int], as_df: bool = False) -> Union[pd.DataFrame, dict]:
+        """Get all stations from NDBC."""
+        station_id = self._parse_station_id(station_id)
+        return self._stations_api.realtime(handler=self._handler, station_id=station_id, as_df=as_df)
+
+    def available_historical(self,  station_id: Union[str, int], as_df: bool = False) -> Union[pd.DataFrame, dict]:
+        """Get all stations from NDBC."""
+        station_id = self._parse_station_id(station_id)
+        return self._stations_api.historical(handler=self._handler, station_id=station_id, as_df=as_df)
 
     def get_data(
         self,
@@ -76,105 +84,18 @@ class NdbcApi:
             raise NotImplementedError('Supported data requests are ' +
                 ['\"'+r+'\"'+'\n' for r in self._handlers]
             )
-        station_id = str(station_id)
-        station_id = station_id.lower()
-        return self._handlers[mode](
-            station_id=station_id,
-            start_time=start_time,
-            end_time=end_time,
-            cols=cols,
-            use_timestamp=use_timestamp,
-            as_df=as_df
-        )
+        station_id = self._parse_station_id(station_id)
+        return self._data_api
 
-    
+
+    """ PRIVATE """
+
+
     def _get_request_handler(self, cache_limit: int) -> Any:
         return RequestHandler(cache_limit=cache_limit or self.cache_limit, log=self.log)
-    
-    def _register_handlers(self) -> dict:
-        return {
-            'adcp': self._adcp,
-            'cwind': self._cwind,
-            'data_spec': self._data_spec,
-            'ocean': self._ocean,
-            'spec': self._spec,
-            'stdmet': self._stdmet,
-            'supl': self._supl,
-            'swden': self._swden,
-            'swdir': self._swdir,
-            'swdir2': self._swdir2,
-            'swr1': self._swr1,
-            'swr2': self._swr2,
-        }
 
-    def _adcp(self, station_id, start_time, end_time, cols, use_timestamp, as_df) -> Union[pd.DataFrame, dict]:
-        """adcp"""
-        reqs = AdcpRequest.build_request(station_id=station_id, start_time=start_time, end_time=end_time)
-        resps = self.handler.handle_requests(station_id, reqs)
-        data = AdcpParser.df_from_responses(resps)
-        if as_df:
-            return data
-        else:
-            return data.to_records()
-
-    def _cwind(self, station_id, start_time, end_time, cols, use_timestamp, as_df) -> Union[pd.DataFrame, dict]:
-        """cwind"""
-        pass
-
-    def _data_spec(self, station_id, start_time, end_time, cols, use_timestamp, as_df) -> Union[pd.DataFrame, dict]:
-        """data_spec"""
-        pass
-
-    def _ocean(self, station_id, start_time, end_time, cols, use_timestamp, as_df) -> Union[pd.DataFrame, dict]:
-        """ocean"""
-        pass
-
-    def _spec(self, station_id, start_time, end_time, cols, use_timestamp, as_df) -> Union[pd.DataFrame, dict]:
-        """spec"""
-        pass
-
-    def _stdmet(self, station_id, start_time, end_time, cols, use_timestamp, as_df) -> Union[pd.DataFrame, dict]:
-        """stdmet"""
-        reqs = StdmetRequest.build_request(station_id=station_id, start_time=start_time, end_time=end_time)
-        resps = self.handler.handle_requests(station_id, reqs)
-        data = StdmetParser.df_from_responses(resps)
-        if as_df:
-            return data
-        else:
-            return data.to_records()
-
-    def _supl(self, station_id, start_time, end_time, cols, use_timestamp, as_df) -> Union[pd.DataFrame, dict]:
-        """supl"""
-        pass
-
-    def _swden(self, station_id, start_time, end_time, cols, use_timestamp, as_df) -> Union[pd.DataFrame, dict]:
-        """swden"""
-        pass
-
-    def _swdir(self, station_id, start_time, end_time, cols, use_timestamp, as_df) -> Union[pd.DataFrame, dict]:
-        """swdir"""
-        pass
-
-    def _swdir2(self, station_id, start_time, end_time, cols, use_timestamp, as_df) -> Union[pd.DataFrame, dict]:
-        """swdir2"""
-        pass
-
-    def _swr1(self, station_id, start_time, end_time, cols, use_timestamp, as_df) -> Union[pd.DataFrame, dict]:
-        """swr1"""
-        pass
-
-    def _swr2(self, station_id, start_time, end_time, cols, use_timestamp, as_df) -> Union[pd.DataFrame, dict]:
-        """swr2"""
-        pass
-
-
-if __name__ == '__main__':
-    api = NdbcApi()
-    vals = api.get_data(
-        mode='stdmet',
-        start_time=datetime.fromisoformat('2020-01-01'),
-        end_time=datetime.fromisoformat('2022-05-20'),
-        station_id='tplm2',
-        cols=None,
-    )
-    print(len(vals))
+    def _parse_station_id(self, station_id: Union[str, int]):
+        """Parse station id"""
+        station_id = str(station_id)  # expect string-valued station id
+        station_id = station_id.lower()  # expect lowercased station id
+        return station_id

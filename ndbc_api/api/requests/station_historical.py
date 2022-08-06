@@ -1,7 +1,7 @@
 from ndbc_api.api.requests._core import CoreRequest
 
 
-class StationMeasurementsRequest(CoreRequest):
+class HistoricalRequest(CoreRequest):
 
     STATION_HISTORY_PREFIX = 'station_history.php?station='
 

@@ -9,32 +9,36 @@ class BaseParser():
 
     HEADER_PREFIX = '#'
     NAN_VALUES = ['MM']
-    DATE_PARSER = lambda x: lambda x: datetime.strptime(x, '%Y %m %d %H %M')
+    DATE_PARSER = lambda x: datetime.strptime(x, '%Y %m %d %H %M')
     PARSE_DATES = ['YY', 'MM', 'DD', 'hh', 'mm']
     INDEX_COL = None
 
     @classmethod
-    def df_from_responses(cls, responses: List[dict]) -> pd.DataFrame:
+    def df_from_responses(cls, responses: List[dict], use_timestamp: bool = True) -> pd.DataFrame:
         components = []
         for response in responses:
-            components.append(cls._read_response(response))
+            components.append(cls._read_response(response, use_timestamp=use_timestamp))
         return pd.concat(components)
 
     @classmethod
-    def _read_response(cls, response: dict) -> pd.DataFrame:
+    def _read_response(cls, response: dict, use_timestamp: bool) -> pd.DataFrame:
         if response.get('status') != 200:
             return pd.DataFrame()
 
         body = response.get('body')
         header, data = cls._parse_body(body)
         names = cls._parse_header(header)
+        if use_timestamp:
+            parse_dates = {'timestamp': cls.PARSE_DATES}
+        else:
+            parse_dates = False
 
         df = pd.read_csv(
-            StringIO(data),
+            StringIO('\n'.join(data)),
             names=names,
             delim_whitespace=True,
             na_values=cls.NAN_VALUES,
-            parse_dates={'timestamp': cls.PARSE_DATES},
+            parse_dates=parse_dates,
             date_parser=cls.DATE_PARSER,
             index_col=cls.INDEX_COL,
         )
@@ -42,7 +46,7 @@ class BaseParser():
         return df
 
     @staticmethod
-    def _parse_body(body: str) -> Tuple(List[str], List[str]):
+    def _parse_body(body: str) -> Tuple[List[str], List[str]]:
         buf = StringIO(body)
         data = []
         header = []

@@ -1,7 +1,7 @@
 from ndbc_api.api.requests._core import CoreRequest
 
 
-class StationMeasurementsRequest(CoreRequest):
+class RealtimeRequest(CoreRequest):
 
     STATION_REALTIME_PREFIX = 'station_realtime.php?station='
 
