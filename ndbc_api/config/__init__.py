@@ -1,1 +1,7 @@
 LOGGER_NAME: str = 'NDBC-API'
+DEFAULT_CACHE_LIMIT: int = 36
+VERIFY_HTTPS: bool = False
+HTTP_RETRY: int = 5
+HTTP_BACKOFF_FACTOR: float = 0.8
+HTTP_DELAY: int = 2000
+HTTP_DEBUG: bool = True

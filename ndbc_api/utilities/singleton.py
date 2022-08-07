@@ -1,3 +1,6 @@
+"""
+A metaclass for singleton types.
+"""
 class Singleton(type):
 
     _instances = {}

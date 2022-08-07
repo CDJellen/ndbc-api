@@ -1,3 +1,4 @@
+from math import cos, asin, sqrt, pi
 from typing import Any, Union
 
 import pandas as pd
@@ -16,6 +17,11 @@ from ndbc_api.api.parsers.station_realtime import RealtimeParser
 
 class StaitonsHandler(BaseHandler):
 
+    DEG_TO_RAD = pi/180
+    DIAM_OF_EARTH = 12756
+    LAT_MAP = lambda x: -1*float(x.strip('S')) if 'S' in x else float(x.strip('N'))
+    LON_MAP = lambda x: -1*float(x.strip('E')) if 'E' in x else float(x.strip('W'))
+
     @classmethod
     def stations(cls, handler: Any, as_df: bool) -> Union[pd.DataFrame, dict]:
         """Get all stations from NDBC."""
@@ -30,7 +36,12 @@ class StaitonsHandler(BaseHandler):
     @classmethod
     def nearest_station(cls, handler: Any, lat: Union[str, float], lon: Union[str, float], as_df: bool) -> str:
         """Get nearest station."""
-        pass
+        df = cls.stations(handler=handler, as_df=True)
+        closest = cls._nearest(df, lat, lon)
+        if as_df:
+            return closest
+        else:
+            return closest.to_records()
 
     @classmethod
     def metadata(cls, handler: Any, station_id: str, as_df: bool) -> Union[pd.DataFrame, dict]:
@@ -64,3 +75,14 @@ class StaitonsHandler(BaseHandler):
             return pd.DataFrame(data)
         else:
             return data
+
+    @staticmethod
+    def _nearest(df:pd.DataFrame, lat_a: float, lon_a: float):
+        def _distance(lat_a: float, lon_a: float, lat_b: float, lon_b: float) -> float:
+            haversine = 0.5 - cos((lat_b-lat_a)*StaitonsHandler.DEG_TO_RAD)/2 + cos(lat_a*StaitonsHandler.DEG_TO_RAD)*cos(lat_b*StaitonsHandler.DEG_TO_RAD) * (1-cos((lon_b-lon_a)*StaitonsHandler.DEG_TO_RAD)) / 2
+            return StaitonsHandler.DIAM_OF_EARTH * asin(sqrt(haversine))
+
+        ls = list(df[['Location Lat/Long']].to_records(index=False))
+        ls = [(idx, StaitonsHandler.LAT_MAP(r[0].split(' ')[0]), StaitonsHandler.LON_MAP(r[0].split(' ')[1])) for idx, r in enumerate(ls)]
+        closest = min(ls, key=lambda p: _distance(lat_a, lon_a, p[1], p[2]))
+        return df.iloc[[closest[0]]]
