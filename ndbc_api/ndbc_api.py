@@ -1,7 +1,7 @@
 import logging
 import pickle
 from datetime import datetime, timedelta
-from typing import Union, List
+from typing import Any, Union, List
 
 import pandas as pd
 
@@ -137,7 +137,7 @@ class NdbcApi(metaclass=Singleton):
         backoff_factor: float,
         debug: bool,
         verify_https: bool
-        ) -> 'ndbc_api.utilities.req_handler.RequestHander':
+        ) -> Any:
         return RequestHandler(cache_limit=cache_limit or self.cache_limit, log=self.log, delay=delay, retries=retries, backoff_factor=backoff_factor, debug=debug, verify_https=verify_https)
 
     def _parse_station_id(self, station_id: Union[str, int]) -> str:

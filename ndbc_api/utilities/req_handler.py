@@ -119,7 +119,7 @@ class RequestHandler(metaclass=Singleton):
         return stn.reqs.get(request=req)
 
     def execute_request(self, url: str, headers: dict) -> dict:
-        response = self._session.get(url=url, headers=headers, allow_redirects=True, verify=self.verify_https)
+        response = self._session.get(url=url, headers=headers, allow_redirects=True, verify=self._verify_https)
         if self._debug:
             self.log.debug(f'GET: {url}\n\theaders: {headers}')
             self.log.debug(f'response: {response.status_code}.')
