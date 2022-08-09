@@ -42,10 +42,10 @@ class RequestHandler(metaclass=Singleton):
 
     class Station:
 
-        __slots__ = 'id', 'reqs'
+        __slots__ = 'id_', 'reqs'
 
         def __init__(self, station_id: str, cache_limit: int) -> None:
-            self.id = station_id
+            self.id_ = station_id
             self.reqs = RequestCache(cache_limit)
 
     def __init__(self, cache_limit: int, log: 'logging.Logger', delay: int, retries: int, backoff_factor: float, headers: dict = None, debug: bool = True,
@@ -75,7 +75,7 @@ class RequestHandler(metaclass=Singleton):
 
     def has_station(self, station_id: Union[str, int]) -> bool:
         for s in self.stations:
-            if s.id == station_id:
+            if s.id_ == station_id:
                 return True
         return False
 
@@ -83,7 +83,7 @@ class RequestHandler(metaclass=Singleton):
         if not self.has_station(station_id):
             self.add_station(station_id=station_id)
         for s in self.stations:
-            if s.id == station_id:
+            if s.id_ == station_id:
                 return s
 
     def add_station(self, station_id: Union[str, int]) -> None:

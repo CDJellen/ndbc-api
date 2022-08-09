@@ -7,4 +7,4 @@ class HistoricalRequest(CoreRequest):
 
     @classmethod
     def build_request(cls, station_id: str) -> str:
-        return f'{cls.BASE_URL}{cls.STATION_REALTIME_PREFIX}{station_id}'
+        return f'{cls.BASE_URL}{cls.STATION_HISTORY_PREFIX}{station_id}'
