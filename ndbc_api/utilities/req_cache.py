@@ -35,11 +35,11 @@ class RequestCache:
         else:  # request not made before
             return dict()
 
-    def put(self, request: str, reponse: dict) -> None:
+    def put(self, request: str, response: dict) -> None:
         if request in self.cache:
             self.remove(self.cache[request])
 
-        self.cache[request] = RequestCache.Request(request, reponse)
+        self.cache[request] = RequestCache.Request(request, response)
         self.add(self.cache[request])
 
         if len(self.cache) > self.capacity:
