@@ -9,7 +9,7 @@ from .utilities.singleton import Singleton
 from .utilities.req_handler import RequestHandler
 from .api.handlers.stations import StaitonsHandler
 from .api.handlers.data import DataHandler
-from .config import LOGGER_NAME, DEFAULT_CACHE_LIMIT, HTTP_RETRY, HTTP_DELAY, HTTP_BACKOFF_FACTOR, HTTP_DEBUG, VERIFY_HTTPS
+from .config import LOGGER_NAME, DEFAULT_CACHE_LIMIT, HTTP_DEBUG, HTTP_DELAY, VERIFY_HTTPS, HTTP_BACKOFF_FACTOR, HTTP_RETRY
 
 
 class NdbcApi(metaclass=Singleton):
