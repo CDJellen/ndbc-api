@@ -42,7 +42,7 @@ class NdbcApi(metaclass=Singleton):
     def dump_cache(self, dest_fp: str = None) -> None:
         """Dump the request cache to dict, or optionally to disk using the specified filepath."""
         data = dict()
-        ids = [r.id for r in self._handler.stations]
+        ids = [r.id_ for r in self._handler.stations]
         caches = [r.reqs.cache for r in self._handler.stations]
         for station_id, cache in zip(ids, caches):
             data[station_id] = dict()

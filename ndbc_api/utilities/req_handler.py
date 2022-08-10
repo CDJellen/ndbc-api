@@ -115,7 +115,7 @@ class RequestHandler(metaclass=Singleton):
         stn = self.get_station(station_id=station_id)
         if req not in stn.reqs.cache:
             resp = self.execute_request(url=req, headers=self._request_headers)
-            stn.reqs.put(request=req, reponse=resp)
+            stn.reqs.put(request=req, response=resp)
         return stn.reqs.get(request=req)
 
     def execute_request(self, url: str, headers: dict) -> dict:
