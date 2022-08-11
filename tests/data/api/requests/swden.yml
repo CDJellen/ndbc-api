@@ -1,0 +1,5 @@
+historical:
+- https://www.ndbc.noaa.gov/view_text_file.php?filename=41001h2020.txt.gz&dir=data/historical/swden/
+- https://www.ndbc.noaa.gov/view_text_file.php?filename=41001h2021.txt.gz&dir=data/historical/swden/
+realtime:
+- https://www.ndbc.noaa.gov/data/realtime2/41001.swden

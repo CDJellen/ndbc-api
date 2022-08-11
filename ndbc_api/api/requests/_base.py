@@ -61,7 +61,7 @@ class BaseRequest(CoreRequest):
         reqs = []
         current_year = datetime.today().year
         last_available_month = (datetime.today()-timedelta(days=44)).month
-        has_realtime = (end_time - datetime.now()) < timedelta(days=44)
+        has_realtime = (datetime.now() - end_time) < timedelta(days=44)
 
         for hist_year in range(int(start_time.year), min(int(current_year), int(end_time.year)+1)):
             reqs.append(req_hist_helper_year(hist_year))

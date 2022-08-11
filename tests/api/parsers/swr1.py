@@ -8,7 +8,7 @@ from ndbc_api.api.parsers._base import BaseParser
 class Swr1Parser(BaseParser):
 
     INDEX_COL = 0
-    NAN_VALUES = [99.0, 999, 999.0, 9999, 9999.0, 'MM']
+    NAN_VALUES = [99.0, 999, 999.0, 9999]
     VALUE_PARSER = lambda x: float(str(x).strip('(').strip(')'))
 
     @classmethod
