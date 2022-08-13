@@ -5,7 +5,7 @@ from typing import List, Tuple
 import pandas as pd
 
 
-class BaseParser():
+class BaseParser:
 
     HEADER_PREFIX = '#'
     NAN_VALUES = ['MM']
@@ -15,11 +15,15 @@ class BaseParser():
     REVERT_COL_NAMES = []
 
     @classmethod
-    def df_from_responses(cls, responses: List[dict], use_timestamp: bool = True) -> pd.DataFrame:
+    def df_from_responses(
+        cls, responses: List[dict], use_timestamp: bool = True
+    ) -> pd.DataFrame:
         components = []
         for response in responses:
             if response.get('status') == 200:
-                components.append(cls._read_response(response, use_timestamp=use_timestamp))
+                components.append(
+                    cls._read_response(response, use_timestamp=use_timestamp)
+                )
         return pd.concat(components)
 
     @classmethod

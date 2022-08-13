@@ -8,11 +8,13 @@ from tests.api.parsers._base import PARSED_TESTS_DIR, RESPONSES_TESTS_DIR
 TEST_FP = RESPONSES_TESTS_DIR.joinpath('station_historical.yml')
 PARSED_FP = PARSED_TESTS_DIR.joinpath('station_historical.yml')
 
+
 @pytest.fixture
 def historical_response():
     with open(TEST_FP, 'r') as f:
         data = yaml.safe_load(f)
     yield data
+
 
 @pytest.fixture
 def parsed_stations_historical():
@@ -20,11 +22,15 @@ def parsed_stations_historical():
         data = yaml.safe_load(f)
     yield data
 
+
 @pytest.fixture
 def stations_historical():
     yield HistoricalParser
 
-def test_available_measurements(stations_historical, historical_response, parsed_stations_historical):
+
+def test_available_measurements(
+    stations_historical, historical_response, parsed_stations_historical
+):
     resp = historical_response.get(list(historical_response.keys())[0])
     want = parsed_stations_historical
     got = stations_historical.available_measurements(resp)

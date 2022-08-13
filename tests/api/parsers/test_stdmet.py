@@ -9,20 +9,24 @@ from tests.api.parsers._base import PARSED_TESTS_DIR, RESPONSES_TESTS_DIR
 TEST_FP = RESPONSES_TESTS_DIR.joinpath('stdmet.yml')
 PARSED_FP = PARSED_TESTS_DIR.joinpath('stdmet.parquet.gzip')
 
+
 @pytest.fixture
 def stdmet_response():
     with open(TEST_FP, 'r') as f:
         data = yaml.safe_load(f)
     yield data
 
+
 @pytest.fixture
 def parsed_stdmet():
     df = pd.read_parquet(PARSED_FP)
     yield df
 
+
 @pytest.fixture
 def stdmet():
     yield StdmetParser
+
 
 def test_available_measurements(stdmet, stdmet_response, parsed_stdmet):
     resp = stdmet_response

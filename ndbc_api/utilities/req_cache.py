@@ -1,5 +1,4 @@
 class RequestCache:
-
     class Request:
 
         __slots__ = 'k', 'v', 'next', 'prev'
@@ -23,7 +22,7 @@ class RequestCache:
 
     def add(self, node: Request):
         node.prev = self.right.prev
-        node.next =  self.right
+        node.next = self.right
         self.right.prev.next = node
         self.right.prev = node
 

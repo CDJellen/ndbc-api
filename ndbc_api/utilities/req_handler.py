@@ -48,8 +48,17 @@ class RequestHandler(metaclass=Singleton):
             self.id_ = station_id
             self.reqs = RequestCache(cache_limit)
 
-    def __init__(self, cache_limit: int, log: 'logging.Logger', delay: int, retries: int, backoff_factor: float, headers: dict = None, debug: bool = True,
-                 verify_https: bool = True) -> None:
+    def __init__(
+        self,
+        cache_limit: int,
+        log: 'logging.Logger',
+        delay: int,
+        retries: int,
+        backoff_factor: float,
+        headers: dict = None,
+        debug: bool = True,
+        verify_https: bool = True,
+    ) -> None:
         self._cache_limit = cache_limit
         self._request_headers = headers or {}
         self.log = log
@@ -90,25 +99,16 @@ class RequestHandler(metaclass=Singleton):
         if isinstance(station_id, int):
             station_id = str(station_id)
         self.stations.append(
-            RequestHandler.Station(
-                station_id=station_id,
-                cache_limit=self._cache_limit)
-            )
+            RequestHandler.Station(station_id=station_id, cache_limit=self._cache_limit)
+        )
 
     def handle_requests(
-        self,
-        station_id: Union[str, int],
-        reqs: List[str]
-        ) -> List[str]:
+        self, station_id: Union[str, int], reqs: List[str]
+    ) -> List[str]:
 
         responses = []
         for req in reqs:
-            responses.append(
-                self.handle_request(
-                    station_id=station_id,
-                    req=req
-                )
-            )
+            responses.append(self.handle_request(station_id=station_id, req=req))
         return responses
 
     def handle_request(self, station_id: Union[str, int], req: str) -> dict:
@@ -119,17 +119,17 @@ class RequestHandler(metaclass=Singleton):
         return stn.reqs.get(request=req)
 
     def execute_request(self, url: str, headers: dict) -> dict:
-        response = self._session.get(url=url, headers=headers, allow_redirects=True, verify=self._verify_https)
+        response = self._session.get(
+            url=url, headers=headers, allow_redirects=True, verify=self._verify_https
+        )
         if self._debug:
             self.log.debug(f'GET: {url}\n\theaders: {headers}')
             self.log.debug(f'response: {response.status_code}.')
-        if response.status_code != 200: # web request did not succeed
+        if response.status_code != 200:  # web request did not succeed
             return dict(status=response.status_code, body='')
         return dict(status=response.status_code, body=response.text)
 
-
     """ PRIVATE """
-
 
     def _create_session(self) -> requests.Session:
         session = requests.Session()

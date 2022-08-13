@@ -6,9 +6,11 @@ from ndbc_api.api.requests.station_historical import HistoricalRequest
 TEST_STN = '41001'
 STATIONS_HISTORICAL_URL = 'https://www.ndbc.noaa.gov/station_history.php?station=41001'
 
+
 @pytest.fixture
 def stations_historical():
     yield HistoricalRequest
+
 
 def test_historical_request(stations_historical):
     want = STATIONS_HISTORICAL_URL
