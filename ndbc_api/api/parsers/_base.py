@@ -24,7 +24,13 @@ class BaseParser:
                 components.append(
                     cls._read_response(response, use_timestamp=use_timestamp)
                 )
-        return pd.concat(components)
+        df = pd.concat(components)
+        try:
+            df = df.reset_index().drop_duplicates(subset='timestamp', keep='first')
+            df = df.set_index('timestamp').sort_index()
+        except KeyError:
+            return pd.DataFrame()
+        return df
 
     @classmethod
     def _read_response(cls, response: dict, use_timestamp: bool) -> pd.DataFrame:
@@ -34,6 +40,9 @@ class BaseParser:
         # check that parsed names match parsed values or revert
         if len([v.strip() for v in data[0].split(' ') if v]) != len(names):
             names = cls.REVERT_COL_NAMES
+        if '(' in data[0]:
+            data = cls._clean_data(data)
+        # check whether to parse dates
         if use_timestamp:
             parse_dates = {'timestamp': cls.PARSE_DATES}
         else:
@@ -49,7 +58,7 @@ class BaseParser:
                 index_col=cls.INDEX_COL,
             )
         except (NotImplementedError, TypeError, ValueError):
-            return pd.DataFrame()
+            df = pd.DataFrame()
 
         return df
 
@@ -73,3 +82,8 @@ class BaseParser:
     def _parse_header(header: List[str]) -> List[str]:
         names = [n for n in header[0].strip('#').strip('\n').split(' ') if n]
         return names or None  # pass 'None' to pd.read_csv on error
+
+    @staticmethod
+    def _clean_data(data: List[str]) -> List[str]:
+        vals = [' '.join([v for v in r.split(' ') if v and '(' not in v]) for r in data]
+        return vals or None  # pass 'None' to pd.read_csv on error

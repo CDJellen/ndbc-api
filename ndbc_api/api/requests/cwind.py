@@ -8,6 +8,7 @@ class CwindRequest(BaseRequest):
 
     FORMAT = 'cwind'
     FILE_FORMAT = '.cwind'
+    HISTORICAL_IDENTIFIER = 'c'
 
     @classmethod
     def build_request(

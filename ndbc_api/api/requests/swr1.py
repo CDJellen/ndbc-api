@@ -8,6 +8,7 @@ class Swr1Request(BaseRequest):
 
     FORMAT = 'swr1'
     FILE_FORMAT = '.swr1'
+    HISTORICAL_IDENTIFIER = 'j'
 
     @classmethod
     def build_request(

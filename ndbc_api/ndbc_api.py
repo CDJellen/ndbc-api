@@ -190,3 +190,8 @@ class NdbcApi(metaclass=Singleton):
         station_id = str(station_id)  # expect string-valued station id
         station_id = station_id.lower()  # expect lowercased station id
         return station_id
+
+if __name__ == '__main__':
+    api = NdbcApi()
+    df = api.get_data('44095', 'swdir', None, '2022-01-01')
+    print(len(df))

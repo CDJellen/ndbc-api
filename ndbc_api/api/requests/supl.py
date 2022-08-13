@@ -8,6 +8,7 @@ class SuplRequest(BaseRequest):
 
     FORMAT = 'supl'
     FILE_FORMAT = '.supl'
+    HISTORICAL_IDENTIFIER = 's'
 
     @classmethod
     def build_request(
