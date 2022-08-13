@@ -9,7 +9,6 @@ class Swr1Parser(BaseParser):
 
     INDEX_COL = 0
     NAN_VALUES = [99.0, 999, 999.0, 9999, 9999.0, 'MM']
-    VALUE_PARSER = lambda x: float(str(x).strip('(').strip(')'))
     REVERT_COL_NAMES = [
         'YY',
         'MM',
@@ -70,5 +69,4 @@ class Swr1Parser(BaseParser):
         cls, responses: List[dict], use_timestamp: bool
     ) -> pd.DataFrame:
         df = super(Swr1Parser, cls).df_from_responses(responses, use_timestamp)
-        df = df.applymap(cls.VALUE_PARSER)
         return df
