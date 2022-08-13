@@ -11,7 +11,9 @@ class StationParser:
     BASE_URL = 'https://www.ndbc.noaa.gov'
 
     @classmethod
-    def _parse_li_urls(cls, urls: List[bs4.element.Tag]) -> List[Tuple[str, str]]:
+    def _parse_li_urls(
+        cls, urls: List[bs4.element.Tag]
+    ) -> List[Tuple[str, str]]:
         parsed = []
         current_year = datetime.now().year
         for raw_url in urls:
@@ -22,7 +24,9 @@ class StationParser:
         return parsed
 
     @classmethod
-    def _build_available_measurements(cls, line_items: List[bs4.element.Tag]) -> dict:
+    def _build_available_measurements(
+        cls, line_items: List[bs4.element.Tag]
+    ) -> dict:
         # unpack nested lists
         nested = [li for li in line_items for li in li.find_all('li')]
         nested = [

@@ -45,7 +45,9 @@ class DataHandler(BaseHandler):
             station_id=station_id, start_time=start_time, end_time=end_time
         )
         resps = handler.handle_requests(station_id=station_id, reqs=reqs)
-        df = AdcpParser.df_from_responses(responses=resps, use_timestamp=use_timestamp)
+        df = AdcpParser.df_from_responses(
+            responses=resps, use_timestamp=use_timestamp
+        )
         if cols:
             df = df[[cols]]
         if as_df:
@@ -69,7 +71,9 @@ class DataHandler(BaseHandler):
             station_id=station_id, start_time=start_time, end_time=end_time
         )
         resps = handler.handle_requests(station_id=station_id, reqs=reqs)
-        df = CwindParser.df_from_responses(responses=resps, use_timestamp=use_timestamp)
+        df = CwindParser.df_from_responses(
+            responses=resps, use_timestamp=use_timestamp
+        )
         if cols:
             df = df[[cols]]
         if as_df:
@@ -93,7 +97,9 @@ class DataHandler(BaseHandler):
             station_id=station_id, start_time=start_time, end_time=end_time
         )
         resps = handler.handle_requests(station_id=station_id, reqs=reqs)
-        df = OceanParser.df_from_responses(responses=resps, use_timestamp=use_timestamp)
+        df = OceanParser.df_from_responses(
+            responses=resps, use_timestamp=use_timestamp
+        )
         if cols:
             df = df[[cols]]
         if as_df:
@@ -117,7 +123,9 @@ class DataHandler(BaseHandler):
             station_id=station_id, start_time=start_time, end_time=end_time
         )
         resps = handler.handle_requests(station_id=station_id, reqs=reqs)
-        df = SpecParser.df_from_responses(responses=resps, use_timestamp=use_timestamp)
+        df = SpecParser.df_from_responses(
+            responses=resps, use_timestamp=use_timestamp
+        )
         if cols:
             df = df[[cols]]
         if as_df:
@@ -167,7 +175,9 @@ class DataHandler(BaseHandler):
             station_id=station_id, start_time=start_time, end_time=end_time
         )
         resps = handler.handle_requests(station_id=station_id, reqs=reqs)
-        df = SuplParser.df_from_responses(responses=resps, use_timestamp=use_timestamp)
+        df = SuplParser.df_from_responses(
+            responses=resps, use_timestamp=use_timestamp
+        )
         if cols:
             df = df[[cols]]
         if as_df:
@@ -191,7 +201,9 @@ class DataHandler(BaseHandler):
             station_id=station_id, start_time=start_time, end_time=end_time
         )
         resps = handler.handle_requests(station_id=station_id, reqs=reqs)
-        df = SwdenParser.df_from_responses(responses=resps, use_timestamp=use_timestamp)
+        df = SwdenParser.df_from_responses(
+            responses=resps, use_timestamp=use_timestamp
+        )
         if cols:
             df = df[[cols]]
         if as_df:
@@ -215,7 +227,9 @@ class DataHandler(BaseHandler):
             station_id=station_id, start_time=start_time, end_time=end_time
         )
         resps = handler.handle_requests(station_id=station_id, reqs=reqs)
-        df = SwdirParser.df_from_responses(responses=resps, use_timestamp=use_timestamp)
+        df = SwdirParser.df_from_responses(
+            responses=resps, use_timestamp=use_timestamp
+        )
         if cols:
             df = df[[cols]]
         if as_df:
@@ -265,7 +279,9 @@ class DataHandler(BaseHandler):
             station_id=station_id, start_time=start_time, end_time=end_time
         )
         resps = handler.handle_requests(station_id=station_id, reqs=reqs)
-        df = Swr1Parser.df_from_responses(responses=resps, use_timestamp=use_timestamp)
+        df = Swr1Parser.df_from_responses(
+            responses=resps, use_timestamp=use_timestamp
+        )
         if cols:
             df = df[[cols]]
         if as_df:
@@ -289,7 +305,9 @@ class DataHandler(BaseHandler):
             station_id=station_id, start_time=start_time, end_time=end_time
         )
         resps = handler.handle_requests(station_id=station_id, reqs=reqs)
-        df = Swr2Parser.df_from_responses(responses=resps, use_timestamp=use_timestamp)
+        df = Swr2Parser.df_from_responses(
+            responses=resps, use_timestamp=use_timestamp
+        )
         if cols:
             df = df[[cols]]
         if as_df:

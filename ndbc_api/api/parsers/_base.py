@@ -26,14 +26,18 @@ class BaseParser:
                 )
         df = pd.concat(components)
         try:
-            df = df.reset_index().drop_duplicates(subset='timestamp', keep='first')
+            df = df.reset_index().drop_duplicates(
+                subset='timestamp', keep='first'
+            )
             df = df.set_index('timestamp').sort_index()
         except KeyError:
             return pd.DataFrame()
         return df
 
     @classmethod
-    def _read_response(cls, response: dict, use_timestamp: bool) -> pd.DataFrame:
+    def _read_response(
+        cls, response: dict, use_timestamp: bool
+    ) -> pd.DataFrame:
         body = response.get('body')
         header, data = cls._parse_body(body)
         names = cls._parse_header(header)
@@ -85,5 +89,8 @@ class BaseParser:
 
     @staticmethod
     def _clean_data(data: List[str]) -> List[str]:
-        vals = [' '.join([v for v in r.split(' ') if v and '(' not in v]) for r in data]
+        vals = [
+            ' '.join([v for v in r.split(' ') if v and '(' not in v])
+            for r in data
+        ]
         return vals or None  # pass 'None' to pd.read_csv on error

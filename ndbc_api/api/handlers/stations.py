@@ -19,8 +19,12 @@ class StaitonsHandler(BaseHandler):
 
     DEG_TO_RAD = pi / 180
     DIAM_OF_EARTH = 12756
-    LAT_MAP = lambda x: -1 * float(x.strip('S')) if 'S' in x else float(x.strip('N'))
-    LON_MAP = lambda x: -1 * float(x.strip('E')) if 'E' in x else float(x.strip('W'))
+    LAT_MAP = (
+        lambda x: -1 * float(x.strip('S')) if 'S' in x else float(x.strip('N'))
+    )
+    LON_MAP = (
+        lambda x: -1 * float(x.strip('E')) if 'E' in x else float(x.strip('W'))
+    )
 
     @classmethod
     def stations(cls, handler: Any, as_df: bool) -> Union[pd.DataFrame, dict]:
@@ -35,7 +39,11 @@ class StaitonsHandler(BaseHandler):
 
     @classmethod
     def nearest_station(
-        cls, handler: Any, lat: Union[str, float], lon: Union[str, float], as_df: bool
+        cls,
+        handler: Any,
+        lat: Union[str, float],
+        lon: Union[str, float],
+        as_df: bool,
     ) -> str:
         """Get nearest station."""
         df = cls.stations(handler=handler, as_df=True)
@@ -86,7 +94,9 @@ class StaitonsHandler(BaseHandler):
 
     @staticmethod
     def _nearest(df: pd.DataFrame, lat_a: float, lon_a: float):
-        def _distance(lat_a: float, lon_a: float, lat_b: float, lon_b: float) -> float:
+        def _distance(
+            lat_a: float, lon_a: float, lat_b: float, lon_b: float
+        ) -> float:
             haversine = (
                 0.5
                 - cos((lat_b - lat_a) * StaitonsHandler.DEG_TO_RAD) / 2
