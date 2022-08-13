@@ -59,7 +59,7 @@ class StaitonsHandler(BaseHandler):
         """Get the available realtime measurements for a station."""
         req = RealtimeRequest.build_request(station_id=station_id)
         resp = handler.handle_request(station_id, req)
-        data = RealtimeParser.available_measurments(resp)
+        data = RealtimeParser.available_measurements(resp)
         if as_df:
             return pd.DataFrame(data)
         else:
@@ -70,7 +70,7 @@ class StaitonsHandler(BaseHandler):
         """Get the available historical measurements for a station."""
         req = HistoricalRequest.build_request(station_id=station_id)
         resp = handler.handle_request(station_id, req)
-        data = HistoricalParser.available_measurments(resp)
+        data = HistoricalParser.available_measurements(resp)
         if as_df:
             return pd.DataFrame(data)
         else:

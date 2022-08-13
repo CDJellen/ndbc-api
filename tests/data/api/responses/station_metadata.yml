@@ -1,0 +1,601 @@
+https://www.ndbc.noaa.gov/station_page.php?station=tplm2:
+  body: "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\"\
+    >\n<html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"en\" lang=\"en\">\n\
+    <head>\n\n\n\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"\
+    \ />\n<meta http-equiv=\"Content-Type\" content=\"Text/html; charset=iso-8859-1\"\
+    \ />\n<meta name=\"DC.title\" content=\"NDBC Station Page\" />\n<meta name=\"\
+    DC.description\" content=\"National Data Buoy Center - Recent observations from\
+    \ C-MAN station TPLM2 (38.899N 76.436W) - Thomas Point, MD.\" />\n<meta name=\"\
+    description\" content=\"National Data Buoy Center - Recent observations from C-MAN\
+    \ station TPLM2 (38.899N 76.436W) - Thomas Point, MD.\" />\n<meta name=\"DC.subject\"\
+    \ content=\"weather, buoy, weather buoy, marine, forecast, hurricane, wind, wave,\
+    \ offshore, surfing, temperature, meteorology, climate, ocean\" />\n<meta name=\"\
+    DC.creator\" content=\"US Department of Commerce, National Oceanic and Atmospheric\
+    \ Administration, National Weather Service, National Data Buoy Center\" />\n<meta\
+    \ name=\"DC.language\" scheme=\"DCTERMS.RFC1766\" content=\"EN-US\" />\n<meta\
+    \ name=\"DC.format\" content=\"text/html;charset=iso-8859-1\" />\n<meta name=\"\
+    DC.date.created\" scheme=\"ISO8601\" content=\"1996-11-08\" />\n<meta http-equiv=\"\
+    Refresh\" content=\"900\" />\n<title>NDBC - Station TPLM2 Recent Data</title>\n\
+    \n\n<link rel=\"canonical\" href=\"http://www.ndbc.noaa.gov/station_page.php?station=tplm2\"\
+    \ />\n<link rel=\"alternate\" type=\"application/rss+xml\" title=\"NDBC - Station\
+    \ TPLM2 Observations\" href=\"/data/latest_obs/tplm2.rss\" />\n<link rel=\"alternate\"\
+    \ type=\"application/rss+xml\" title=\"NDBC - Station Observations near 38.899N\
+    \ 76.436W\" href=\"/rss/ndbc_obs_search.php?lat=38.899N&amp;lon=76.436W\" />\n\
+    <link rel=\"stylesheet\" href=\"/style/ndbc2017a.css\" type=\"text/css\" />\n\n\
+    \  <link rel=\"stylesheet\" href=\"https://js.arcgis.com/3.37/dijit/themes/claro/claro.css\"\
+    \ type=\"text/css\" />\n  <link rel=\"stylesheet\" href=\"https://js.arcgis.com/3.37/esri/css/esri.css\"\
+    \ type=\"text/css\" />\n  <style type=\"text/css\">\n\t#stnmap {\n      height:175px;\n\
+    \      width:250px;\n      border:1px solid #ccc;\n      margin:2px 0px;\n\t \
+    \ text-align:left;\n    }\n\t.esriSimpleSlider div {\n\t    width: 18px;\n   \
+    \ \theight: 18px;\n    \tfont-size: 12px;\n    \tfont-family: verdana,helvetica;\n\
+    \    \tfont-weight: bold;\n    \ttext-align: center;\n    \tline-height: 18px;\n\
+    \    \t-moz-user-select: none;\n    \tcursor: pointer;\n\t}\n\t.esriSimpleSliderTL\
+    \ {\n\t    top: 10px;\n    \tleft: 10px;\n\t}\n  </style>\n  <script src=\"https://js.arcgis.com/3.37/\"\
+    \ type=\"text/javascript\"></script>\n  <script type=\"text/javascript\"><!--\n\
+    //<![CDATA[\n  \tvar currentstnid = '';\n  \tvar currentstnlat = 38.899;\n  \t\
+    var currentstnlng = -76.436;\n  \tvar currentstnname = '';\n  \tvar currentstndata\
+    \ = 'y';\n    require([\n\t\t\t\"esri/map\", \n\t\t\t\"dojo/dom\", \n\t\t\t\"\
+    dojo/on\", \n\t\t\t\"dojo/dom-class\", \n\t\t\t\"dijit/TooltipDialog\",\n\t\t\t\
+    \"dijit/popup\",\n\t\t\t\"esri/config\",\n\t\t\t\"esri/graphic\",\n\t\t\t\"esri/lang\"\
+    ,\n\t\t\t\"esri/layers/FeatureLayer\",\n\t\t\t\"esri/layers/ArcGISTiledMapServiceLayer\"\
+    ,\n\t\t\t\"esri/geometry/Point\",\n\t\t\t\"esri/request\",\n\t\t\t\"dojo/dom-style\"\
+    ,\n\t\t\t\"dojo/_base/array\",\n\t\t\t\"dojo/cookie\",\n\t\t\t\"dojo/has\",\n\t\
+    \t\t\"dojo/domReady!\"], \n\t\t\tfunction(Map,dom,on,domClass,TooltipDialog,dijitPopup,Config,Graphic,esriLang,FeatureLayer,ArcGISTiledMapServiceLayer,Point,esriRequest,domStyle,array,cookie,has)\
+    \ {\n    \tvar touchscreen = false;\n    \tif (has(\"touch\")) { touchscreen =\
+    \ true; }\n    \tConfig.defaults.map.slider = { left:\"10px\", top:\"10px\" };\n\
+    \        dom.byId(\"stnmap\").innerHTML = '';\n    \tmap = new Map(\"stnmap\"\
+    , {\n    \t\tcenter: [currentstnlng, currentstnlat],\n    \t\tzoom: 8,\n    \t\
+    \tminZoom: 5,\n    \t\tsliderStyle: \"small\"\n    \t});\n    \tvar currentBasemap\
+    \ = [];\n    \tvar topoBasemap = new ArcGISTiledMapServiceLayer(\"https://server.arcgisonline.com/arcgis/rest/services/World_Topo_Map/MapServer?appid=1ad64ec9-3608-40af-b061-2def30eb7a31\"\
+    );\n\t    var streetsBasemap = new ArcGISTiledMapServiceLayer(\"https://server.arcgisonline.com/arcgis/rest/services/World_Street_Map/MapServer?appid=1ad64ec9-3608-40af-b061-2def30eb7a31\"\
+    );\n\t\tvar satelliteBasemap = new ArcGISTiledMapServiceLayer(\"https://server.arcgisonline.com/arcgis/rest/services/World_Imagery/MapServer?appid=1ad64ec9-3608-40af-b061-2def30eb7a31\"\
+    );\n\t\tvar oceanBasemap = new ArcGISTiledMapServiceLayer(\"https://server.arcgisonline.com/arcgis/rest/services/Ocean/World_Ocean_Base/MapServer?appid=1ad64ec9-3608-40af-b061-2def30eb7a31\"\
+    );\n\t\t//The following associative array allows you to map the dropdown values\
+    \ with an object reference to the tiled service layers created above\n\t\tvar\
+    \ bmList = ({\n    \t\t  \"topo\": topoBasemap,\n    \t\t  \"satellite\": satelliteBasemap,\n\
+    \    \t\t  \"streets\": streetsBasemap,\n    \t\t  \"oceans\": oceanBasemap\n\
+    \    \t\t  });\n\t\tvar mt = cookie('maptype');\n\t\tvar layer = null;\n\t\tfor\
+    \ (var x in bmList) {\n\t\t\tif (x === mt) {changeLayer(bmList[x],x); layer =\
+    \ mt; break;}\n\t\t}\n\t\tif (layer == null) {\n\t\t\tchangeLayer(topoBasemap,'oceans');\n\
+    \t\t}\n\n\t\tfunction setSelectedValue(selectObj, valueToSet) {\n\t\t    for (var\
+    \ i = 0; i < selectObj.options.length; i++) {\n\t\t        if (selectObj.options[i].value==\
+    \ valueToSet) {\n\t\t            selectObj.options[i].selected = true;\n\t\t \
+    \           return;\n\t\t        }\n\t\t    }\n\t\t}\n\t\t\n        function changeLayer(layerChosen,layerName)\
+    \ {\n        \tsetSelectedValue(dom.byId(\"basemap-selected\"),layerName);\n \
+    \       \tvar satellite_ref_layer = \"\";\n\t\t\tvar ocean_ref_layer = \"\";\n\
+    \    \t     if (currentBasemap.length > 0) { map.removeLayer(currentBasemap[0])\
+    \ }\n    \t     currentBasemap.length = 0;\n    \t     currentBasemap.push(layerChosen)\n\
+    \    \t     map.addLayer(layerChosen)\n    \t     if(layerName == \"satellite\"\
+    ) {\n    \t    \t satellite_ref_layer = new ArcGISTiledMapServiceLayer(\"https://server.arcgisonline.com/arcgis/rest/services/Reference/World_Boundaries_and_Places/MapServer?appid=1ad64ec9-3608-40af-b061-2def30eb7a31\"\
+    );\n    \t    \t map.addLayer(satellite_ref_layer);\n    \t     }\n    \t    \
+    \ if(layerName == \"oceans\") {\n    \t    \t ocean_ref_layer = new ArcGISTiledMapServiceLayer(\"\
+    https://server.arcgisonline.com/arcgis/rest/services/Ocean/World_Ocean_Reference/MapServer?appid=1ad64ec9-3608-40af-b061-2def30eb7a31\"\
+    );\n    \t    \t map.addLayer(ocean_ref_layer);\n    \t   \t }\n    \t     cookie(\"\
+    maptype\", layerName, { expires: 30, path: '/' });\n\t\t}\n\n        var bmselect\
+    \ = dom.byId(\"basemap-selected\");\n\t\ton(bmselect,'change',function(evt){\n\
+    \t\t\tvar newBasemap = evt.target.options[evt.target.selectedIndex].value;\n\t\
+    \t\tif (newBasemap === \"none\" || newBasemap == null) {\n\t\t\t\tchangeLayer(oceanBasemap,'oceans')\n\
+    \t\t\t} else {\n\t\t    \t  //Find the selected basemap in the array above and\
+    \ use the associated object to add the selected theme layer to the map\n\t\t \
+    \   \t  for (var x in bmList) {\n\t\t    \t\t  if (x === newBasemap) {\n\t\t \
+    \   \t\t\t  changeLayer(bmList[x],x)\n\t\t    \t\t  }\n\t\t    \t  }\n\t\t   \
+    \   }      \n\t\t});\n\t\tvar featureCollection = {\n  \t\t\t\t\"layerDefinition\"\
+    : null,\n  \t\t\t\t\t\"featureSet\": {\n    \t\t\t\t\t\"features\": [],\n    \t\
+    \t\t\t\t\"geometryType\": \"esriGeometryPoint\"\n  \t\t\t\t\t}\n\t\t\t\t\t};\n\
+    \t\t\t\t\tfeatureCollection.layerDefinition = {\n  \t\t\t\t\t\"geometryType\"\
+    : \"esriGeometryPoint\",\n  \t\t\t\t\t\"objectIdField\": \"ObjectID\",\n  \t\t\
+    \t\t\t\"drawingInfo\": {\n    \t\t\t\t\t\"renderer\": {\n    \t\t\t\t\t\t\"type\"\
+    : \"uniqueValue\",\n  \t\t\t\t\t\t\t\"field1\": \"data\",\n  \t\t\t\t\t\t\t\"\
+    field2\": \"current\",\n  \t\t\t\t\t\t\t\"fieldDelimiter\": \":\",\n  \t\t\t\t\
+    \t\t\t\"defaultSymbol\": {\n  \t\t\t\t\t\t\t\t\"type\" : \"esriSMS\",\n\t\t\t\t\
+    \t\t\t\t\t\"style\" : \"esriSMSDiamond\",\n\t\t\t\t\t\t\t\t\t\"color\" : [ 222,\
+    \ 222, 222, 255 ],\n\t\t\t\t\t\t\t\t\t\"size\" : 11,\n\t\t\t\t\t\t\t\t\t\"outline\"\
+    : {\n\t\t\t\t\t\t        \t\t\"color\": [30,30,30,255],\n        \t\t\t\t\t\t\t\
+    \t\"width\": 1,\n       \t\t\t\t\t\t\t\t\t\"type\": \"esriSLS\",\n        \t\t\
+    \t\t\t\t\t\t\"style\": \"esriSLSSolid\"\n\t\t\t\t\t\t\t\t \t}\n      \t\t\t\t\t\
+    \t},\n      \t\t\t\t\t\t\"uniqueValueInfos\": [{\n    \t\t\t\t\t\t\t\"value\"\
+    : \"y:y\",\n    \t\t\t\t\t\t\t\"symbol\": {\n \t\t\t\t\t\t\t\t\t\"type\" : \"\
+    esriSMS\",\n\t\t\t\t\t\t\t\t\t\"style\" : \"esriSMSDiamond\",\n\t\t\t\t\t\t\t\t\
+    \t\"color\" : [ 255, 255, 0, 255 ],\n\t\t\t\t\t\t\t\t\t\"size\" : 17,\n\t\t\t\t\
+    \t\t\t\t\t\"outline\": {\n\t\t\t\t\t\t        \t\t\"color\": [30,30,30,255],\n\
+    \t       \t\t\t\t\t\t\t\t\"width\": 1,\n\t     \t\t\t\t\t\t\t\t\"type\": \"esriSLS\"\
+    ,\n\t       \t\t\t\t\t\t\t\t\"style\": \"esriSLSSolid\"\n\t\t\t\t\t\t\t\t \t}\n\
+    \    \t  \t\t\t\t\t\t}\n\t\t\t\t\t\t\t}, {\n    \t\t\t\t\t\t\t\"value\": \"n:y\"\
+    ,\n    \t\t\t\t\t\t\t\"symbol\": {\n \t\t\t\t\t\t\t\t\t\"type\" : \"esriSMS\"\
+    ,\n\t\t\t\t\t\t\t\t\t\"style\" : \"esriSMSDiamond\",\n\t\t\t\t\t\t\t\t\t\"color\"\
+    \ : [ 255, 0, 0, 255 ],\n\t\t\t\t\t\t\t\t\t\"size\" : 17,\n\t\t\t\t\t\t\t\t\t\"\
+    outline\": {\n\t\t\t\t\t\t        \t\t\"color\": [30,30,30,255],\n\t       \t\t\
+    \t\t\t\t\t\t\"width\": 1,\n\t     \t\t\t\t\t\t\t\t\"type\": \"esriSLS\",\n\t \
+    \      \t\t\t\t\t\t\t\t\"style\": \"esriSLSSolid\"\n\t\t\t\t\t\t\t\t\t}\n\t\t\t\
+    \t\t\t\t\t }\n\t\t\t\t\t\t\t},{\n    \t\t\t\t\t\t\t\"value\": \"y:n\",\n    \t\
+    \t\t\t\t\t\t\"symbol\": {\n \t\t\t\t\t\t\t\t\t\"type\" : \"esriSMS\",\n\t\t\t\t\
+    \t\t\t\t\t\"style\" : \"esriSMSDiamond\",\n\t\t\t\t\t\t\t\t\t\"color\" : [ 255,\
+    \ 255, 0, 255 ],\n\t\t\t\t\t\t\t\t\t\"size\" : 11,\n\t\t\t\t\t\t\t\t\t\"outline\"\
+    : {\n\t\t\t\t\t\t        \t\t\"color\": [30,30,30,255],\n\t       \t\t\t\t\t\t\
+    \t\t\"width\": 1,\n\t     \t\t\t\t\t\t\t\t\"type\": \"esriSLS\",\n\t       \t\t\
+    \t\t\t\t\t\t\"style\": \"esriSLSSolid\"\n\t\t\t\t\t\t\t\t \t}\n    \t  \t\t\t\t\
+    \t\t}\n\t\t\t\t\t\t\t}, {\n    \t\t\t\t\t\t\t\"value\": \"n:n\",\n    \t\t\t\t\
+    \t\t\t\"symbol\": {\n \t\t\t\t\t\t\t\t\t\"type\" : \"esriSMS\",\n\t\t\t\t\t\t\t\
+    \t\t\"style\" : \"esriSMSDiamond\",\n\t\t\t\t\t\t\t\t\t\"color\" : [ 255, 0, 0,\
+    \ 255 ],\n\t\t\t\t\t\t\t\t\t\"size\" : 11,\n\t\t\t\t\t\t\t\t\t\"outline\": {\n\
+    \t\t\t\t\t\t        \t\t\"color\": [30,30,30,255],\n\t       \t\t\t\t\t\t\t\t\"\
+    width\": 1,\n\t     \t\t\t\t\t\t\t\t\"type\": \"esriSLS\",\n\t       \t\t\t\t\t\
+    \t\t\t\"style\": \"esriSLSSolid\"\n\t\t\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t\t }\n\t\
+    \t\t\t\t\t\t}\n    \t\t\t\t]}},\n  \t\t\t\t\t\"fields\": [{\n      \t\t\t\t\t\"\
+    name\": \"ObjectID\",\n      \t\t\t\t\t\"alias\": \"ObjectID\",\n      \t\t\t\t\
+    \t\"type\": \"esriFieldTypeOID\"\n    \t\t\t\t\t}, {\n      \t\t\t\t\t\"name\"\
+    : \"id\",\n      \t\t\t\t\t\"alias\": \"id\",\n      \t\t\t\t\t\"type\": \"esriFieldTypeString\"\
+    \n    \t\t\t\t\t}, {\n      \t\t\t\t\t\"name\": \"name\",\n      \t\t\t\t\t\"\
+    alias\": \"name\",\n      \t\t\t\t\t\"type\": \"esriFieldTypeString\"\n    \t\t\
+    \t\t\t}, {\n      \t\t\t\t\t\"name\": \"data\",\n      \t\t\t\t\t\"alias\": \"\
+    data\",\n      \t\t\t\t\t\"type\": \"esriFieldTypeString\"\n    \t\t\t\t\t}, {\n\
+    \          \t\t\t\t\"name\": \"current\",\n          \t\t\t\t\"alias\": \"current\"\
+    ,\n          \t\t\t\t\"type\": \"esriFieldTypeString\"\n    \t\t\t\t\t}, {\n \
+    \   \t\t\t\t\t\t\"name\": \"seq\",\n    \t\t\t\t\t\t\"alias\": \"seq\",\n    \t\
+    \t\t\t\t\t\"type\": \"esriFieldTypeInteger\"\n    \t\t\t\t\t}\n  \t\t\t\t\t]\n\
+    \t\t\t\t\t};\n\t\t\t\t\tvar featureLayer = new FeatureLayer(featureCollection,\
+    \ {\n  \t\t\t\t\tid: 'myFeatureLayer',\n  \t\t\t\t\tmode: FeatureLayer.MODE_SNAPSHOT\n\
+    \t\t\t\t\t});\n\t\t\t\t\t map.on(\"layers-add-result\", function(results) {\n\
+    \          \trequestStations();\n        \t});\n\t\t\t\t\tmap.addLayers([featureLayer]);\t\
+    \n\n          dialog = new TooltipDialog({\n\t\t\t\t\t\tid: \"tooltipDialog\"\
+    ,\n\t\t\t\t\t\tstyle: \"position: absolute; width: 250px; font: normal normal\
+    \ normal 10pt Helvetica;z-index:100\"\n\t\t\t\t\t});\n\t\t\t\t\tdialog.startup();\n\
+    \          map.on(\"load\", function(){\n\t          map.graphics.enableMouseEvents();\n\
+    \t        });\n          \n          if (!touchscreen) {\n\t       \t  featureLayer.on(\"\
+    mouse-over\", function(evt){\n\t        \t  if (evt.graphic.attributes.id != currentstnid)\
+    \ { map.setMapCursor('pointer'); }\n\t        \t  var t = \"<b>Station ${id}<\\\
+    /b> - ${name}\";\n\t        \t  var content = esriLang.substitute(evt.graphic.attributes,t);\n\
+    \t        \t  dialog.setContent(content);\n\t        \t  domStyle.set(dialog.domNode,\
+    \ \"opacity\", 0.85);\n\t        \t  dijitPopup.open({\n\t        \t\t  popup:\
+    \ dialog, \n\t        \t\t  x: evt.pageX,\n\t        \t\t  y: evt.pageY\n\t  \
+    \      \t  });\n\t          });\n\t\t\tfeatureLayer.on(\"mouse-out\",function(evt)\
+    \ {\n\t\t\t\tcloseDialog();\n\t\t\t\tmap.setMapCursor('default');\n\t\t\t});\n\
+    \          }\n\t\t\t\t\n\tfeatureLayer.on(\"click\",function(evt) {\n\t\tif (evt.graphic.attributes.seq\
+    \ == null) {\n\t\t\tif (evt.graphic.attributes.id == currentstnid) { return; }\n\
+    \t\t\tlocation.href = \"/station_page.php?station=\"+evt.graphic.attributes.id.toLowerCase();\n\
+    \t\t} else {\n\t\t\tlocation.href = \"http://tao.ndbc.noaa.gov/refreshed/site.php?site=\"\
+    +evt.graphic.attributes.seq;\n\t\t}\n\t});\n\t\t\t\t\t\n        function closeDialog()\
+    \ {\n\t          map.graphics.clear();\n  \t        dijitPopup.close(dialog);\n\
+    \   \t    }\n\n\t\tfunction requestStations() {\n    \t\t\tvar stations = esriRequest({\n\
+    \        \t\t\turl: \"/ndbcmapstations.json\",\n        \t\t\thandleAs: \"json\"\
+    \n      \t\t\t});\n     \t\tstations.then(requestSucceeded, requestFailed);\n\
+    \      \t}\n\n\t\tfunction requestSucceeded(response, io){\n\t\t\tvar features\
+    \ = [];\n\t\t\tvar cs = currentstnid.toLowerCase();\n\t\t\tarray.forEach(response.station,\
+    \ function(stn) {\n\t\t\t\tif (stn.status == 'E') {\n\t\t\t\t\tvar attr = {};\n\
+    \t\t\t\t\tattr[\"id\"] = stn.id.toUpperCase();\n\t\t\t\t\tattr[\"name\"] = stn.name;\n\
+    \t\t\t\t\tattr[\"data\"] = stn.data;\n\t\t\t\t\tattr[\"seq\"] = parseInt(stn.seq);\n\
+    \t\t\t\t\tif (isNaN(attr[\"seq\"])) { attr[\"seq\"] = null; }\n\t\t\t\t\tvar geometry\
+    \ = new Point(stn.lon, stn.lat);\n\t\t\t\t\tvar graphic = new Graphic(geometry);\n\
+    \t\t\t\t\tgraphic.setAttributes(attr);\n\t\t\t\t\tfeatures.push(graphic);\n\t\t\
+    \t\t\tif (stn.id == cs) {\n\t\t\t\t\t\tattr[\"current\"] = 'y';\n\t\t\t\t\t\t\
+    if (stn.lat != currentstnlat && stn.lon != currentstnlng) {\n\t\t\t\t\t\t\tmap.centerAt(geometry);\n\
+    \t\t\t\t\t\t}\n\t\t\t\t\t\tcs = null;\n\t\t\t\t\t} else {\n\t\t\t\t\t\tattr[\"\
+    current\"] = 'n';\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t});\n\t\t\tif (cs != null) {\
+    \ // If current station not in JSON, add it to map.\n\t\t\t\tvar attr = {};\n\t\
+    \t\t\tattr[\"id\"] = currentstnid.toUpperCase();\n\t\t\t\tattr[\"name\"] = currentstnname;\n\
+    \t\t\t\tattr[\"data\"] = currentstndata;\n\t\t\t\tattr[\"seq\"] = null;  // Not\
+    \ called for TAO stations.\n\t\t\t\tattr[\"current\"] = 'y';\n\t\t\t\tvar geometry\
+    \ = new Point(currentstnlng, currentstnlat);\n\t\t\t\tvar graphic = new Graphic(geometry);\n\
+    \t\t\t\tgraphic.setAttributes(attr);\n\t\t\t\tfeatures.push(graphic);\n\t\t\t\
+    }\n\t\t\tfeatureLayer.applyEdits(features, null, null);\n\t\t}\n\n\t\tfunction\
+    \ requestFailed(error, io){\n\t\t\talert(\"Unable to load map data at this time!\"\
+    );\n\t\t}\n      \n\t});\n//]]>\n//-->\n</script>\n</head>\n<!-- Start Top Navbar\
+    \ -->\n<body class=\"claro\">\n\n<div id=\"topnav\" class=\"noprint\">\n<table\
+    \ cellspacing=\"0\" cellpadding=\"0\" border=\"0\" width=\"100%\">\n<tr><td>\n\
+    <table cellspacing=\"0\" cellpadding=\"0\" border=\"0\" width=\"100%\" style=\"\
+    background-image:url(/images/nws/topbanner.jpg)\">\n\t<tr>\n\t<td align=\"right\"\
+    \ height=\"19\"><a href=\"#contents\"><img src=\"/images/nws/skipgraphic.gif\"\
+    \ alt=\"Skip Navigation Links\" width=\"1\" height=\"1\" border=\"0\" /></a> <a\
+    \ href=\"https://www.weather.gov/\"><span class=\"nwslink\">weather.gov</span></a>&nbsp;</td>\n\
+    \t</tr>\n</table>\n\n<table cellspacing=\"0\" cellpadding=\"0\" border=\"0\" width=\"\
+    100%\">\n\t<tr>\n\t\t<td><a href=\"https://www.noaa.gov/\"><img src=\"/images/nws/noaaleft.jpg\"\
+    \ alt=\"NOAA logo-Select to go to the NOAA homepage\" width=\"85\" height=\"78\"\
+    \ border=\"0\" /></a></td>\n\t\t<td width=\"500\" height=\"78\" align=\"center\"\
+    \ nowrap=\"nowrap\"><img src=\"/images/nws/ndbc_title.jpg\" width=\"500\" height=\"\
+    78\" alt=\"NDBC Title Graphic\" border=\"0\" usemap=\"#NDBCLinkMap\"/><map id=\"\
+    NDBCLinkMap\" name=\"NDBCLinkMap\"><area shape=\"rect\" coords=\"62,20,452,56\"\
+    \ href=\"/\" alt=\"Click to go to NDBC home page\" /></map></td>\n\t\t<td width=\"\
+    100%\" style=\"background-image:url(/images/nws/wfo_bkgrnd.jpg)\">&nbsp;</td>\n\
+    \t\t<td align=\"right\"><a href=\"https://www.weather.gov/\"><img src=\"/images/nws/nwsright.jpg\"\
+    \ alt=\"Select to go to the NWS homepage\" width=\"85\" height=\"78\" border=\"\
+    0\" /></a></td>\n\t</tr>\n</table>\n\n<table cellspacing=\"0\" cellpadding=\"\
+    0\" border=\"0\" style=\"background-image:url(/images/nws/navbkgrnd.gif)\" width=\"\
+    100%\">\n\t<tr>\n\t\t<td align=\"left\" valign=\"top\" width=\"94\"><img src=\"\
+    /images/nws/navbarleft.jpg\" alt=\"\" width=\"94\" height=\"23\" border=\"0\"\
+    \ /></td>\n\t\t<td width=\"15%\" align=\"center\" nowrap=\"nowrap\"><a href=\"\
+    /\" class=\"nav\">Home</a></td>\n\t\t<td width=\"15%\" align=\"center\"><a href=\"\
+    /ndbc.shtml\" class=\"nav\">About Us</a></td>\n\t\t<td width=\"15%\" align=\"\
+    center\"><a href=\"/contact_us.shtml\" class=\"nav\">Contact Us</a></td>\n\t\t\
+    <td align=\"right\" class=\"searchinput\" width=\"40%\" nowrap=\"nowrap\"><form\
+    \ method=\"get\" action=\"https://search.usa.gov/search\" style=\"margin-bottom:0;\
+    \ margin-top:0;\">\n\t\t\t<label for=\"Search\" class=\"yellow\">Search&nbsp;</label>\n\
+    \t\t\t<input type=\"hidden\" name=\"affiliate\" value=\"ndbc.noaa.gov\" />\n\t\
+    \t\t<input type=\"hidden\" name=\"v:project\" value=\"firstgov\" />\n\t\t\t<input\
+    \ type=\"text\" name=\"query\" value=\"NDBC Web Site\" onclick=\"this.value='';return(true);\"\
+    \ size=\"20\" maxlength=\"256\" id=\"Search\" />\n\t\t\t<input type=\"submit\"\
+    \ value=\"Search\" />\n\t\t</form></td>\n\t\t<td width=\"10%\">&nbsp;</td>\n\t\
+    \t<td align=\"right\" valign=\"bottom\" width=\"24\"><img src=\"/images/nws/navbarendcap.jpg\"\
+    \ alt=\"\" width=\"24\" height=\"23\" border=\"0\" /></td>\n\t</tr>\n</table>\n\
+    </td></tr></table>\n</div>\n<!-- End Top Navbar -->\n\n\r\n<!-- Start Side Navbar\
+    \ -->\r\n\r\n<div id=\"contentdiv\">\r\n<table id=\"contenttable\" width=\"700\"\
+    \ border=\"0\" cellspacing=\"0\" cellpadding=\"0\">\r\n\t<tr valign=\"top\">\r\
+    \n\t<td id=\"sidenav\" class=\"noprint\" width=\"150\" bgcolor=\"#0a2390\" align=\"\
+    left\" valign=\"top\" style=\"margin-top:5px\" nowrap=\"nowrap\">\r\n\t\t\t<form\
+    \ id=\"station_form\" method=\"get\" action=\"/station_page.php\" style=\"margin-bottom:0\"\
+    >\r\n\t\t\t&nbsp;<span class=\"yellow\"><label for=\"station\">Station ID Search</label></span><br\
+    \ />\r\n\t\t\t&nbsp;&nbsp;&nbsp;&nbsp;<span class=\"searchinput\"><input name=\"\
+    station\" id=\"station\" value=\"\" size=\"8\" maxlength=\"7\" />\r\n\t\t\t<input\
+    \ type=\"submit\" value=\"Go\"/></span></form>\r\n\t\t\t&nbsp;&nbsp;&nbsp;&nbsp;<a\
+    \ href=\"/to_station.shtml\" title=\"View a list of available stations ordered\
+    \ by owner\" class=\"nav\">Station List</a><br /><br />\r\n\r\n\t\t\t&nbsp;<span\
+    \ class=\"yellow\">Data Access</span><br />\r\n\t\t\t&nbsp;&nbsp;&nbsp;&nbsp;<a\
+    \ href=\"/mobile/\" title=\"Access latest marine observations on your mobile device\"\
+    \ class=\"nav\">Mobile Access</a><br />\r\n\t\t\t&nbsp;&nbsp;&nbsp;&nbsp;<span\
+    \ class=\"yellow\">Interactive Maps</span><br />\r\n\t\t\t&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a\
+    \ href=\"/obs.shtml\" class=\"nav\">All Stations</a><br />\r\n\t\t\t&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a\
+    \ href=\"/obs.shtml?lat=13&lon=-173&zoom=2&pgm=tsunami\" title=\"Deep Ocean Assessment\
+    \ and Reporting of Tsunamis\" class=\"nav\">DART&#174;</a><br />\r\n\t\t\t&nbsp;&nbsp;&nbsp;&nbsp;<a\
+    \ href=\"/os.shtml\" title=\"Get a tabular list of recent marine observations\
+    \ near a specific location\" class=\"nav\">Obs Search</a><br />\r\n\t\t\t&nbsp;&nbsp;&nbsp;&nbsp;<a\
+    \ href=\"/ship_obs.php\" title=\"View a list of recent marine observations from\
+    \ ships\" class=\"nav\">Ship Obs Report</a><br />\r\n\t\t\t&nbsp;&nbsp;&nbsp;&nbsp;<a\
+    \ href=\"/buoycams.shtml\" title=\"BuoyCAMs\" class=\"nav\">BuoyCAMs</a><br />\r\
+    \n\t\t\t&nbsp;&nbsp;&nbsp;&nbsp;<a href=\"https://tao.ndbc.noaa.gov/\" title=\"\
+    Tropical Atmosphere Ocean\" class=\"nav\">TAO</a><br />\r\n\t\t\t&nbsp;&nbsp;&nbsp;&nbsp;<a\
+    \ href=\"https://dods.ndbc.noaa.gov/\" title=\"NDBC DODS Server\" class=\"nav\"\
+    >DODS</a><br />\r\n                        &nbsp;&nbsp;&nbsp;&nbsp;<a href=\"\
+    https://dods.ndbc.noaa.gov/oceansites/\" title=\"NDBC OceanSITES GDAC\" class=\"\
+    nav\">OceanSITES</a><br />\r\n\t\t\t&nbsp;&nbsp;&nbsp;&nbsp;<a href=\"https://hfradar.ndbc.noaa.gov/\"\
+    \ title=\"View ocean surface currents measured by High Frequency Radar\" class=\"\
+    nav\">HF Radar</a><br />\r\n\t\t\t&nbsp;&nbsp;&nbsp;&nbsp;<a href=\"http://osmc.noaa.gov/Monitor/OSMC/OSMC.html\"\
+    \ title=\"Observing System Monitoring Center (OSMC)\" class=\"nav\">OSMC</a><br\
+    \ />\r\n\t\t\t&nbsp;&nbsp;&nbsp;&nbsp;<a href=\"/dial.shtml\" title=\"Listen to\
+    \ latest marine observations on your phone\" class=\"nav\">Dial-A-Buoy</a><br\
+    \ />\r\n\t\t\t&nbsp;&nbsp;&nbsp;&nbsp;<a href=\"/rss_access.shtml\" title=\"Latest\
+    \ marine observations via RSS Feeds\" class=\"nav\">RSS Feeds <img src='/images/feed-icon-14x14.png'\
+    \ alt='Image indicating link to RSS feed access page' width='14' height='14' border='0'\
+    \ /></a><br />\r\n                        &nbsp;&nbsp;&nbsp;&nbsp;<a href=\"/widgets/\"\
+    \ title=\"Add latest marine observations for a given station to your web site\"\
+    \ class=\"nav\">Web Widget</a><br />\r\n\t\t\t&nbsp;&nbsp;&nbsp;&nbsp;<a href=\"\
+    /docs/ndbc_web_data_guide.pdf\" title=\"How to access data on the NDBC web site\"\
+    \ class=\"nav\">Web Data Guide</a><br />\r\n\r\n\t\t\t&nbsp;&nbsp;&nbsp;&nbsp;<a\
+    \ href=\"/ops.shtml\" title=\"Maintenance schedule for NDBC stations\" class=\"\
+    nav\">Maintenance Schedule</a><br />\r\n\t\t\t&nbsp;&nbsp;&nbsp;&nbsp;<a href=\"\
+    /wstat.shtml\" title=\"Status report for NDBC Stations\" class=\"nav\">Station\
+    \ Status Report</a><br /><br />\r\n\r\n\t\t\t&nbsp;<span class=\"yellow\">Program\
+    \ Info</span><br />\r\n\t\t\t&nbsp;&nbsp;&nbsp;&nbsp;<a href=\"https://tao.ndbc.noaa.gov/proj_overview/proj_overview_ndbc.shtml\"\
+    \ title=\"Tropical Atmosphere Ocean\" class=\"nav\">TAO</a><br />\r\n\t\t\t&nbsp;&nbsp;&nbsp;&nbsp;<a\
+    \ href=\"/dart/dart.shtml\" title=\"Deep Ocean Assessment and Reporting of Tsunamis\"\
+    \ class=\"nav\">DART&#174;</a><br />\r\n\t\t\t&nbsp;&nbsp;&nbsp;&nbsp;<a href=\"\
+    https://ioos.noaa.gov/\" title=\"Integrated Ocean Observing System (IOOS&#174;)\"\
+    \ class=\"nav\">IOOS&#174;</a><br /><br />\r\n\r\n\t\t\t&nbsp;<span class=\"yellow\"\
+    >Publications</span><br />\r\n\t\t\t&nbsp;&nbsp;&nbsp;&nbsp;<a href=\"/pea/ndbc_final_pea_20180104.pdf\"\
+    \ title=\"NDBC Final Programmatic Environmental Assessment\" class=\"nav\">NDBC\
+    \ PEA</a><br />\r\n\t\t\t&nbsp;&nbsp;&nbsp;&nbsp;<a href=\"/pea/ndbc_fonsi_signed_20180102.pdf\"\
+    \ title=\"NDBC Finding of No Significant Impact\" class=\"nav\">NDBC FONSI</a><br\
+    \ />\r\n\t\t\t&nbsp;&nbsp;&nbsp;&nbsp;<a href=\"/NDBCHandbookofAutomatedDataQualityControl2009.pdf\"\
+    \ title=\"Handbook of Automated Data Quality Control Checks and Procedures\" class=\"\
+    nav\">NDBC DQC Handbook</a><br />\r\n\t\t\t<br />\r\n\r\n\t\t\t&nbsp;<span class=\"\
+    yellow\"><a href=\"/visitorinfo.shtml\" class=\"nav\">Visitor Information</a></span><br\
+    \ />\r\n\t\t\t&nbsp;<br />\r\n\t\t\t<a href=\"https://www.usa.gov/\"><img src=\"\
+    /images/usagov_logo.gif\" title=\"USA.gov is the U.S. government's official web\
+    \ portal to all federal, state and local government web resources and services\"\
+    \ alt=\"USA.gov is the U.S. government's official web portal to all federal, state\
+    \ and local government web resources and services.\" width=\"110\" height=\"30\"\
+    \ hspace=\"3\" vspace=\"3\" border=\"0\" /></a><br />\r\n\t\t</td>\r\n\t\t<td\
+    \ id=\"contentarea\" valign=\"top\" width=\"560\"><a name=\"contents\"></a>\r\n\
+    \t<div id=\"notices\" class=\"noprint\">\r\n\t\t<!-- Put notices here -->\r\n\t\
+    \t<p class=\"notice\">NDBC is adding additional data to its .drift file format\
+    \ on or about August 17. For more info, see the <a href=\"/driftfileformatchange.shtml\"\
+    >Drift File Format Change Notice</a>.</p>\r\n        </div>\r\n\t\t\r\n      \
+    \          <h1 style=\"text-align:center; margin:3px;\">Station TPLM2  - Thomas\
+    \ Point, MD <a href='/data/latest_obs/tplm2.rss' title='RSS feed of recent observations\
+    \ from Station TPLM2'><img src='/images/feed-icon-14x14.png' alt='Image indicating\
+    \ link to RSS feed of recent meteorological observations for station TPLM2' width='14'\
+    \ height='14' border='0' /></a></h1>\r\n                \r\n\r\n<!-- End Side\
+    \ Navbar -->\r\n\r\n\n<table width=\"650\" border=\"0\" cellpadding=\"2\" cellspacing=\"\
+    0\">\n<tr>\n\t<td>\n\t\t<div id=\"stn_metadata\">\n\t\t<p><b>Owned and maintained\
+    \ by National Data Buoy Center</b><br />\n\t\t<b>C-MAN Station</b><br />\n\t\t\
+    <b>MARS payload</b><br />\n\t\t<b>38.899 N 76.436 W (38&#176;53'56\" N 76&#176;26'9\"\
+    \ W)</b><br />\n\t\t<br />\n\t\t<b>Site elevation:</b> 0 m above mean sea level<br\
+    \ />\n\t\t<b>Air temp height:</b> 17.4 m above site elevation<br />\n\t\t<b>Anemometer\
+    \ height:</b> 18 m above site elevation<br />\n\t\t<b>Barometer elevation:</b>\
+    \ 12.2 m above mean sea level<br />\n\t\t<b>Sea temp depth:</b> 1 m below MLLW<br\
+    \ />\n\t\t</p>\n\t\t<p><a href=\"/data/Forecasts/FZUS51.KLWX.html\">Latest NWS\
+    \ Marine Forecast</a></p>\n\t\t<p><b><a href=\"/marine_notice.shtml\">Important\
+    \ Notice to Mariners</a></b></p>\n\t\t<p><a href=\"/sar.php?station=tplm2\">Search\
+    \ And Rescue (SAR) Data</a></p>\n\t\t<p><a href=\"/radial_search.php?lat1=38.899N&amp;lon1=76.436W&amp;uom=E&amp;dist=250\"\
+    >Meteorological Observations from Nearby Stations and Ships</a>\n\t\t<a href=\"\
+    /rss/ndbc_obs_search.php?lat=38.899N&amp;lon=76.436W\" title=\"RSS feed of recent\
+    \ meteorological observations near station TPLM2\">\n\t\t\t<img src=\"/images/feed-icon-14x14.png\"\
+    \ alt=\"Image indicating link to RSS feed of recent meteorological observations\
+    \ near station TPLM2\" width=\"14\" height=\"14\" border=\"0\" />\n\t\t</a></p>\n\
+    \t\t<p>Sector pictures are available for this station at <a href=\"/sector_pics.php?station=tplm2&amp;hdg=000&amp;scrn=1\"\
+    >0</a>, <a href=\"/sector_pics.php?station=tplm2&amp;hdg=045&amp;scrn=1\">45</a>,\
+    \ <a href=\"/sector_pics.php?station=tplm2&amp;hdg=090&amp;scrn=1\">90</a>, <a\
+    \ href=\"/sector_pics.php?station=tplm2&amp;hdg=135&amp;scrn=1\">135</a>, <a href=\"\
+    /sector_pics.php?station=tplm2&amp;hdg=180&amp;scrn=1\">180</a>, <a href=\"/sector_pics.php?station=tplm2&amp;hdg=225&amp;scrn=1\"\
+    >225</a>, <a href=\"/sector_pics.php?station=tplm2&amp;hdg=270&amp;scrn=1\">270</a>,\
+    \ <a href=\"/sector_pics.php?station=tplm2&amp;hdg=315&amp;scrn=1\">315</a> degrees.</p>\n\
+    \t\t<p><b>(SECTOR PHOTOS ARE NOT IN REAL-TIME AND ARE NOT UPDATED!)</b></p>\n\t\
+    \t</div>\n\t\t<div id=\"stn_img_map\">\n\t\t\t\t<a href=\"/images/stations/tplm2.jpg\"\
+    ><img src=\"/images/stations/tplm2_mini.jpg\" border=\"0\" alt=\"Station TPLM2\"\
+    \ /></a>\n\t<div id=\"stnmapcontainer\">\n  <div id=\"switch-basemap-container\"\
+    >\n    <div id=\"basemap-selection-form\" title=\"Choose a Basemap\">\n      \
+    \  <label for=\"basemap-selected\">Map Type: </label>\n     \t<select name=\"\
+    basemap-selected\" id=\"basemap-selected\" title=\"Basemap Dropdown Menu\">\n\
+    \        <option value=\"none\">Select Basemap</option>\n       \t<option value=\"\
+    oceans\">Oceans</option>\n       \t<option value=\"satellite\">Satellite</option>\n\
+    \       \t<option value=\"streets\">Streets</option>\n       \t<option value=\"\
+    topo\">Topographic</option>\n     \t</select>\n   \t</div>\n  </div>\n  <div id=\"\
+    stnmap\"></div>\n  <div id=\"ndbcmapfooter\">\n\t<div id=\"ndbcmaplegend\" style=\"\
+    text-align:left;margin:0;background-color:white;color:black;float:left;width:80%;\"\
+    >\n      Large icon indicates selected station.<br />\n      <img src=\"/images/maps/markers/tiny_active_marker.png\"\
+    \ width=\"11\" height=\"11\" alt=\"yellow diamond\" style=\"vertical-align:middle;\"\
+    \ /> Stations with recent data<br />\n      <img src=\"/images/maps/markers/tiny_inactive_marker.png\"\
+    \ width=\"11\" height=\"11\" alt=\"red diamond\" style=\"vertical-align:middle;\"\
+    \ /> Stations with no data in last 8 hours<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(24\
+    \ hours for tsunami stations)\n    </div>\n    <div id=\"ndbcmapnwslinks\" style=\"\
+    text-align:left;margin:0;background-color:white;color:black;float:right;width:20%;\"\
+    >\n      <a href=\"https://www.weather.gov/disclaimer#esri\" target=\"_blank\"\
+    \ rel=\"noopener\" onclick=\"window.open('https://www.weather.gov/disclaimer#esri','_blank','width=750,height=550,top=0,left=0,menubar=yes,toolbar=yes,scrollbars=yes');return\
+    \ false\">Disclaimer</a><br />\n      <!--<a href=\"javascript:alert('Reserved\
+    \ for future KML option');\">Download in KML/KMZ</a>-->\n    </div>\n  </div>\n\
+    </div>\n\t</div>\n</td></tr></table>\n<br style=\"clear:both;\" /><div id=\"data\"\
+    \ data-nosnippet>\n<hr width=\"100%\" size=\"1\" />\n<table bgcolor=\"#f0f8fe\"\
+    \ border=\"0\" cellspacing=\"0\" cellpadding=\"2\"><caption class=\"titleDataHeader\"\
+    >Conditions at TPLM2 as of<br />(4:00 pm EDT)<br />2000 GMT on 08/12/2022:</caption>\n\
+    <tr>\n\t<td colspan=\"3\" bgcolor=\"#ffffff\">\n<form name=\"uom_m\" action=\"\
+    /station_page.php\" method=\"get\">\n<input type=\"hidden\" name=\"station\" size=\"\
+    7\" value=\"tplm2\" />\n<label for=\"uom\">Unit of Measure: </label><select name=\"\
+    uom\" id=\"uom\" size=\"1\">\n<option value=\"E\" selected=\"selected\"> Imperial</option>\n\
+    <option value=\"M\"> Metric</option>\n</select>&nbsp;&nbsp;\n<label for=\"tz\"\
+    >Time Zone: </label><select name=\"tz\" id=\"tz\" size=\"1\">\n<option value=\"\
+    STN\">Station Local Time</option>\n<option value=\"GMT\">Greenwich Mean Time [GMT]</option>\n\
+    <option value=\"BST\">British Summer Time [GMT+1]</option>\n<option value=\"EGT\"\
+    >Eastern Greenland [GMT-1]</option>\n<option value=\"AT\">Azores [GMT-2]</option>\n\
+    <option value=\"WGT\">Western Greenland [GMT-3]</option>\n<option value=\"AST\"\
+    >Atlantic Standard [GMT-4]</option>\n<option value=\"EST\">US/Eastern Standard</option>\n\
+    <option value=\"CST\">US/Central Standard</option>\n<option value=\"MST\">US/Mountain\
+    \ Standard</option>\n<option value=\"PST\">US/Pacific Standard</option>\n<option\
+    \ value=\"AKST\">Alaska Standard [GMT-9]</option>\n<option value=\"HAST\">Hawaii-Aleutian\
+    \ Standard [GMT-10]</option>\n<option value=\"SST\">Samoa Standard [GMT-11]</option>\n\
+    <option value=\"IDLW\">International Date Line West [GMT-12]</option>\n<option\
+    \ value=\"WET\">Western European [GMT+0]</option>\n<option value=\"CET\">Central\
+    \ European [GMT+1]</option>\n<option value=\"EET\">Eastern European [GMT+2]</option>\n\
+    <option value=\"MSK\">Moscow [GMT+3]</option>\n<option value=\"GMT+4\">GMT+4</option>\n\
+    <option value=\"PKT\">Pakistan Standard [GMT+5]</option>\n<option value=\"GMT+6\"\
+    >GMT+6</option>\n<option value=\"ICT\">Indochina Time [GMT+7]</option>\n<option\
+    \ value=\"CCT\">China Coast [GMT+8]</option>\n<option value=\"JST\">Japan Standard\
+    \ [GMT+9]</option>\n<option value=\"GST\">Guam Standard [GMT+10]</option>\n<option\
+    \ value=\"ZP11\">GMT+11</option>\n<option value=\"IDLE\">International Date Line\
+    \ East [GMT+12]</option>\n</select>&nbsp;&nbsp;<input type=\"submit\" value=\"\
+    \ Select \" /></form>\n<p><i>Click on the graph icon in the table below to see\
+    \ a time series plot of the last five days of that observation.</i></p></td>\n\
+    </tr>\n<tr>\n\t<td><a href=\"/show_plot.php?station=tplm2&amp;meas=wdir&amp;uom=E&amp;time_diff=-4&amp;time_label=EDT\"\
+    ><img alt=\"5-day plot - Wind Direction\" border=\"0\" src=\"/images/graph04.gif\"\
+    \ width=\"21\" height=\"20\" /></a></td>\n\t<td>Wind Direction (WDIR):</td>\n\t\
+    <td>  N ( 350 deg true )</td>\n</tr>\n<tr>\n\t<td><a href=\"/show_plot.php?station=tplm2&amp;meas=wspd&amp;uom=E&amp;time_diff=-4&amp;time_label=EDT\"\
+    ><img alt=\"5-day plot - Wind Speed\" border=\"0\" src=\"/images/graph04.gif\"\
+    \ width=\"21\" height=\"20\" /></a></td>\n\t<td>Wind Speed (WSPD):</td>\n\t<td>\
+    \   11 kts</td>\n</tr>\n<tr>\n\t<td><a href=\"/show_plot.php?station=tplm2&amp;meas=wgst&amp;uom=E&amp;time_diff=-4&amp;time_label=EDT\"\
+    ><img alt=\"5-day plot - Wind Gust\" border=\"0\" src=\"/images/graph04.gif\"\
+    \ width=\"21\" height=\"20\" /></a></td>\n\t<td>Wind Gust (GST):</td>\n\t<td>\
+    \   13 kts</td>\n</tr>\n<tr>\n\t<td><a href=\"/show_plot.php?station=tplm2&amp;meas=pres&amp;uom=E&amp;time_diff=-4&amp;time_label=EDT\"\
+    ><img alt=\"5-day plot - Atmospheric Pressure\" border=\"0\" src=\"/images/graph04.gif\"\
+    \ width=\"21\" height=\"20\" /></a></td>\n\t<td>Atmospheric Pressure (PRES):</td>\n\
+    \t<td>30.03 in</td>\n</tr>\n<tr>\n\t<td><a href=\"/show_plot.php?station=tplm2&amp;meas=ptnd&amp;uom=E&amp;time_diff=-4&amp;time_label=EDT\"\
+    ><img alt=\"5-day plot - Pressure Tendency\" border=\"0\" src=\"/images/graph04.gif\"\
+    \ width=\"21\" height=\"20\" /></a></td>\n\t<td>Pressure Tendency (PTDY):</td>\n\
+    \t<td>-0.03 in ( Falling )</td>\n</tr>\n<tr>\n\t<td><a href=\"/show_plot.php?station=tplm2&amp;meas=atmp&amp;uom=E&amp;time_diff=-4&amp;time_label=EDT\"\
+    ><img alt=\"5-day plot - Air Temperature\" border=\"0\" src=\"/images/graph04.gif\"\
+    \ width=\"21\" height=\"20\" /></a></td>\n\t<td>Air Temperature (ATMP):</td>\n\
+    \t<td> 79.0 &deg;F</td>\n</tr>\n<tr>\n\t<td><a href=\"/show_plot.php?station=tplm2&amp;meas=w10m&amp;uom=E&amp;time_diff=-4&amp;time_label=EDT\"\
+    ><img alt=\"5-day plot - Wind Speed at 10 Meters\" border=\"0\" src=\"/images/graph04.gif\"\
+    \ width=\"21\" height=\"20\" /></a></td>\n\t<td>Wind Speed at 10 meters (WSPD10M):</td>\n\
+    \t<td>   10 kts</td>\n</tr>\n<tr>\n\t<td><a href=\"/show_plot.php?station=tplm2&amp;meas=w20m&amp;uom=E&amp;time_diff=-4&amp;time_label=EDT\"\
+    ><img alt=\"5-day plot - Wind Speed at 10 Meters\" border=\"0\" src=\"/images/graph04.gif\"\
+    \ width=\"21\" height=\"20\" /></a></td>\n\t<td>Wind Speed at 20 meters (WSPD20M):</td>\n\
+    \t<td>   12 kts</td>\n</tr>\n<tr>\n\t<td><a href=\"/show_plot.php?station=tplm2&amp;meas=wdpr&amp;uom=E&amp;time_diff=-4&amp;time_label=EDT\"\
+    ><img alt=\"5-day plot - Wind Speed, Wind Gust and Atmospheric Pressure\" border=\"\
+    0\" src=\"/images/graph04.gif\" width=\"21\" height=\"20\" /></a></td>\n\t<td\
+    \ colspan=\"2\"><a href=\"/show_plot.php?station=tplm2&amp;meas=wdpr&amp;uom=E&amp;time_diff=-4&amp;time_label=EDT\"\
+    >Combined plot of Wind Speed, Gust, and Air Pressure</a></td>\n</tr>\n</table>\n\
+    <table border=\"0\" cellspacing=\"10\" cellpadding=\"0\">\n<tr valign=\"top\"\
+    >\n\t<td>\n<table bgcolor=\"#f0f8fe\" border=\"0\" cellspacing=\"0\" cellpadding=\"\
+    2\">\n<caption class=\"titleDataHeader\">Continuous Winds</caption>\n<tr valign=\"\
+    bottom\" align=\"center\">\n\t<th class=\"dataHeader\">TIME<br />(EDT)</th>\n\t\
+    <th class=\"dataHeader\"><a href=\"/show_plot.php?station=tplm2&amp;meas=dir&amp;uom=E&amp;time_diff=-4&amp;time_label=EDT\"\
+    ><img alt=\"5-day plot - Wind Direction\" border=\"0\" src=\"/images/graph04.gif\"\
+    \ width=\"21\" height=\"20\" /></a> WDIR</th>\n\t<th class=\"dataHeader\"><a href=\"\
+    /show_plot.php?station=tplm2&amp;meas=spd&amp;uom=E&amp;time_diff=-4&amp;time_label=EDT\"\
+    ><img alt=\"5-day plot - Wind Speed\" border=\"0\" src=\"/images/graph04.gif\"\
+    \ width=\"21\" height=\"20\" /></a> WSPD</th>\n</tr>\n<tr align=\"right\"><td>4:00&nbsp;pm</td><td\
+    \ style=\"white-space: nowrap\">N ( 352 deg )</td><td>   10 kts</td></tr>\n<tr\
+    \ align=\"right\"><td>3:50&nbsp;pm</td><td style=\"white-space: nowrap\">N ( 0\
+    \ deg )</td><td>   11 kts</td></tr>\n<tr align=\"right\"><td>3:40&nbsp;pm</td><td\
+    \ style=\"white-space: nowrap\">N ( 358 deg )</td><td>   12 kts</td></tr>\n<tr\
+    \ align=\"right\"><td>3:30&nbsp;pm</td><td style=\"white-space: nowrap\">N ( 6\
+    \ deg )</td><td>   12 kts</td></tr>\n<tr align=\"right\"><td>3:20&nbsp;pm</td><td\
+    \ style=\"white-space: nowrap\">N ( 2 deg )</td><td>   12 kts</td></tr>\n<tr align=\"\
+    right\"><td>3:10&nbsp;pm</td><td style=\"white-space: nowrap\">N ( 358 deg )</td><td>\
+    \   12 kts</td></tr>\n</table>\n</td>\n\t<td width=\"40\">&nbsp;</td>\n\t<td>\n\
+    </td>\n</tr>\n<tr valign=\"top\">\n\t<td>\n\t<table bgcolor=\"#f0f8fe\" border=\"\
+    0\" cellspacing=\"0\" cellpadding=\"2\"><caption class=\"titleDataHeader\">Peak\
+    \ gust during the measurement hour<br /></caption>\n<tr valign=\"bottom\" align=\"\
+    center\">\n\t<th class=\"dataHeader\">TIME<br />(EDT)</th>\n\t<th class=\"dataHeader\"\
+    ><a href=\"/show_plot.php?station=tplm2&amp;meas=gdr&amp;uom=E&amp;time_diff=-4&amp;time_label=EDT\"\
+    ><img alt=\"5-day plot - Gust Direction\" border=\"0\" src=\"/images/graph04.gif\"\
+    \ width=\"21\" height=\"20\" /></a> GDR</th>\n\t<th class=\"dataHeader\"><a href=\"\
+    /show_plot.php?station=tplm2&amp;meas=gst&amp;uom=E&amp;time_diff=-4&amp;time_label=EDT\"\
+    ><img alt=\"5-day plot - Gust Speed\" border=\"0\" src=\"/images/graph04.gif\"\
+    \ width=\"21\" height=\"20\" /></a> GST</th>\n</tr>\n<tr align=\"right\"><td>3:05&nbsp;pm</td><td\
+    \ style=\"white-space: nowrap\">N ( 360 deg )</td><td>   15 kts</td>\n</tr>\n\
+    </table>\n</td>\n</tr>\n</table><table class=\"dataTable\">\n<caption class=\"\
+    dataHeader\">Previous observations</caption>\n<tr valign=\"top\" align=\"right\"\
+    >\n\t<td></td>\n\t<td></td>\n\t<td></td>\n\t<th><a href=\"/show_plot.php?station=tplm2&amp;meas=wdir&amp;uom=E&amp;time_diff=-4&amp;time_label=EDT\"\
+    ><img alt=\"5-day plot - Wind Direction\" border=\"0\" src=\"/images/graph04.gif\"\
+    \ width=\"21\" height=\"20\" /></a></th>\n\t<th><a href=\"/show_plot.php?station=tplm2&amp;meas=wspd&amp;uom=E&amp;time_diff=-4&amp;time_label=EDT\"\
+    ><img alt=\"5-day plot - Wind Speed\" border=\"0\" src=\"/images/graph04.gif\"\
+    \ width=\"21\" height=\"20\" /></a></th>\n\t<th><a href=\"/show_plot.php?station=tplm2&amp;meas=wgst&amp;uom=E&amp;time_diff=-4&amp;time_label=EDT\"\
+    ><img alt=\"5-day plot - Wind Gust\" border=\"0\" src=\"/images/graph04.gif\"\
+    \ width=\"21\" height=\"20\" /></a></th>\n\t<th><a href=\"/show_plot.php?station=tplm2&amp;meas=wvht&amp;uom=E&amp;time_diff=-4&amp;time_label=EDT\"\
+    ><img alt=\"5-day plot - Wave Height\" border=\"0\" src=\"/images/graph04.gif\"\
+    \ width=\"21\" height=\"20\" /></a></th>\n\t<th><a href=\"/show_plot.php?station=tplm2&amp;meas=dmpd&amp;uom=E&amp;time_diff=-4&amp;time_label=EDT\"\
+    ><img alt=\"5-day plot - Dominant Wave Period\" border=\"0\" src=\"/images/graph04.gif\"\
+    \ width=\"21\" height=\"20\" /></a></th>\n\t<th><a href=\"/show_plot.php?station=tplm2&amp;meas=avpd&amp;uom=E&amp;time_diff=-4&amp;time_label=EDT\"\
+    ><img alt=\"5-day plot - Average Period\" border=\"0\" src=\"/images/graph04.gif\"\
+    \ width=\"21\" height=\"20\" /></a></th>\n\t<th><a href=\"/show_plot.php?station=tplm2&amp;meas=wvdr&amp;uom=E&amp;time_diff=-4&amp;time_label=EDT\"\
+    ><img alt=\"5-day plot - Mean Wave Direction\" border=\"0\" src=\"/images/graph04.gif\"\
+    \ width=\"21\" height=\"20\" /></a></th>\n\t<th><a href=\"/show_plot.php?station=tplm2&amp;meas=pres&amp;uom=E&amp;time_diff=-4&amp;time_label=EDT\"\
+    ><img alt=\"5-day plot - Atmospheric Pressure\" border=\"0\" src=\"/images/graph04.gif\"\
+    \ width=\"21\" height=\"20\" /></a></th>\n\t<th><a href=\"/show_plot.php?station=tplm2&amp;meas=ptnd&amp;uom=E&amp;time_diff=-4&amp;time_label=EDT\"\
+    ><img alt=\"5-day plot - Pressure Tendency\" border=\"0\" src=\"/images/graph04.gif\"\
+    \ width=\"21\" height=\"20\" /></a></th>\n\t<th><a href=\"/show_plot.php?station=tplm2&amp;meas=atmp&amp;uom=E&amp;time_diff=-4&amp;time_label=EDT\"\
+    ><img alt=\"5-day plot - Air Temperature\" border=\"0\" src=\"/images/graph04.gif\"\
+    \ width=\"21\" height=\"20\" /></a></th>\n\t<th><a href=\"/show_plot.php?station=tplm2&amp;meas=wtmp&amp;uom=E&amp;time_diff=-4&amp;time_label=EDT\"\
+    ><img alt=\"5-day plot - Water Temperature\" border=\"0\" src=\"/images/graph04.gif\"\
+    \ width=\"21\" height=\"20\" /></a></th>\n\t<th><a href=\"/show_plot.php?station=tplm2&amp;meas=dewp&amp;uom=E&amp;time_diff=-4&amp;time_label=EDT\"\
+    ><img alt=\"5-day plot - Dew Point\" border=\"0\" src=\"/images/graph04.gif\"\
+    \ width=\"21\" height=\"20\" /></a></th>\n\t<th><a href=\"/show_plot.php?station=tplm2&amp;meas=salt&amp;uom=E&amp;time_diff=-4&amp;time_label=EDT\"\
+    ><img alt=\"5-day plot - Salinity\" border=\"0\" src=\"/images/graph04.gif\" width=\"\
+    21\" height=\"20\" /></a></th>\n\t<th><a href=\"/show_plot.php?station=tplm2&amp;meas=visi&amp;uom=E&amp;time_diff=-4&amp;time_label=EDT\"\
+    ><img alt=\"5-day plot - Visibility\" border=\"0\" src=\"/images/graph04.gif\"\
+    \ width=\"21\" height=\"20\" /></a></th>\n\t<th><a href=\"/show_plot.php?station=tplm2&amp;meas=tide&amp;uom=E&amp;time_diff=-4&amp;time_label=EDT\"\
+    ><img alt=\"5-day plot - Tide (above MLLW)\" border=\"0\" src=\"/images/graph04.gif\"\
+    \ width=\"21\" height=\"20\" /></a></th>\n</tr>\n<tr valign=\"top\" align=\"right\"\
+    ><th class=\"dataHeader\">MM</th>\n<th class=\"dataHeader\">DD</th>\n<th class=\"\
+    dataHeader\">TIME<br />(EDT)</th>\n<th class=\"dataHeader\">WDIR</th>\n<th class=\"\
+    dataHeader\">WSPD<br />kts</th>\n<th class=\"dataHeader\">GST<br />kts</th>\n\
+    <th class=\"dataHeader\">WVHT<br />ft</th>\n<th class=\"dataHeader\">DPD<br />sec</th>\n\
+    <th class=\"dataHeader\">APD<br />sec</th>\n<th class=\"dataHeader\">MWD</th>\n\
+    <th class=\"dataHeader\">PRES<br />in</th>\n<th class=\"dataHeader\">PTDY<br />in</th>\n\
+    <th class=\"dataHeader\">ATMP<br />&deg;F</th>\n<th class=\"dataHeader\">WTMP<br\
+    \ />&deg;F</th>\n<th class=\"dataHeader\">DEWP<br />&deg;F</th>\n<th class=\"\
+    dataHeader\">SAL<br />psu</th>\n<th class=\"dataHeader\">VIS<br />nmi</th>\n<th\
+    \ class=\"dataHeader\">TIDE<br />ft</th>\n</tr>\n<tr bgcolor=\"#f0f8fe\" align=\"\
+    right\"><td>08</td><td>12</td><td> 3:00&nbsp;pm</td><td align=\"left\">  N</td><td>\
+    \   12</td><td>   14</td><td>-</td><td>-</td><td>-</td><td align=\"center\">-</td><td>30.03</td><td>-0.03</td><td>\
+    \ 78.4</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>\n<tr bgcolor=\"\
+    #fffff0\" align=\"right\"><td>08</td><td>12</td><td> 2:00&nbsp;pm</td><td align=\"\
+    left\">  N</td><td>   11</td><td>   12</td><td>-</td><td>-</td><td>-</td><td align=\"\
+    center\">-</td><td>30.04</td><td>-0.02</td><td> 77.7</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>\n\
+    <tr bgcolor=\"#f0f8fe\" align=\"right\"><td>08</td><td>12</td><td> 1:00&nbsp;pm</td><td\
+    \ align=\"left\">  N</td><td>   12</td><td>   14</td><td>-</td><td>-</td><td>-</td><td\
+    \ align=\"center\">-</td><td>30.06</td><td>+0.01</td><td> 76.8</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>\n\
+    <tr bgcolor=\"#fffff0\" align=\"right\"><td>08</td><td>12</td><td>12:00&nbsp;pm</td><td\
+    \ align=\"left\">NNW</td><td>   10</td><td>   11</td><td>-</td><td>-</td><td>-</td><td\
+    \ align=\"center\">-</td><td>30.06</td><td>+0.03</td><td> 75.7</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>\n\
+    <tr bgcolor=\"#f0f8fe\" align=\"right\"><td>08</td><td>12</td><td>11:00&nbsp;am</td><td\
+    \ align=\"left\">NNW</td><td>   14</td><td>   16</td><td>-</td><td>-</td><td>-</td><td\
+    \ align=\"center\">-</td><td>30.06</td><td>+0.04</td><td> 74.8</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>\n\
+    <tr bgcolor=\"#fffff0\" align=\"right\"><td>08</td><td>12</td><td>10:00&nbsp;am</td><td\
+    \ align=\"left\">NNW</td><td>   16</td><td>   17</td><td>-</td><td>-</td><td>-</td><td\
+    \ align=\"center\">-</td><td>30.04</td><td>+0.02</td><td> 73.9</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>\n\
+    <tr bgcolor=\"#f0f8fe\" align=\"right\"><td>08</td><td>12</td><td> 9:00&nbsp;am</td><td\
+    \ align=\"left\">  N</td><td>   19</td><td>   20</td><td>-</td><td>-</td><td>-</td><td\
+    \ align=\"center\">-</td><td>30.03</td><td>+0.03</td><td> 73.8</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>\n\
+    <tr bgcolor=\"#fffff0\" align=\"right\"><td>08</td><td>12</td><td> 8:00&nbsp;am</td><td\
+    \ align=\"left\">NNW</td><td>   18</td><td>   20</td><td>-</td><td>-</td><td>-</td><td\
+    \ align=\"center\">-</td><td>30.02</td><td>+0.05</td><td> 74.3</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>\n\
+    <tr bgcolor=\"#f0f8fe\" align=\"right\"><td>08</td><td>12</td><td> 7:00&nbsp;am</td><td\
+    \ align=\"left\">NNW</td><td>   17</td><td>   18</td><td>-</td><td>-</td><td>-</td><td\
+    \ align=\"center\">-</td><td>30.02</td><td>+0.05</td><td> 75.2</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>\n\
+    <tr bgcolor=\"#fffff0\" align=\"right\"><td>08</td><td>12</td><td> 6:00&nbsp;am</td><td\
+    \ align=\"left\">NNW</td><td>   14</td><td>   16</td><td>-</td><td>-</td><td>-</td><td\
+    \ align=\"center\">-</td><td>30.00</td><td>+0.03</td><td> 76.3</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>\n\
+    <tr bgcolor=\"#f0f8fe\" align=\"right\"><td>08</td><td>12</td><td> 5:00&nbsp;am</td><td\
+    \ align=\"left\">  N</td><td>   18</td><td>   20</td><td>-</td><td>-</td><td>-</td><td\
+    \ align=\"center\">-</td><td>29.97</td><td>+0.01</td><td> 77.7</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>\n\
+    <tr bgcolor=\"#fffff0\" align=\"right\"><td>08</td><td>12</td><td> 4:00&nbsp;am</td><td\
+    \ align=\"left\">WNW</td><td>   13</td><td>   14</td><td>-</td><td>-</td><td>-</td><td\
+    \ align=\"center\">-</td><td>29.98</td><td>+0.01</td><td> 75.2</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>\n\
+    <tr bgcolor=\"#f0f8fe\" align=\"right\"><td>08</td><td>12</td><td> 3:00&nbsp;am</td><td\
+    \ align=\"left\">WNW</td><td>   10</td><td>   12</td><td>-</td><td>-</td><td>-</td><td\
+    \ align=\"center\">-</td><td>29.97</td><td>+0.01</td><td> 75.9</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>\n\
+    <tr bgcolor=\"#fffff0\" align=\"right\"><td>08</td><td>12</td><td> 2:00&nbsp;am</td><td\
+    \ align=\"left\"> NW</td><td>   10</td><td>   11</td><td>-</td><td>-</td><td>-</td><td\
+    \ align=\"center\">-</td><td>29.96</td><td>+0.00</td><td> 77.5</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>\n\
+    <tr bgcolor=\"#f0f8fe\" align=\"right\"><td>08</td><td>12</td><td> 1:00&nbsp;am</td><td\
+    \ align=\"left\">WNW</td><td>   12</td><td>   14</td><td>-</td><td>-</td><td>-</td><td\
+    \ align=\"center\">-</td><td>29.96</td><td>+0.00</td><td> 77.4</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>\n\
+    <tr bgcolor=\"#fffff0\" align=\"right\"><td>08</td><td>12</td><td>12:00&nbsp;am</td><td\
+    \ align=\"left\">WNW</td><td>   16</td><td>   18</td><td>-</td><td>-</td><td>-</td><td\
+    \ align=\"center\">-</td><td>29.96</td><td>+0.01</td><td> 78.4</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>\n\
+    <tr bgcolor=\"#f0f8fe\" align=\"right\"><td>08</td><td>11</td><td>11:00&nbsp;pm</td><td\
+    \ align=\"left\">  W</td><td>   12</td><td>   14</td><td>-</td><td>-</td><td>-</td><td\
+    \ align=\"center\">-</td><td>29.96</td><td>+0.02</td><td> 79.5</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>\n\
+    <tr bgcolor=\"#fffff0\" align=\"right\"><td>08</td><td>11</td><td>10:00&nbsp;pm</td><td\
+    \ align=\"left\">  W</td><td>   12</td><td>   14</td><td>-</td><td>-</td><td>-</td><td\
+    \ align=\"center\">-</td><td>29.96</td><td>+0.04</td><td> 80.2</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>\n\
+    <tr bgcolor=\"#f0f8fe\" align=\"right\"><td>08</td><td>11</td><td> 9:00&nbsp;pm</td><td\
+    \ align=\"left\">WSW</td><td>    8</td><td>    9</td><td>-</td><td>-</td><td>-</td><td\
+    \ align=\"center\">-</td><td>29.95</td><td>+0.02</td><td> 81.3</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>\n\
+    <tr bgcolor=\"#fffff0\" align=\"right\"><td>08</td><td>11</td><td> 8:00&nbsp;pm</td><td\
+    \ align=\"left\"> SE</td><td>    2</td><td>    2</td><td>-</td><td>-</td><td>-</td><td\
+    \ align=\"center\">-</td><td>29.93</td><td>+0.00</td><td> 83.3</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>\n\
+    <tr bgcolor=\"#f0f8fe\" align=\"right\"><td>08</td><td>11</td><td> 7:00&nbsp;pm</td><td\
+    \ align=\"left\"> NE</td><td>    3</td><td>    4</td><td>-</td><td>-</td><td>-</td><td\
+    \ align=\"center\">-</td><td>29.92</td><td>-0.02</td><td> 84.2</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>\n\
+    <tr bgcolor=\"#fffff0\" align=\"right\"><td>08</td><td>11</td><td> 6:00&nbsp;pm</td><td\
+    \ align=\"left\">  W</td><td>   10</td><td>   11</td><td>-</td><td>-</td><td>-</td><td\
+    \ align=\"center\">-</td><td>29.93</td><td>-0.03</td><td> 84.9</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>\n\
+    <tr bgcolor=\"#f0f8fe\" align=\"right\"><td>08</td><td>11</td><td> 5:00&nbsp;pm</td><td\
+    \ align=\"left\">WSW</td><td>    8</td><td>    8</td><td>-</td><td>-</td><td>-</td><td\
+    \ align=\"center\">-</td><td>29.93</td><td>-0.04</td><td> 84.0</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>\n\
+    </table>\n</div>\n<hr width=\"100%\" size=\"1\" />\n<p><a href=\"/measdes.shtml\"\
+    >Description of Measurements</a></p>\n<p>Links which are specific to this station\
+    \ are listed below:</p>\n<p><a href=\"/station_realtime.php?station=tplm2\">Real\
+    \ Time Data</a> in tabular form for the last forty-five days.</p>\n<p><a href=\"\
+    /station_history.php?station=tplm2\">Historical Data &#38; Climatic Summaries</a>\
+    \ for quality controlled data for the current month, previous months, and previous\
+    \ years.</p>\n<p>The <a href=\"/wstat.shtml\">weekly status report</a> and the\
+    \ <a href=\"/ops.shtml\">weekly maintenance report</a>\nalso provide valuable\
+    \ station information.</p><p>Note that the <a href=\"/rsa.shtml\">payload types</a>\
+    \ and the station locations occasionally change.<br />\nPlease refer to the <a\
+    \ href=\"/data_availability/data_avail.php\"> NDBC data inventory</a>\nfor the\
+    \ data history of each station.</p><!-- Start Tail -->\n\n\t\t<div id=\"footer\"\
+    \ class=\"noprint\" style=\"clear:both;\">\n\t\t\t<hr width=\"100%\" size=\"1\"\
+    \ noshade=\"noshade\" />\n\t\t\t\t<div id=\"footer-flexbox\" class=\"footer-flexbox\"\
+    \ width=\"100%\">\n\t\t\t\t\t<a class=\"socialMediaLink\" href=\"/ndbcexit.php?url=https://www.facebook.com/NWSNDBC&amp;blurb=NDBC%20on%20Facebook\"\
+    ><img src=\"/images/facebook_logo.png\" class=\"socialMediaLogo\" height=\"21\"\
+    \ width=\"21\" alt=\"Facebook Logo\" title=\"NDBC on Facebook\"/>&nbsp;NDBC on\
+    \ Facebook</a><br />\n\t\t\t\t\t<a class=\"socialMediaLink\" href=\"/ndbcexit.php?url=https://www.linkedin.com/company/noaa&amp;blurb=NOAA%20on%20LinkedIn\"\
+    ><img src=\"/images/linkedin_logo.png\" class=\"socialMediaLogo\" height=\"21\"\
+    \ width=\"25\" alt=\"LinkedIn Logo\" title=\"NDBC on LinkedIn\"/>&nbsp;NOAA on\
+    \ LinkedIn</a><br />\n\t\t\t\t\t<a class=\"socialMediaLink\" href=\"/ndbcexit.php?url=https://www.twitter.com/databuoycenter&amp;blurb=NDBC%20on%20Twitter\"\
+    ><img src=\"/images/twitter.png\" class=\"socialMediaLogo\" height=\"21\" width=\"\
+    25\" alt=\"Twitter Logo\" title=\"NDBC on Twitter\"/>&nbsp;NDBC on Twitter</a><br\
+    \ />\n\t\t\t\t</div>\n\t\t\t<table width=\"100%\" cellpadding=\"2\" border=\"\
+    0\">\n\t\t\t\t<tr valign=\"top\">\n\t\t\t\t\t<td width=\"70%\" align=\"left\"\
+    \ class=\"footertext\"><a href=\"https://www.commerce.gov/\"><span class=\"footertext\"\
+    >U.S. Dept. of Commerce</span></a><br />\n\t\t\t\t\t<a href=\"https://www.noaa.gov/\"\
+    ><span class=\"footertext\">National Oceanic and Atmospheric Administration</span></a><br\
+    \ />\n\t\t\t\t\t<a href=\"https://www.weather.gov/\"><span class=\"footertext\"\
+    >National Weather Service</span></a><br />\n\t\t\t\t\tNational Data Buoy Center<br\
+    \ />\n\t\t\t\t\tBldg. 3205<br />\n\t\t\t\t\tStennis Space Center, MS 39529<br\
+    \ />\n\t\t\t\t\t<a href=\"/contact_us.shtml\"><span class=\"footertext\">Contact&nbsp;Us</span></a><br\
+    \ />\n\t\t\t\t\tPage last modified: March 16, 2022</td>\n\t\t\t\t\t<td width=\"\
+    15%\" align=\"left\">\n\t\t\t\t\t<a href=\"https://www.weather.gov/disclaimer\"\
+    \ target=\"_blank\" rel=\"noopener\" onclick=\"window.open('https://www.weather.gov/disclaimer','_blank','width=750,height=550,top=0,left=0,menubar=yes,toolbar=yes,scrollbars=yes');return\
+    \ false\"><span class=\"footertext\">Disclaimer</span></a><br />\n\t\t\t\t\t<a\
+    \ href=\"https://www.cio.noaa.gov/services_programs/info_quality.html\" target=\"\
+    _blank\" rel=\"noopener\" onclick=\"window.open('https://www.cio.noaa.gov/services_programs/info_quality.html','_blank','width=750,height=550,top=0,left=0,menubar=yes,toolbar=yes,scrollbars=yes');return\
+    \ false\"><span class=\"footertext\">Information&nbsp;Quality</span></a><br />\n\
+    \t\t\t\t\t<a href=\"https://www.weather.gov/glossary\" target=\"_blank\" rel=\"\
+    noopener\" onclick=\"window.open('https://www.weather.gov/glossary','_blank','width=750,height=550,top=0,left=0,menubar=yes,toolbar=yes,scrollbars=yes');return\
+    \ false\"><span class=\"footertext\">Glossary</span></a></td>\n\t\t\t\t\t<td width=\"\
+    15%\" align=\"left\">\n\t\t\t\t\t<a href=\"https://www.weather.gov/privacy\" target=\"\
+    _blank\" rel=\"noopener\" onclick=\"window.open('https://www.weather.gov/privacy','_blank','width=750,height=550,top=0,left=0,menubar=yes,toolbar=yes,scrollbars=yes');return\
+    \ false\"><span class=\"footertext\">Privacy Policy</span></a><br />\n\t\t\t\t\
+    \t<a href=\"https://www.noaa.gov/foia-freedom-of-information-act\" target=\"_blank\"\
+    \ rel=\"noopener\" onclick=\"window.open('https://www.noaa.gov/foia-freedom-of-information-act','_blank','width=750,height=550,top=0,left=0,menubar=yes,toolbar=yes,scrollbars=yes');return\
+    \ false\"><span class=\"footertext\">Freedom&nbsp;of&nbsp;Information</span></a><br\
+    \ />\n\t\t\t\t\t<a href=\"/ndbc.shtml\"><span class=\"footertext\">About Us</span></a><br\
+    \ />\n\t\t\t\t\t<a href=\"https://www.weather.gov/careers\" target=\"_blank\"\
+    \ rel=\"noopener\" onclick=\"window.open('https://www.weather.gov/careers','_blank','width=750,height=550,top=0,left=0,menubar=yes,toolbar=yes,scrollbars=yes');return\
+    \ false\"><span class=\"footertext\">Career&nbsp;Opportunities</span></a></td>\n\
+    \t\t\t\t</tr>\n\t\t\t</table>\n\t\t</div>\n\t\t</td>\n\t</tr>\n</table>\n</div>\n\
+    <script id=\"_fed_an_ua_tag\" type=\"text/javascript\" src=\"/js/federated-analytics.js?agency=DOC&amp;subagency=NOAA&amp;pua=UA-33523145-1\"\
+    ></script>\n</body>\n\n<!-- End Tail -->\n\n\n\n\n</html>\n"
+  status: 200

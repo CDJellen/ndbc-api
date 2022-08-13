@@ -8,6 +8,7 @@ class AdcpRequest(BaseRequest):
 
     FORMAT = 'adcp'
     FILE_FORMAT = '.adcp'
+    HISTORICAL_IDENTIFIER = 'a'
 
     @classmethod
     def build_request(

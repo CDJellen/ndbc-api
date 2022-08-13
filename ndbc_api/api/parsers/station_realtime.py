@@ -6,7 +6,7 @@ from ndbc_api.api.parsers._station import StationParser
 class RealtimeParser(StationParser):
 
     @classmethod
-    def available_measurments(cls, response: dict) -> dict:
+    def available_measurements(cls, response: dict) -> dict:
         if response.get('status') == 200:
             soup = bs4.BeautifulSoup(response.get('body'), 'html.parser')
             line_items = soup.find_all('li')

@@ -1,0 +1,30 @@
+Real time derived measurements data:
+  Real time derived measurements data: https://www.ndbc.noaa.gov/data/derived2/41013.dmv
+  description: https://www.ndbc.noaa.gov/measdes.shtml#deriv
+Real time hourly standard meteorological:
+  data directory: https://www.ndbc.noaa.gov/data/hourly2/
+  description: https://www.ndbc.noaa.gov/measdes.shtml#cwind
+Real time raw spectral wave (alpha1) data:
+  Real time raw spectral wave (alpha1) data: https://www.ndbc.noaa.gov/data/realtime2/41013.swdir
+  description: https://www.ndbc.noaa.gov/data_spec.shtml
+Real time raw spectral wave (alpha2) data:
+  Real time raw spectral wave (alpha2) data: https://www.ndbc.noaa.gov/data/realtime2/41013.swdir2
+  description: https://www.ndbc.noaa.gov/data_spec.shtml
+Real time raw spectral wave (r1) data:
+  Real time raw spectral wave (r1) data: https://www.ndbc.noaa.gov/data/realtime2/41013.swr1
+  description: https://www.ndbc.noaa.gov/data_spec.shtml
+Real time raw spectral wave (r2) data:
+  Real time raw spectral wave (r2) data: https://www.ndbc.noaa.gov/data/realtime2/41013.swr2
+  description: https://www.ndbc.noaa.gov/data_spec.shtml
+Real time raw spectral wave data:
+  Real time raw spectral wave data: https://www.ndbc.noaa.gov/data/realtime2/41013.data_spec
+  description: https://www.ndbc.noaa.gov/data_spec.shtml
+Real time spectral wave data:
+  Real time spectral wave data: https://www.ndbc.noaa.gov/data/realtime2/41013.spec
+  description: https://www.ndbc.noaa.gov/waveobs.shtml
+Real time standard meteorological data:
+  Real time standard meteorological data: https://www.ndbc.noaa.gov/data/realtime2/41013.txt
+  description: https://www.ndbc.noaa.gov/measdes.shtml#stdmet
+Real time supplemental measurements data:
+  Real time supplemental measurements data: https://www.ndbc.noaa.gov/data/realtime2/41013.supl
+  description: https://www.ndbc.noaa.gov/measdes.shtml#supl

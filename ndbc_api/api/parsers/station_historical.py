@@ -10,7 +10,7 @@ class HistoricalParser(StationParser):
     LIST_IDENTIFIER = re.compile('Available historical data for station .{5} include:')
 
     @classmethod
-    def available_measurments(cls, response: dict) -> dict:
+    def available_measurements(cls, response: dict) -> dict:
         if response.get('status') == 200:
             soup = bs4.BeautifulSoup(response.get('body'), 'html.parser')
             p_tag = soup.find('p', text=cls.LIST_IDENTIFIER)

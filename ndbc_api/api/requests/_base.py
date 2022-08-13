@@ -12,6 +12,7 @@ class BaseRequest(CoreRequest):
     HISTORICAL_DATA_PREFIX = '&dir=data/'
     HISTORICAL_URL_PREFIX = 'view_text_file.php?filename='
     HISTORICAL_SUFFIX = 'historical/'
+    HISTORICAL_IDENTIFIER = 'h'
     FORMAT = ''
     FILE_FORMAT = ''
 
@@ -43,7 +44,7 @@ class BaseRequest(CoreRequest):
         ) -> List[str]:
 
         def req_hist_helper_year(req_year: int) -> str:
-            return f'{cls.BASE_URL}{cls.HISTORICAL_URL_PREFIX}{station_id}h{req_year}{cls.HISTORICAL_FILE_EXTENSION_SUFFIX}{cls.HISTORICAL_DATA_PREFIX}{cls.HISTORICAL_SUFFIX}{cls.FORMAT}/'
+            return f'{cls.BASE_URL}{cls.HISTORICAL_URL_PREFIX}{station_id}{cls.HISTORICAL_IDENTIFIER}{req_year}{cls.HISTORICAL_FILE_EXTENSION_SUFFIX}{cls.HISTORICAL_DATA_PREFIX}{cls.HISTORICAL_SUFFIX}{cls.FORMAT}/'
 
         def req_hist_helper_month(req_month: int) -> str:
             month = month_abbr[req_month]
@@ -60,7 +61,7 @@ class BaseRequest(CoreRequest):
 
         reqs = []
         current_year = datetime.today().year
-        last_available_month = (datetime.today()-timedelta(days=44)).month
+        last_available_month = (datetime.today()-timedelta(days=31)).month
         has_realtime = (datetime.now() - end_time) < timedelta(days=44)
 
         for hist_year in range(int(start_time.year), min(int(current_year), int(end_time.year)+1)):

@@ -122,30 +122,34 @@ https://www.ndbc.noaa.gov/station_history.php?station=tplm2:
     \ and local government web resources and services.\" width=\"110\" height=\"30\"\
     \ hspace=\"3\" vspace=\"3\" border=\"0\" /></a><br />\r\n\t\t</td>\r\n\t\t<td\
     \ id=\"contentarea\" valign=\"top\" width=\"560\"><a name=\"contents\"></a>\r\n\
-    \t<div id=\"notices\" class=\"noprint\">\r\n\t\t<!-- Put notices here -->\r\n\t\
-    \t<p class=\"notice\">NDBC is adding additional data to its .drift file format\
-    \ on or about August 17. For more info, see the <a href=\"/driftfileformatchange.shtml\"\
-    >Drift File Format Change Notice</a>.</p>\r\n        </div>\r\n\t\t\r\n      \
-    \          <h1 style=\"text-align:center; margin:3px;\">Station TPLM2  - Thomas\
-    \ Point, MD</h1>\r\n                \r\n\r\n<!-- End Side Navbar -->\r\n\r\n\n\
-    \n<p><b>Owned and maintained by National Data Buoy Center</b><br />\n<b>38.899\
-    \ N 76.436 W (38&#176;53'56\" N 76&#176;26'9\" W)</b></p>\n<p>Available historical\
-    \ data for station TPLM2 include:</p>\n<ul><li><a name=\"HISTORY\"></a><b>Quality\
-    \ controlled data for 2022</b> (<i><a href=\"/measdes.shtml\">data descriptions</a></i>)\n\
-    <ul>\n<li> <b>Standard meteorological data: </b>\n <a href=\"/download_data.php?filename=tplm212022.txt.gz&amp;dir=data/stdmet/Jan/\"\
+    \t<div id=\"notices\" class=\"noprint\">\r\n\t\t<!-- Put notices here -->\r\n\
+    <div style=\"border:red solid 2px;margin:4px 0px;display:inline-block;\">\n<p\
+    \ style=\"margin: 10px\"><img src=\"/images/hurrsmall.jpg\" alt=\"Hurricane Symbol\"\
+    \ height=\"22\" width=\"11\" style=\"margin-right:0.5em;vertical-align:middle;\"\
+    \ /> <strong><span style=\"color:red\">Storm Special!</span></strong>  View the\
+    \ latest observations near <a href=\"/radial_search.php?storm=ep4\"><strong>East\
+    \ Pacific Tropical Storm Howard</strong></a>.</p>\n</div>\n\t\t<p class=\"notice\"\
+    >NDBC is adding additional data to its .drift file format on or about August 17.\
+    \ For more info, see the <a href=\"/driftfileformatchange.shtml\">Drift File Format\
+    \ Change Notice</a>.</p>\r\n        </div>\r\n\t\t\r\n                <h1 style=\"\
+    text-align:center; margin:3px;\">Station TPLM2  - Thomas Point, MD</h1>\r\n  \
+    \              \r\n\r\n<!-- End Side Navbar -->\r\n\r\n\n\n<p><b>Owned and maintained\
+    \ by National Data Buoy Center</b><br />\n<b>38.899 N 76.436 W (38&#176;53'56\"\
+    \ N 76&#176;26'9\" W)</b></p>\n<p>Available historical data for station TPLM2\
+    \ include:</p>\n<ul><li><a name=\"HISTORY\"></a><b>Quality controlled data for\
+    \ 2022</b> (<i><a href=\"/measdes.shtml\">data descriptions</a></i>)\n<ul>\n<li>\
+    \ <b>Standard meteorological data: </b>\n <a href=\"/download_data.php?filename=tplm212022.txt.gz&amp;dir=data/stdmet/Jan/\"\
     >Jan</a> <a href=\"/download_data.php?filename=tplm222022.txt.gz&amp;dir=data/stdmet/Feb/\"\
     >Feb</a> <a href=\"/download_data.php?filename=tplm232022.txt.gz&amp;dir=data/stdmet/Mar/\"\
     >Mar</a> <a href=\"/download_data.php?filename=tplm242022.txt.gz&amp;dir=data/stdmet/Apr/\"\
     >Apr</a> <a href=\"/download_data.php?filename=tplm252022.txt.gz&amp;dir=data/stdmet/May/\"\
-    >May</a> <a href=\"/download_data.php?filename=tplm262022.txt.gz&amp;dir=data/stdmet/Jun/\"\
-    >Jun</a> <a href=\"/data/stdmet/Jul/tplm2.txt\">Jul</a>\n</li>\n<li> <b>Continuous\
+    >May</a> <a href=\"/data/stdmet/Jun/tplm2.txt\">Jun</a>\n</li>\n<li> <b>Continuous\
     \ winds data: </b>\n <a href=\"/download_data.php?filename=tplm212022.txt.gz&amp;dir=data/cwind/Jan/\"\
     >Jan</a> <a href=\"/download_data.php?filename=tplm222022.txt.gz&amp;dir=data/cwind/Feb/\"\
     >Feb</a> <a href=\"/download_data.php?filename=tplm232022.txt.gz&amp;dir=data/cwind/Mar/\"\
     >Mar</a> <a href=\"/download_data.php?filename=tplm242022.txt.gz&amp;dir=data/cwind/Apr/\"\
     >Apr</a> <a href=\"/download_data.php?filename=tplm252022.txt.gz&amp;dir=data/cwind/May/\"\
-    >May</a> <a href=\"/download_data.php?filename=tplm262022.txt.gz&amp;dir=data/cwind/Jun/\"\
-    >Jun</a> <a href=\"/data/cwind/Jul/tplm2.txt\">Jul</a>\n</li>\n</ul></li>\n<li><b>\
+    >May</a> <a href=\"/data/cwind/Jun/tplm2.txt\">Jun</a>\n</li>\n</ul></li>\n<li><b>\
     \ <a href=\"historical_data.shtml\">Historical data</a></b> (<i><a href=\"/measdes.shtml\"\
     >data descriptions</a></i>)<ul><li> <b>Standard meteorological data: </b>\n <a\
     \ href=\"/download_data.php?filename=tplm2h1985.txt.gz&amp;dir=data/historical/stdmet/\"\
