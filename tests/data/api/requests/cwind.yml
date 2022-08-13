@@ -1,5 +1,5 @@
 historical:
-- https://www.ndbc.noaa.gov/view_text_file.php?filename=tplm2h2020.txt.gz&dir=data/historical/cwind/
-- https://www.ndbc.noaa.gov/view_text_file.php?filename=tplm2h2021.txt.gz&dir=data/historical/cwind/
+- https://www.ndbc.noaa.gov/view_text_file.php?filename=tplm2c2020.txt.gz&dir=data/historical/cwind/
+- https://www.ndbc.noaa.gov/view_text_file.php?filename=tplm2c2021.txt.gz&dir=data/historical/cwind/
 realtime:
 - https://www.ndbc.noaa.gov/data/realtime2/TPLM2.cwind

@@ -6,7 +6,6 @@ import pandas as pd
 from ndbc_api.api.handlers._base import BaseHandler
 from ndbc_api.api.requests.adcp import AdcpRequest
 from ndbc_api.api.requests.cwind import CwindRequest
-from ndbc_api.api.requests.data_spec import DataSpecRequest
 from ndbc_api.api.requests.ocean import OceanRequest
 from ndbc_api.api.requests.spec import SpecRequest
 from ndbc_api.api.requests.stdmet import StdmetRequest
@@ -18,7 +17,6 @@ from ndbc_api.api.requests.swr1 import Swr1Request
 from ndbc_api.api.requests.swr2 import Swr2Request
 from ndbc_api.api.parsers.adcp import AdcpParser
 from ndbc_api.api.parsers.cwind import CwindParser
-from ndbc_api.api.parsers.data_spec import DataSpecParser
 from ndbc_api.api.parsers.ocean import OceanParser
 from ndbc_api.api.parsers.spec import SpecParser
 from ndbc_api.api.parsers.stdmet import StdmetParser
@@ -72,32 +70,6 @@ class DataHandler(BaseHandler):
         )
         resps = handler.handle_requests(station_id=station_id, reqs=reqs)
         df = CwindParser.df_from_responses(responses=resps, use_timestamp=use_timestamp)
-        if cols:
-            df = df[[cols]]
-        if as_df:
-            return df
-        else:
-            return df.to_records()
-
-    @classmethod
-    def data_spec(
-        cls,
-        handler: Any,
-        station_id: Union[int, str],
-        cols: List[str] = None,
-        start_time: Union[str, datetime] = datetime.now() - timedelta(days=30),
-        end_time: Union[str, datetime] = datetime.now(),
-        use_timestamp: bool = True,
-        as_df: bool = True,
-    ) -> Union[pd.DataFrame, dict]:
-        """data_spec"""
-        reqs = DataSpecRequest.build_request(
-            station_id=station_id, start_time=start_time, end_time=end_time
-        )
-        resps = handler.handle_requests(station_id=station_id, reqs=reqs)
-        df = DataSpecParser.df_from_responses(
-            responses=resps, use_timestamp=use_timestamp
-        )
         if cols:
             df = df[[cols]]
         if as_df:

@@ -8,6 +8,7 @@ class Swdir2Request(BaseRequest):
 
     FORMAT = 'swdir2'
     FILE_FORMAT = '.swdir2'
+    HISTORICAL_IDENTIFIER = 'i'
 
     @classmethod
     def build_request(

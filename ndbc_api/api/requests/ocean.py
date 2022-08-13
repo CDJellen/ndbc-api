@@ -8,6 +8,7 @@ class OceanRequest(BaseRequest):
 
     FORMAT = 'ocean'
     FILE_FORMAT = '.ocean'
+    HISTORICAL_IDENTIFIER = 'o'
 
     @classmethod
     def build_request(

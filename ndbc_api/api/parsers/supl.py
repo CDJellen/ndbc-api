@@ -8,6 +8,7 @@ from ndbc_api.api.parsers._base import BaseParser
 class SuplParser(BaseParser):
 
     INDEX_COL = 0
+    NAN_VALUES = [99.0, 999, 999.0, 9999, 9999.0, 'MM']
 
     @classmethod
     def df_from_responses(

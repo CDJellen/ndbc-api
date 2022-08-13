@@ -8,6 +8,7 @@ class SwdenRequest(BaseRequest):
 
     FORMAT = 'swden'
     FILE_FORMAT = '.swden'
+    HISTORICAL_IDENTIFIER = 'w'
 
     @classmethod
     def build_request(
