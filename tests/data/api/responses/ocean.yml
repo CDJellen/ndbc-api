@@ -1,0 +1,5 @@
+historical:
+- https://www.ndbc.noaa.gov/view_text_file.php?filename=41024h2020.txt.gz&dir=data/historical/ocean/
+- https://www.ndbc.noaa.gov/view_text_file.php?filename=41024h2021.txt.gz&dir=data/historical/ocean/
+realtime:
+- https://www.ndbc.noaa.gov/data/realtime2/41024.ocean

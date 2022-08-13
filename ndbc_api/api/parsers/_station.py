@@ -25,7 +25,11 @@ class StationParser:
     def _build_available_measurements(cls, line_items: List[bs4.element.Tag]) -> dict:
         # unpack nested lists
         nested = [li for li in line_items for li in li.find_all('li')]
-        nested = [li for li in nested if li.get('href') is not None and 'plot' not in li.get('href')]
+        nested = [
+            li
+            for li in nested
+            if li.get('href') is not None and 'plot' not in li.get('href')
+        ]
         line_items = [li for li in line_items if len(li.find_all('li')) == 0]
         line_items.extend(nested)
         available_measurements = defaultdict(dict)

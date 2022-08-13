@@ -1,0 +1,81 @@
+Continuous winds data:
+  '1990': https://www.ndbc.noaa.gov/download_data.php?filename=tplm2c1990.txt.gz&dir=data/historical/cwind/
+  '1991': https://www.ndbc.noaa.gov/download_data.php?filename=tplm2c1991.txt.gz&dir=data/historical/cwind/
+  '1992': https://www.ndbc.noaa.gov/download_data.php?filename=tplm2c1992.txt.gz&dir=data/historical/cwind/
+  '1993': https://www.ndbc.noaa.gov/download_data.php?filename=tplm2c1993.txt.gz&dir=data/historical/cwind/
+  '1996': https://www.ndbc.noaa.gov/download_data.php?filename=tplm2c1996.txt.gz&dir=data/historical/cwind/
+  '1997': https://www.ndbc.noaa.gov/download_data.php?filename=tplm2c1997.txt.gz&dir=data/historical/cwind/
+  '1998': https://www.ndbc.noaa.gov/download_data.php?filename=tplm2c1998.txt.gz&dir=data/historical/cwind/
+  '1999': https://www.ndbc.noaa.gov/download_data.php?filename=tplm2c1999.txt.gz&dir=data/historical/cwind/
+  '2000': https://www.ndbc.noaa.gov/download_data.php?filename=tplm2c2000.txt.gz&dir=data/historical/cwind/
+  '2001': https://www.ndbc.noaa.gov/download_data.php?filename=tplm2c2001.txt.gz&dir=data/historical/cwind/
+  '2002': https://www.ndbc.noaa.gov/download_data.php?filename=tplm2c2002.txt.gz&dir=data/historical/cwind/
+  '2003': https://www.ndbc.noaa.gov/download_data.php?filename=tplm2c2003.txt.gz&dir=data/historical/cwind/
+  '2004': https://www.ndbc.noaa.gov/download_data.php?filename=tplm2c2004.txt.gz&dir=data/historical/cwind/
+  '2005': https://www.ndbc.noaa.gov/download_data.php?filename=tplm2c2005.txt.gz&dir=data/historical/cwind/
+  '2006': https://www.ndbc.noaa.gov/download_data.php?filename=tplm2c2006.txt.gz&dir=data/historical/cwind/
+  '2007': https://www.ndbc.noaa.gov/download_data.php?filename=tplm2c2007.txt.gz&dir=data/historical/cwind/
+  '2008': https://www.ndbc.noaa.gov/download_data.php?filename=tplm2c2008.txt.gz&dir=data/historical/cwind/
+  '2009': https://www.ndbc.noaa.gov/download_data.php?filename=tplm2c2009.txt.gz&dir=data/historical/cwind/
+  '2010': https://www.ndbc.noaa.gov/download_data.php?filename=tplm2c2010.txt.gz&dir=data/historical/cwind/
+  '2011': https://www.ndbc.noaa.gov/download_data.php?filename=tplm2c2011.txt.gz&dir=data/historical/cwind/
+  '2012': https://www.ndbc.noaa.gov/download_data.php?filename=tplm2c2012.txt.gz&dir=data/historical/cwind/
+  '2013': https://www.ndbc.noaa.gov/download_data.php?filename=tplm2c2013.txt.gz&dir=data/historical/cwind/
+  '2014': https://www.ndbc.noaa.gov/download_data.php?filename=tplm2c2014.txt.gz&dir=data/historical/cwind/
+  '2015': https://www.ndbc.noaa.gov/download_data.php?filename=tplm2c2015.txt.gz&dir=data/historical/cwind/
+  '2016': https://www.ndbc.noaa.gov/download_data.php?filename=tplm2c2016.txt.gz&dir=data/historical/cwind/
+  '2017': https://www.ndbc.noaa.gov/download_data.php?filename=tplm2c2017.txt.gz&dir=data/historical/cwind/
+  '2018': https://www.ndbc.noaa.gov/download_data.php?filename=tplm2c2018.txt.gz&dir=data/historical/cwind/
+  '2019': https://www.ndbc.noaa.gov/download_data.php?filename=tplm2c2019.txt.gz&dir=data/historical/cwind/
+  '2020': https://www.ndbc.noaa.gov/download_data.php?filename=tplm2c2020.txt.gz&dir=data/historical/cwind/
+  '2021': https://www.ndbc.noaa.gov/download_data.php?filename=tplm2c2021.txt.gz&dir=data/historical/cwind/
+  Apr 2022: https://www.ndbc.noaa.gov/download_data.php?filename=tplm242022.txt.gz&dir=data/cwind/Apr/
+  Feb 2022: https://www.ndbc.noaa.gov/download_data.php?filename=tplm222022.txt.gz&dir=data/cwind/Feb/
+  Jan 2022: https://www.ndbc.noaa.gov/download_data.php?filename=tplm212022.txt.gz&dir=data/cwind/Jan/
+  Jun 2022: https://www.ndbc.noaa.gov/data/cwind/Jun/tplm2.txt
+  Mar 2022: https://www.ndbc.noaa.gov/download_data.php?filename=tplm232022.txt.gz&dir=data/cwind/Mar/
+  May 2022: https://www.ndbc.noaa.gov/download_data.php?filename=tplm252022.txt.gz&dir=data/cwind/May/
+Standard meteorological data:
+  '1985': https://www.ndbc.noaa.gov/download_data.php?filename=tplm2h1985.txt.gz&dir=data/historical/stdmet/
+  '1986': https://www.ndbc.noaa.gov/download_data.php?filename=tplm2h1986.txt.gz&dir=data/historical/stdmet/
+  '1987': https://www.ndbc.noaa.gov/download_data.php?filename=tplm2h1987.txt.gz&dir=data/historical/stdmet/
+  '1988': https://www.ndbc.noaa.gov/download_data.php?filename=tplm2h1988.txt.gz&dir=data/historical/stdmet/
+  '1989': https://www.ndbc.noaa.gov/download_data.php?filename=tplm2h1989.txt.gz&dir=data/historical/stdmet/
+  '1990': https://www.ndbc.noaa.gov/download_data.php?filename=tplm2h1990.txt.gz&dir=data/historical/stdmet/
+  '1991': https://www.ndbc.noaa.gov/download_data.php?filename=tplm2h1991.txt.gz&dir=data/historical/stdmet/
+  '1992': https://www.ndbc.noaa.gov/download_data.php?filename=tplm2h1992.txt.gz&dir=data/historical/stdmet/
+  '1993': https://www.ndbc.noaa.gov/download_data.php?filename=tplm2h1993.txt.gz&dir=data/historical/stdmet/
+  '1994': https://www.ndbc.noaa.gov/download_data.php?filename=tplm2h1994.txt.gz&dir=data/historical/stdmet/
+  '1995': https://www.ndbc.noaa.gov/download_data.php?filename=tplm2h1995.txt.gz&dir=data/historical/stdmet/
+  '1996': https://www.ndbc.noaa.gov/download_data.php?filename=tplm2h1996.txt.gz&dir=data/historical/stdmet/
+  '1997': https://www.ndbc.noaa.gov/download_data.php?filename=tplm2h1997.txt.gz&dir=data/historical/stdmet/
+  '1998': https://www.ndbc.noaa.gov/download_data.php?filename=tplm2h1998.txt.gz&dir=data/historical/stdmet/
+  '1999': https://www.ndbc.noaa.gov/download_data.php?filename=tplm2h1999.txt.gz&dir=data/historical/stdmet/
+  '2000': https://www.ndbc.noaa.gov/download_data.php?filename=tplm2h2000.txt.gz&dir=data/historical/stdmet/
+  '2001': https://www.ndbc.noaa.gov/download_data.php?filename=tplm2h2001.txt.gz&dir=data/historical/stdmet/
+  '2002': https://www.ndbc.noaa.gov/download_data.php?filename=tplm2h2002.txt.gz&dir=data/historical/stdmet/
+  '2003': https://www.ndbc.noaa.gov/download_data.php?filename=tplm2h2003.txt.gz&dir=data/historical/stdmet/
+  '2004': https://www.ndbc.noaa.gov/download_data.php?filename=tplm2h2004.txt.gz&dir=data/historical/stdmet/
+  '2005': https://www.ndbc.noaa.gov/download_data.php?filename=tplm2h2005.txt.gz&dir=data/historical/stdmet/
+  '2006': https://www.ndbc.noaa.gov/download_data.php?filename=tplm2h2006.txt.gz&dir=data/historical/stdmet/
+  '2007': https://www.ndbc.noaa.gov/download_data.php?filename=tplm2h2007.txt.gz&dir=data/historical/stdmet/
+  '2008': https://www.ndbc.noaa.gov/download_data.php?filename=tplm2h2008.txt.gz&dir=data/historical/stdmet/
+  '2009': https://www.ndbc.noaa.gov/download_data.php?filename=tplm2h2009.txt.gz&dir=data/historical/stdmet/
+  '2010': https://www.ndbc.noaa.gov/download_data.php?filename=tplm2h2010.txt.gz&dir=data/historical/stdmet/
+  '2011': https://www.ndbc.noaa.gov/download_data.php?filename=tplm2h2011.txt.gz&dir=data/historical/stdmet/
+  '2012': https://www.ndbc.noaa.gov/download_data.php?filename=tplm2h2012.txt.gz&dir=data/historical/stdmet/
+  '2013': https://www.ndbc.noaa.gov/download_data.php?filename=tplm2h2013.txt.gz&dir=data/historical/stdmet/
+  '2014': https://www.ndbc.noaa.gov/download_data.php?filename=tplm2h2014.txt.gz&dir=data/historical/stdmet/
+  '2015': https://www.ndbc.noaa.gov/download_data.php?filename=tplm2h2015.txt.gz&dir=data/historical/stdmet/
+  '2016': https://www.ndbc.noaa.gov/download_data.php?filename=tplm2h2016.txt.gz&dir=data/historical/stdmet/
+  '2017': https://www.ndbc.noaa.gov/download_data.php?filename=tplm2h2017.txt.gz&dir=data/historical/stdmet/
+  '2018': https://www.ndbc.noaa.gov/download_data.php?filename=tplm2h2018.txt.gz&dir=data/historical/stdmet/
+  '2019': https://www.ndbc.noaa.gov/download_data.php?filename=tplm2h2019.txt.gz&dir=data/historical/stdmet/
+  '2020': https://www.ndbc.noaa.gov/download_data.php?filename=tplm2h2020.txt.gz&dir=data/historical/stdmet/
+  '2021': https://www.ndbc.noaa.gov/download_data.php?filename=tplm2h2021.txt.gz&dir=data/historical/stdmet/
+  Apr 2022: https://www.ndbc.noaa.gov/download_data.php?filename=tplm242022.txt.gz&dir=data/stdmet/Apr/
+  Feb 2022: https://www.ndbc.noaa.gov/download_data.php?filename=tplm222022.txt.gz&dir=data/stdmet/Feb/
+  Jan 2022: https://www.ndbc.noaa.gov/download_data.php?filename=tplm212022.txt.gz&dir=data/stdmet/Jan/
+  Jun 2022: https://www.ndbc.noaa.gov/data/stdmet/Jun/tplm2.txt
+  Mar 2022: https://www.ndbc.noaa.gov/download_data.php?filename=tplm232022.txt.gz&dir=data/stdmet/Mar/
+  May 2022: https://www.ndbc.noaa.gov/download_data.php?filename=tplm252022.txt.gz&dir=data/stdmet/May/

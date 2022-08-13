@@ -31,20 +31,21 @@ from ndbc_api.api.parsers.swr2 import Swr2Parser
 
 
 class DataHandler(BaseHandler):
-
     @classmethod
     def adcp(
         cls,
         handler: Any,
         station_id: Union[int, str],
         cols: List[str] = None,
-        start_time: Union[str, datetime] = datetime.now()-timedelta(days=30),
+        start_time: Union[str, datetime] = datetime.now() - timedelta(days=30),
         end_time: Union[str, datetime] = datetime.now(),
         use_timestamp: bool = True,
-        as_df: bool = True
-        ) -> Union[pd.DataFrame, dict]:
+        as_df: bool = True,
+    ) -> Union[pd.DataFrame, dict]:
         """adcp"""
-        reqs = AdcpRequest.build_request(station_id=station_id, start_time=start_time, end_time=end_time)
+        reqs = AdcpRequest.build_request(
+            station_id=station_id, start_time=start_time, end_time=end_time
+        )
         resps = handler.handle_requests(station_id=station_id, reqs=reqs)
         df = AdcpParser.df_from_responses(responses=resps, use_timestamp=use_timestamp)
         if cols:
@@ -60,13 +61,15 @@ class DataHandler(BaseHandler):
         handler: Any,
         station_id: Union[int, str],
         cols: List[str] = None,
-        start_time: Union[str, datetime] = datetime.now()-timedelta(days=30),
+        start_time: Union[str, datetime] = datetime.now() - timedelta(days=30),
         end_time: Union[str, datetime] = datetime.now(),
         use_timestamp: bool = True,
-        as_df: bool = True
-        ) -> Union[pd.DataFrame, dict]:
+        as_df: bool = True,
+    ) -> Union[pd.DataFrame, dict]:
         """cwind"""
-        reqs = CwindRequest.build_request(station_id=station_id, start_time=start_time, end_time=end_time)
+        reqs = CwindRequest.build_request(
+            station_id=station_id, start_time=start_time, end_time=end_time
+        )
         resps = handler.handle_requests(station_id=station_id, reqs=reqs)
         df = CwindParser.df_from_responses(responses=resps, use_timestamp=use_timestamp)
         if cols:
@@ -82,15 +85,19 @@ class DataHandler(BaseHandler):
         handler: Any,
         station_id: Union[int, str],
         cols: List[str] = None,
-        start_time: Union[str, datetime] = datetime.now()-timedelta(days=30),
+        start_time: Union[str, datetime] = datetime.now() - timedelta(days=30),
         end_time: Union[str, datetime] = datetime.now(),
         use_timestamp: bool = True,
-        as_df: bool = True
-        ) -> Union[pd.DataFrame, dict]:
+        as_df: bool = True,
+    ) -> Union[pd.DataFrame, dict]:
         """data_spec"""
-        reqs = DataSpecRequest.build_request(station_id=station_id, start_time=start_time, end_time=end_time)
+        reqs = DataSpecRequest.build_request(
+            station_id=station_id, start_time=start_time, end_time=end_time
+        )
         resps = handler.handle_requests(station_id=station_id, reqs=reqs)
-        df = DataSpecParser.df_from_responses(responses=resps, use_timestamp=use_timestamp)
+        df = DataSpecParser.df_from_responses(
+            responses=resps, use_timestamp=use_timestamp
+        )
         if cols:
             df = df[[cols]]
         if as_df:
@@ -104,13 +111,15 @@ class DataHandler(BaseHandler):
         handler: Any,
         station_id: Union[int, str],
         cols: List[str] = None,
-        start_time: Union[str, datetime] = datetime.now()-timedelta(days=30),
+        start_time: Union[str, datetime] = datetime.now() - timedelta(days=30),
         end_time: Union[str, datetime] = datetime.now(),
         use_timestamp: bool = True,
-        as_df: bool = True
-        ) -> Union[pd.DataFrame, dict]:
+        as_df: bool = True,
+    ) -> Union[pd.DataFrame, dict]:
         """ocean"""
-        reqs = OceanRequest.build_request(station_id=station_id, start_time=start_time, end_time=end_time)
+        reqs = OceanRequest.build_request(
+            station_id=station_id, start_time=start_time, end_time=end_time
+        )
         resps = handler.handle_requests(station_id=station_id, reqs=reqs)
         df = OceanParser.df_from_responses(responses=resps, use_timestamp=use_timestamp)
         if cols:
@@ -126,13 +135,15 @@ class DataHandler(BaseHandler):
         handler: Any,
         station_id: Union[int, str],
         cols: List[str] = None,
-        start_time: Union[str, datetime] = datetime.now()-timedelta(days=30),
+        start_time: Union[str, datetime] = datetime.now() - timedelta(days=30),
         end_time: Union[str, datetime] = datetime.now(),
         use_timestamp: bool = True,
-        as_df: bool = True
-        ) -> Union[pd.DataFrame, dict]:
+        as_df: bool = True,
+    ) -> Union[pd.DataFrame, dict]:
         """spec"""
-        reqs = SpecRequest.build_request(station_id=station_id, start_time=start_time, end_time=end_time)
+        reqs = SpecRequest.build_request(
+            station_id=station_id, start_time=start_time, end_time=end_time
+        )
         resps = handler.handle_requests(station_id=station_id, reqs=reqs)
         df = SpecParser.df_from_responses(responses=resps, use_timestamp=use_timestamp)
         if cols:
@@ -148,15 +159,19 @@ class DataHandler(BaseHandler):
         handler: Any,
         station_id: Union[int, str],
         cols: List[str] = None,
-        start_time: Union[str, datetime] = datetime.now()-timedelta(days=30),
+        start_time: Union[str, datetime] = datetime.now() - timedelta(days=30),
         end_time: Union[str, datetime] = datetime.now(),
         use_timestamp: bool = True,
-        as_df: bool = True
-        ) -> Union[pd.DataFrame, dict]:
+        as_df: bool = True,
+    ) -> Union[pd.DataFrame, dict]:
         """stdmet"""
-        reqs = StdmetRequest.build_request(station_id=station_id, start_time=start_time, end_time=end_time)
+        reqs = StdmetRequest.build_request(
+            station_id=station_id, start_time=start_time, end_time=end_time
+        )
         resps = handler.handle_requests(station_id=station_id, reqs=reqs)
-        df = StdmetParser.df_from_responses(responses=resps, use_timestamp=use_timestamp)
+        df = StdmetParser.df_from_responses(
+            responses=resps, use_timestamp=use_timestamp
+        )
         if cols:
             df = df[[cols]]
         if as_df:
@@ -170,13 +185,15 @@ class DataHandler(BaseHandler):
         handler: Any,
         station_id: Union[int, str],
         cols: List[str] = None,
-        start_time: Union[str, datetime] = datetime.now()-timedelta(days=30),
+        start_time: Union[str, datetime] = datetime.now() - timedelta(days=30),
         end_time: Union[str, datetime] = datetime.now(),
         use_timestamp: bool = True,
-        as_df: bool = True
-        ) -> Union[pd.DataFrame, dict]:
+        as_df: bool = True,
+    ) -> Union[pd.DataFrame, dict]:
         """supl"""
-        reqs = SuplRequest.build_request(station_id=station_id, start_time=start_time, end_time=end_time)
+        reqs = SuplRequest.build_request(
+            station_id=station_id, start_time=start_time, end_time=end_time
+        )
         resps = handler.handle_requests(station_id=station_id, reqs=reqs)
         df = SuplParser.df_from_responses(responses=resps, use_timestamp=use_timestamp)
         if cols:
@@ -192,13 +209,15 @@ class DataHandler(BaseHandler):
         handler: Any,
         station_id: Union[int, str],
         cols: List[str] = None,
-        start_time: Union[str, datetime] = datetime.now()-timedelta(days=30),
+        start_time: Union[str, datetime] = datetime.now() - timedelta(days=30),
         end_time: Union[str, datetime] = datetime.now(),
         use_timestamp: bool = True,
-        as_df: bool = True
-        ) -> Union[pd.DataFrame, dict]:
+        as_df: bool = True,
+    ) -> Union[pd.DataFrame, dict]:
         """swden"""
-        reqs = SwdenRequest.build_request(station_id=station_id, start_time=start_time, end_time=end_time)
+        reqs = SwdenRequest.build_request(
+            station_id=station_id, start_time=start_time, end_time=end_time
+        )
         resps = handler.handle_requests(station_id=station_id, reqs=reqs)
         df = SwdenParser.df_from_responses(responses=resps, use_timestamp=use_timestamp)
         if cols:
@@ -214,13 +233,15 @@ class DataHandler(BaseHandler):
         handler: Any,
         station_id: Union[int, str],
         cols: List[str] = None,
-        start_time: Union[str, datetime] = datetime.now()-timedelta(days=30),
+        start_time: Union[str, datetime] = datetime.now() - timedelta(days=30),
         end_time: Union[str, datetime] = datetime.now(),
         use_timestamp: bool = True,
-        as_df: bool = True
-        ) -> Union[pd.DataFrame, dict]:
+        as_df: bool = True,
+    ) -> Union[pd.DataFrame, dict]:
         """swdir"""
-        reqs = SwdirRequest.build_request(station_id=station_id, start_time=start_time, end_time=end_time)
+        reqs = SwdirRequest.build_request(
+            station_id=station_id, start_time=start_time, end_time=end_time
+        )
         resps = handler.handle_requests(station_id=station_id, reqs=reqs)
         df = SwdirParser.df_from_responses(responses=resps, use_timestamp=use_timestamp)
         if cols:
@@ -236,15 +257,19 @@ class DataHandler(BaseHandler):
         handler: Any,
         station_id: Union[int, str],
         cols: List[str] = None,
-        start_time: Union[str, datetime] = datetime.now()-timedelta(days=30),
+        start_time: Union[str, datetime] = datetime.now() - timedelta(days=30),
         end_time: Union[str, datetime] = datetime.now(),
         use_timestamp: bool = True,
-        as_df: bool = True
-        ) -> Union[pd.DataFrame, dict]:
+        as_df: bool = True,
+    ) -> Union[pd.DataFrame, dict]:
         """swdir2"""
-        reqs = Swdir2Request.build_request(station_id=station_id, start_time=start_time, end_time=end_time)
+        reqs = Swdir2Request.build_request(
+            station_id=station_id, start_time=start_time, end_time=end_time
+        )
         resps = handler.handle_requests(station_id=station_id, reqs=reqs)
-        df = Swdir2Parser.df_from_responses(responses=resps, use_timestamp=use_timestamp)
+        df = Swdir2Parser.df_from_responses(
+            responses=resps, use_timestamp=use_timestamp
+        )
         if cols:
             df = df[[cols]]
         if as_df:
@@ -258,13 +283,15 @@ class DataHandler(BaseHandler):
         handler: Any,
         station_id: Union[int, str],
         cols: List[str] = None,
-        start_time: Union[str, datetime] = datetime.now()-timedelta(days=30),
+        start_time: Union[str, datetime] = datetime.now() - timedelta(days=30),
         end_time: Union[str, datetime] = datetime.now(),
         use_timestamp: bool = True,
-        as_df: bool = True
-        ) -> Union[pd.DataFrame, dict]:
+        as_df: bool = True,
+    ) -> Union[pd.DataFrame, dict]:
         """swr1"""
-        reqs = Swr1Request.build_request(station_id=station_id, start_time=start_time, end_time=end_time)
+        reqs = Swr1Request.build_request(
+            station_id=station_id, start_time=start_time, end_time=end_time
+        )
         resps = handler.handle_requests(station_id=station_id, reqs=reqs)
         df = Swr1Parser.df_from_responses(responses=resps, use_timestamp=use_timestamp)
         if cols:
@@ -280,13 +307,15 @@ class DataHandler(BaseHandler):
         handler: Any,
         station_id: Union[int, str],
         cols: List[str] = None,
-        start_time: Union[str, datetime] = datetime.now()-timedelta(days=30),
+        start_time: Union[str, datetime] = datetime.now() - timedelta(days=30),
         end_time: Union[str, datetime] = datetime.now(),
         use_timestamp: bool = True,
-        as_df: bool = True
-        ) -> Union[pd.DataFrame, dict]:
+        as_df: bool = True,
+    ) -> Union[pd.DataFrame, dict]:
         """swr2"""
-        reqs = Swr2Request.build_request(station_id=station_id, start_time=start_time, end_time=end_time)
+        reqs = Swr2Request.build_request(
+            station_id=station_id, start_time=start_time, end_time=end_time
+        )
         resps = handler.handle_requests(station_id=station_id, reqs=reqs)
         df = Swr2Parser.df_from_responses(responses=resps, use_timestamp=use_timestamp)
         if cols:
