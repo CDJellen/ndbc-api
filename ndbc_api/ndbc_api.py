@@ -9,6 +9,7 @@ from .utilities.singleton import Singleton
 from .utilities.req_handler import RequestHandler
 from .api.handlers.stations import StaitonsHandler
 from .api.handlers.data import DataHandler
+from .exceptions import HandlerException, TimestampException, RequestException, ParserException
 from .config import (
     LOGGER_NAME,
     DEFAULT_CACHE_LIMIT,
@@ -66,6 +67,7 @@ class NdbcApi(metaclass=Singleton):
 
     def clear_cache(self) -> None:
         """Clear the request cache."""
+        del self._handler
         self._handler = self._get_request_handler(
             cache_limit=self._cache_limit,
             delay=HTTP_DELAY,
@@ -81,7 +83,11 @@ class NdbcApi(metaclass=Singleton):
 
     def stations(self, as_df: bool = True) -> Union[pd.DataFrame, dict]:
         """Get all stations from NDBC."""
-        return self._stations_api.stations(handler=self._handler, as_df=as_df)
+        data = self._stations_api.stations(handler=self._handler, as_df=as_df)
+        try:
+            return self._handle_data(data, as_df, cols=None)
+        except (ValueError, KeyError) as e:
+            raise HandlerException('Failed to handle returned data.') from e
 
     def nearest_station(
         self,
@@ -92,63 +98,74 @@ class NdbcApi(metaclass=Singleton):
         """Get nearest station."""
         if not (lat and lon):
             raise ValueError('lat and lon must be specified.')
-        return self._stations_api.nearest_station(
+        data = self._stations_api.nearest_station(
             handler=self._handler, lat=lat, lon=lon, as_df=as_df
         )
+        try:
+            return self._handle_data(data, as_df, cols=None)
+        except (ValueError, KeyError) as e:
+            raise HandlerException('Failed to handle returned data.') from e
 
     def station(
         self, station_id: Union[str, int], as_df: bool = False
     ) -> Union[pd.DataFrame, dict]:
         """Get all stations from NDBC."""
         station_id = self._parse_station_id(station_id)
-        return self._stations_api.metadata(
+        data = self._stations_api.metadata(
             handler=self._handler, station_id=station_id, as_df=as_df
         )
+        try:
+            return self._handle_data(data, as_df, cols=None)
+        except (ValueError, KeyError) as e:
+            raise HandlerException('Failed to handle returned data.') from e
 
     def available_realtime(
         self, station_id: Union[str, int], as_df: bool = False
     ) -> Union[pd.DataFrame, dict]:
         """Get all stations from NDBC."""
         station_id = self._parse_station_id(station_id)
-        return self._stations_api.realtime(
+        data = self._stations_api.realtime(
             handler=self._handler, station_id=station_id, as_df=as_df
         )
+        try:
+            return self._handle_data(data, as_df, cols=None)
+        except (ValueError, KeyError) as e:
+            raise HandlerException('Failed to handle returned data.') from e
 
     def available_historical(
         self, station_id: Union[str, int], as_df: bool = False
     ) -> Union[pd.DataFrame, dict]:
         """Get all stations from NDBC."""
         station_id = self._parse_station_id(station_id)
-        return self._stations_api.historical(
+        data = self._stations_api.historical(
             handler=self._handler, station_id=station_id, as_df=as_df
         )
+        try:
+            return self._handle_data(data, as_df, cols=None)
+        except (ValueError, KeyError) as e:
+            raise HandlerException('Failed to handle returned data.') from e
 
     def get_data(
         self,
         station_id: Union[int, str],
         mode: str,
-        cols: List[str] = None,
         start_time: Union[str, datetime] = datetime.now() - timedelta(days=30),
         end_time: Union[str, datetime] = datetime.now(),
         use_timestamp: bool = True,
         as_df: bool = True,
+        cols: List[str] = None,
     ) -> Union[pd.DataFrame, dict]:
-        """Execute data query against a station."""
-        if not isinstance(start_time, datetime):
-            try:
-                start_time = datetime.fromisoformat(start_time)
-            except ValueError as e:
-                raise ValueError(
-                    'Please supply start time as ISO formatted string.'
-                ) from e
+        """Execute data query against the specified NDBC station."""
+        start_time = self._handle_timestamp(start_time)
+        end_time = self._handle_timestamp(end_time)
         station_id = self._parse_station_id(station_id)
         data_api_call = getattr(self._data_api, mode)
         if not data_api_call:
-            raise NotImplementedError(
+            raise RequestException(
                 'Please supply a supported mode from `get_modes()`.'
             )
         try:
-            return data_api_call(
+            data = data_api_call(
                 self._handler,
                 station_id,
                 cols,
@@ -157,8 +174,12 @@ class NdbcApi(metaclass=Singleton):
                 use_timestamp,
                 as_df,
             )
-        except Exception as e:
-            raise ValueError('hit an error') from e
+        except (ValueError, TypeError, KeyError) as e:
+            raise ParserException('Failed to handle API call.') from e
+        try:
+            return self._handle_data(data, as_df, cols)
+        except (ValueError, KeyError) as e:
+            raise HandlerException('Failed to handle returned data.') from e
 
     def get_modes(self):
         """Get the list of supported modes."""
@@ -175,6 +196,7 @@ class NdbcApi(metaclass=Singleton):
         debug: bool,
         verify_https: bool,
     ) -> Any:
+        """Build a new `RequestHandler` for the `NdbcApi`."""
         return RequestHandler(
             cache_limit=cache_limit or self.cache_limit,
             log=self.log,
@@ -185,12 +207,39 @@ class NdbcApi(metaclass=Singleton):
             verify_https=verify_https,
         )
 
-    def _parse_station_id(self, station_id: Union[str, int]) -> str:
+    @staticmethod
+    def _parse_station_id(station_id: Union[str, int]) -> str:
         """Parse station id"""
         station_id = str(station_id)  # expect string-valued station id
         station_id = station_id.lower()  # expect lowercased station id
         return station_id
 
+    @staticmethod
+    def _handle_timestamp(timestamp: Union[datetime, str]) -> datetime:
+        """Convert the specified timestamp to `datetime.datetime`."""
+        if isinstance(timestamp, datetime):
+            return timestamp
+        else:
+            try:
+                return datetime.fromisoformat(str(timestamp))
+            except ValueError as e:
+                raise TimestampException from e
+
+    @staticmethod
+    def _handle_data(data: pd.DataFrame, as_df: bool = True, cols: List[str] = None) -> Union[pd.DataFrame, dict]:
+        """Apply column down selection and return format handling."""
+        if cols:
+            try:
+                data = data[[*cols]]
+            except ValueError as e:
+                raise ParserException('Failed to parse column selection.') from e
+        if as_df:
+            return data
+        else:
+            try:
+                return data.to_dict()
+            except ValueError as e:
+                raise HandlerException('Failed to convert `pd.DataFrame` to `dict`.')
 
 if __name__ == '__main__':
     api = NdbcApi()

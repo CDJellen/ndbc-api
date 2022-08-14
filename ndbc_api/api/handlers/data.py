@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from typing import Any, List, Union
+from typing import Any
 
 import pandas as pd
 
@@ -26,6 +26,7 @@ from ndbc_api.api.parsers.swdir import SwdirParser
 from ndbc_api.api.parsers.swdir2 import Swdir2Parser
 from ndbc_api.api.parsers.swr1 import Swr1Parser
 from ndbc_api.api.parsers.swr2 import Swr2Parser
+from ndbc_api.exceptions import RequestException, ResponseException, ParserException
 
 
 class DataHandler(BaseHandler):
@@ -33,284 +34,304 @@ class DataHandler(BaseHandler):
     def adcp(
         cls,
         handler: Any,
-        station_id: Union[int, str],
-        cols: List[str] = None,
-        start_time: Union[str, datetime] = datetime.now() - timedelta(days=30),
-        end_time: Union[str, datetime] = datetime.now(),
+        station_id: str,
+        start_time: datetime = datetime.now() - timedelta(days=30),
+        end_time: datetime = datetime.now(),
         use_timestamp: bool = True,
-        as_df: bool = True,
-    ) -> Union[pd.DataFrame, dict]:
+    ) -> pd.DataFrame:
         """adcp"""
-        reqs = AdcpRequest.build_request(
-            station_id=station_id, start_time=start_time, end_time=end_time
-        )
-        resps = handler.handle_requests(station_id=station_id, reqs=reqs)
-        df = AdcpParser.df_from_responses(
-            responses=resps, use_timestamp=use_timestamp
-        )
-        if cols:
-            df = df[[cols]]
-        if as_df:
-            return df
-        else:
-            return df.to_records()
+        try:
+            reqs = AdcpRequest.build_request(
+                station_id=station_id, start_time=start_time, end_time=end_time
+            )
+        except Exception as e:
+            raise RequestException('Failed to build request.') from e
+        try:
+            resps = handler.handle_requests(station_id=station_id, reqs=reqs)
+        except Exception as e:
+            raise ResponseException('Failed to execute requests.') from e
+        try:
+            return AdcpParser.df_from_responses(
+                responses=resps, use_timestamp=use_timestamp
+            )
+        except (ValueError, KeyError) as e:
+            raise ParserException('Failed to parse responses as `pd.DataFrame`.') from e
 
     @classmethod
     def cwind(
         cls,
         handler: Any,
-        station_id: Union[int, str],
-        cols: List[str] = None,
-        start_time: Union[str, datetime] = datetime.now() - timedelta(days=30),
-        end_time: Union[str, datetime] = datetime.now(),
+        station_id: str,
+        start_time: datetime = datetime.now() - timedelta(days=30),
+        end_time: datetime = datetime.now(),
         use_timestamp: bool = True,
-        as_df: bool = True,
-    ) -> Union[pd.DataFrame, dict]:
+    ) -> pd.DataFrame:
         """cwind"""
-        reqs = CwindRequest.build_request(
-            station_id=station_id, start_time=start_time, end_time=end_time
-        )
-        resps = handler.handle_requests(station_id=station_id, reqs=reqs)
-        df = CwindParser.df_from_responses(
-            responses=resps, use_timestamp=use_timestamp
-        )
-        if cols:
-            df = df[[cols]]
-        if as_df:
-            return df
-        else:
-            return df.to_records()
+        try:
+            reqs = CwindRequest.build_request(
+                station_id=station_id, start_time=start_time, end_time=end_time
+            )
+        except Exception as e:
+            raise RequestException('Failed to build request.') from e
+        try:
+            resps = handler.handle_requests(station_id=station_id, reqs=reqs)
+        except Exception as e:
+            raise ResponseException('Failed to execute requests.') from e
+        try:
+            return CwindParser.df_from_responses(
+                responses=resps, use_timestamp=use_timestamp
+            )
+        except (ValueError, KeyError) as e:
+            raise ParserException('Failed to parse responses as `pd.DataFrame`.') from e
+
 
     @classmethod
     def ocean(
         cls,
         handler: Any,
-        station_id: Union[int, str],
-        cols: List[str] = None,
-        start_time: Union[str, datetime] = datetime.now() - timedelta(days=30),
-        end_time: Union[str, datetime] = datetime.now(),
+        station_id: str,
+        start_time: datetime = datetime.now() - timedelta(days=30),
+        end_time: datetime = datetime.now(),
         use_timestamp: bool = True,
-        as_df: bool = True,
-    ) -> Union[pd.DataFrame, dict]:
+    ) -> pd.DataFrame:
         """ocean"""
-        reqs = OceanRequest.build_request(
-            station_id=station_id, start_time=start_time, end_time=end_time
-        )
-        resps = handler.handle_requests(station_id=station_id, reqs=reqs)
-        df = OceanParser.df_from_responses(
-            responses=resps, use_timestamp=use_timestamp
-        )
-        if cols:
-            df = df[[cols]]
-        if as_df:
-            return df
-        else:
-            return df.to_records()
+        try:
+            reqs = OceanRequest.build_request(
+                station_id=station_id, start_time=start_time, end_time=end_time
+            )
+        except Exception as e:
+            raise RequestException('Failed to build request.') from e
+        try:
+            resps = handler.handle_requests(station_id=station_id, reqs=reqs)
+        except Exception as e:
+            raise ResponseException('Failed to execute requests.') from e
+        try:
+            return OceanParser.df_from_responses(
+                responses=resps, use_timestamp=use_timestamp
+            )
+        except (ValueError, KeyError) as e:
+            raise ParserException('Failed to parse responses as `pd.DataFrame`.') from e
+
 
     @classmethod
     def spec(
         cls,
         handler: Any,
-        station_id: Union[int, str],
-        cols: List[str] = None,
-        start_time: Union[str, datetime] = datetime.now() - timedelta(days=30),
-        end_time: Union[str, datetime] = datetime.now(),
+        station_id: str,
+        start_time: datetime = datetime.now() - timedelta(days=30),
+        end_time: datetime = datetime.now(),
         use_timestamp: bool = True,
-        as_df: bool = True,
-    ) -> Union[pd.DataFrame, dict]:
+    ) -> pd.DataFrame:
         """spec"""
-        reqs = SpecRequest.build_request(
-            station_id=station_id, start_time=start_time, end_time=end_time
-        )
-        resps = handler.handle_requests(station_id=station_id, reqs=reqs)
-        df = SpecParser.df_from_responses(
-            responses=resps, use_timestamp=use_timestamp
-        )
-        if cols:
-            df = df[[cols]]
-        if as_df:
-            return df
-        else:
-            return df.to_records()
+        try:
+            reqs = SpecRequest.build_request(
+                station_id=station_id, start_time=start_time, end_time=end_time
+            )
+        except Exception as e:
+            raise RequestException('Failed to build request.') from e
+        try:
+            resps = handler.handle_requests(station_id=station_id, reqs=reqs)
+        except Exception as e:
+            raise ResponseException('Failed to execute requests.') from e
+        try:
+            return SpecParser.df_from_responses(
+                responses=resps, use_timestamp=use_timestamp
+            )
+        except (ValueError, KeyError) as e:
+            raise ParserException('Failed to parse responses as `pd.DataFrame`.') from e
+
 
     @classmethod
     def stdmet(
         cls,
         handler: Any,
-        station_id: Union[int, str],
-        cols: List[str] = None,
-        start_time: Union[str, datetime] = datetime.now() - timedelta(days=30),
-        end_time: Union[str, datetime] = datetime.now(),
+        station_id: str,
+        start_time:datetime = datetime.now() - timedelta(days=30),
+        end_time: datetime = datetime.now(),
         use_timestamp: bool = True,
-        as_df: bool = True,
-    ) -> Union[pd.DataFrame, dict]:
+    ) -> pd.DataFrame:
         """stdmet"""
-        reqs = StdmetRequest.build_request(
-            station_id=station_id, start_time=start_time, end_time=end_time
-        )
-        resps = handler.handle_requests(station_id=station_id, reqs=reqs)
-        df = StdmetParser.df_from_responses(
-            responses=resps, use_timestamp=use_timestamp
-        )
-        if cols:
-            df = df[[cols]]
-        if as_df:
-            return df
-        else:
-            return df.to_records()
+        try:
+            reqs = StdmetRequest.build_request(
+                station_id=station_id, start_time=start_time, end_time=end_time
+            )
+        except Exception as e:
+            raise RequestException('Failed to build request.') from e
+        try:
+            resps = handler.handle_requests(station_id=station_id, reqs=reqs)
+        except Exception as e:
+            raise ResponseException('Failed to execute requests.') from e
+        try:
+            return StdmetParser.df_from_responses(
+                responses=resps, use_timestamp=use_timestamp
+            )
+        except (ValueError, KeyError) as e:
+            raise ParserException('Failed to parse responses as `pd.DataFrame`.') from e
+
 
     @classmethod
     def supl(
         cls,
         handler: Any,
-        station_id: Union[int, str],
-        cols: List[str] = None,
-        start_time: Union[str, datetime] = datetime.now() - timedelta(days=30),
-        end_time: Union[str, datetime] = datetime.now(),
+        station_id: str,
+        start_time: datetime = datetime.now() - timedelta(days=30),
+        end_time: datetime = datetime.now(),
         use_timestamp: bool = True,
-        as_df: bool = True,
-    ) -> Union[pd.DataFrame, dict]:
+    ) -> pd.DataFrame:
         """supl"""
-        reqs = SuplRequest.build_request(
-            station_id=station_id, start_time=start_time, end_time=end_time
-        )
-        resps = handler.handle_requests(station_id=station_id, reqs=reqs)
-        df = SuplParser.df_from_responses(
-            responses=resps, use_timestamp=use_timestamp
-        )
-        if cols:
-            df = df[[cols]]
-        if as_df:
-            return df
-        else:
-            return df.to_records()
+        try:
+            reqs = SuplRequest.build_request(
+                station_id=station_id, start_time=start_time, end_time=end_time
+            )
+        except Exception as e:
+            raise RequestException('Failed to build request.') from e
+        try:
+            resps = handler.handle_requests(station_id=station_id, reqs=reqs)
+        except Exception as e:
+            raise ResponseException('Failed to execute requests.') from e
+        try:
+            return SuplParser.df_from_responses(
+                responses=resps, use_timestamp=use_timestamp
+            )
+        except (ValueError, KeyError) as e:
+            raise ParserException('Failed to parse responses as `pd.DataFrame`.') from e
+
 
     @classmethod
     def swden(
         cls,
         handler: Any,
-        station_id: Union[int, str],
-        cols: List[str] = None,
-        start_time: Union[str, datetime] = datetime.now() - timedelta(days=30),
-        end_time: Union[str, datetime] = datetime.now(),
+        station_id: str,
+        start_time: datetime = datetime.now() - timedelta(days=30),
+        end_time: datetime = datetime.now(),
         use_timestamp: bool = True,
-        as_df: bool = True,
-    ) -> Union[pd.DataFrame, dict]:
+    ) -> pd.DataFrame:
         """swden"""
-        reqs = SwdenRequest.build_request(
-            station_id=station_id, start_time=start_time, end_time=end_time
-        )
-        resps = handler.handle_requests(station_id=station_id, reqs=reqs)
-        df = SwdenParser.df_from_responses(
-            responses=resps, use_timestamp=use_timestamp
-        )
-        if cols:
-            df = df[[cols]]
-        if as_df:
-            return df
-        else:
-            return df.to_records()
+        try:
+            reqs = SwdenRequest.build_request(
+                station_id=station_id, start_time=start_time, end_time=end_time
+            )
+        except Exception as e:
+            raise RequestException('Failed to build request.') from e
+        try:
+            resps = handler.handle_requests(station_id=station_id, reqs=reqs)
+        except Exception as e:
+            raise ResponseException('Failed to execute requests.') from e
+        try:
+            return SwdenParser.df_from_responses(
+                responses=resps, use_timestamp=use_timestamp
+            )
+        except (ValueError, KeyError) as e:
+            raise ParserException('Failed to parse responses as `pd.DataFrame`.') from e
+
 
     @classmethod
     def swdir(
         cls,
         handler: Any,
-        station_id: Union[int, str],
-        cols: List[str] = None,
-        start_time: Union[str, datetime] = datetime.now() - timedelta(days=30),
-        end_time: Union[str, datetime] = datetime.now(),
+        station_id: str,
+        start_time: datetime = datetime.now() - timedelta(days=30),
+        end_time: datetime = datetime.now(),
         use_timestamp: bool = True,
-        as_df: bool = True,
-    ) -> Union[pd.DataFrame, dict]:
+    ) -> pd.DataFrame:
         """swdir"""
-        reqs = SwdirRequest.build_request(
-            station_id=station_id, start_time=start_time, end_time=end_time
-        )
-        resps = handler.handle_requests(station_id=station_id, reqs=reqs)
-        df = SwdirParser.df_from_responses(
-            responses=resps, use_timestamp=use_timestamp
-        )
-        if cols:
-            df = df[[cols]]
-        if as_df:
-            return df
-        else:
-            return df.to_records()
+        try:
+            reqs = SwdirRequest.build_request(
+                station_id=station_id, start_time=start_time, end_time=end_time
+            )
+        except Exception as e:
+            raise RequestException('Failed to build request.') from e
+        try:
+            resps = handler.handle_requests(station_id=station_id, reqs=reqs)
+        except Exception as e:
+            raise ResponseException('Failed to execute requests.') from e
+        try:
+            return SwdirParser.df_from_responses(
+                responses=resps, use_timestamp=use_timestamp
+            )
+        except (ValueError, KeyError) as e:
+            raise ParserException('Failed to parse responses as `pd.DataFrame`.') from e
+
 
     @classmethod
     def swdir2(
         cls,
         handler: Any,
-        station_id: Union[int, str],
-        cols: List[str] = None,
-        start_time: Union[str, datetime] = datetime.now() - timedelta(days=30),
-        end_time: Union[str, datetime] = datetime.now(),
+        station_id: str,
+        start_time: datetime = datetime.now() - timedelta(days=30),
+        end_time: datetime = datetime.now(),
         use_timestamp: bool = True,
-        as_df: bool = True,
-    ) -> Union[pd.DataFrame, dict]:
+    ) -> pd.DataFrame:
         """swdir2"""
-        reqs = Swdir2Request.build_request(
-            station_id=station_id, start_time=start_time, end_time=end_time
-        )
-        resps = handler.handle_requests(station_id=station_id, reqs=reqs)
-        df = Swdir2Parser.df_from_responses(
-            responses=resps, use_timestamp=use_timestamp
-        )
-        if cols:
-            df = df[[cols]]
-        if as_df:
-            return df
-        else:
-            return df.to_records()
+        try:
+            reqs = Swdir2Request.build_request(
+                station_id=station_id, start_time=start_time, end_time=end_time
+            )
+        except Exception as e:
+            raise RequestException('Failed to build request.') from e
+        try:
+            resps = handler.handle_requests(station_id=station_id, reqs=reqs)
+        except Exception as e:
+            raise ResponseException('Failed to execute requests.') from e
+        try:
+            return Swdir2Parser.df_from_responses(
+                responses=resps, use_timestamp=use_timestamp
+            )
+        except (ValueError, KeyError) as e:
+            raise ParserException('Failed to parse responses as `pd.DataFrame`.') from e
+
 
     @classmethod
     def swr1(
         cls,
         handler: Any,
-        station_id: Union[int, str],
-        cols: List[str] = None,
-        start_time: Union[str, datetime] = datetime.now() - timedelta(days=30),
-        end_time: Union[str, datetime] = datetime.now(),
+        station_id: str,
+        start_time: datetime = datetime.now() - timedelta(days=30),
+        end_time: datetime = datetime.now(),
         use_timestamp: bool = True,
-        as_df: bool = True,
-    ) -> Union[pd.DataFrame, dict]:
+    ) -> pd.DataFrame:
         """swr1"""
-        reqs = Swr1Request.build_request(
-            station_id=station_id, start_time=start_time, end_time=end_time
-        )
-        resps = handler.handle_requests(station_id=station_id, reqs=reqs)
-        df = Swr1Parser.df_from_responses(
-            responses=resps, use_timestamp=use_timestamp
-        )
-        if cols:
-            df = df[[cols]]
-        if as_df:
-            return df
-        else:
-            return df.to_records()
+        try:
+            reqs = Swr1Request.build_request(
+                station_id=station_id, start_time=start_time, end_time=end_time
+            )
+        except Exception as e:
+            raise RequestException('Failed to build request.') from e
+        try:
+            resps = handler.handle_requests(station_id=station_id, reqs=reqs)
+        except Exception as e:
+            raise ResponseException('Failed to execute requests.') from e
+        try:
+            return Swr1Parser.df_from_responses(
+                responses=resps, use_timestamp=use_timestamp
+            )
+        except (ValueError, KeyError) as e:
+            raise ParserException('Failed to parse responses as `pd.DataFrame`.') from e
+
 
     @classmethod
     def swr2(
         cls,
         handler: Any,
-        station_id: Union[int, str],
-        cols: List[str] = None,
-        start_time: Union[str, datetime] = datetime.now() - timedelta(days=30),
-        end_time: Union[str, datetime] = datetime.now(),
+        station_id: str,
+        start_time: datetime = datetime.now() - timedelta(days=30),
+        end_time: datetime = datetime.now(),
         use_timestamp: bool = True,
-        as_df: bool = True,
-    ) -> Union[pd.DataFrame, dict]:
+    ) -> pd.DataFrame:
         """swr2"""
-        reqs = Swr2Request.build_request(
-            station_id=station_id, start_time=start_time, end_time=end_time
-        )
-        resps = handler.handle_requests(station_id=station_id, reqs=reqs)
-        df = Swr2Parser.df_from_responses(
-            responses=resps, use_timestamp=use_timestamp
-        )
-        if cols:
-            df = df[[cols]]
-        if as_df:
-            return df
-        else:
-            return df.to_records()
+        try:
+            reqs = Swr2Request.build_request(
+                station_id=station_id, start_time=start_time, end_time=end_time
+            )
+        except Exception as e:
+            raise RequestException('Failed to build request.') from e
+        try:
+            resps = handler.handle_requests(station_id=station_id, reqs=reqs)
+        except Exception as e:
+            raise ResponseException('Failed to execute requests.') from e
+        try:
+            return Swr2Parser.df_from_responses(
+                responses=resps, use_timestamp=use_timestamp
+            )
+        except (ValueError, KeyError) as e:
+            raise ParserException('Failed to parse responses as `pd.DataFrame`.') from e
