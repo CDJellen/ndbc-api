@@ -9,13 +9,11 @@
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white&style=flat-square)](https://www.linkedin.com/in/cdjellen/)
 [![GitHub](https://img.shields.io/github/license/cdjellen/ndbc-api)](https://github.com/cdjellen/ndbc-api/blob/main/LICENSE)
 [![PyPI - Downloads](https://img.shields.io/pypi/dm/ndbc-api)](https://pypi.org/project/ndbc-api/)
-[![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/cdjellen/ndbc-api)](https://github.com/cdjellen/ndbc-api)
-[![Documentation Status](https://readthedocs.org/projects/ndbc-api/badge/?version=latest)](https://ndbc-api.readthedocs.io/en/latest/?badge=latest)
       
 
 <div align="center">
     <h3>A Python API for the National Data Buoy Center</h3>
-</div?>
+</div>
 
 
 The National Oceanic and Atmospheric Ascociation's National Data Buoy Center maintains marine monitoring and observation stations around the world[^1].
