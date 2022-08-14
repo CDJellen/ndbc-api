@@ -88,7 +88,7 @@ class NdbcApi(metaclass=Singleton):
 
     def stations(self, as_df: bool = True) -> Union[pd.DataFrame, dict]:
         """Get all stations from NDBC."""
-        data = self._stations_api.stations(handler=self._handler, as_df=as_df)
+        data = self._stations_api.stations(handler=self._handler)
         try:
             return self._handle_data(data, as_df, cols=None)
         except (ValueError, KeyError) as e:
@@ -104,7 +104,7 @@ class NdbcApi(metaclass=Singleton):
         if not (lat and lon):
             raise ValueError('lat and lon must be specified.')
         data = self._stations_api.nearest_station(
-            handler=self._handler, lat=lat, lon=lon, as_df=as_df
+            handler=self._handler, lat=lat, lon=lon
         )
         try:
             return self._handle_data(data, as_df, cols=None)
@@ -117,7 +117,7 @@ class NdbcApi(metaclass=Singleton):
         """Get all stations from NDBC."""
         station_id = self._parse_station_id(station_id)
         data = self._stations_api.metadata(
-            handler=self._handler, station_id=station_id, as_df=as_df
+            handler=self._handler, station_id=station_id
         )
         try:
             return self._handle_data(data, as_df, cols=None)
@@ -130,7 +130,7 @@ class NdbcApi(metaclass=Singleton):
         """Get all stations from NDBC."""
         station_id = self._parse_station_id(station_id)
         data = self._stations_api.realtime(
-            handler=self._handler, station_id=station_id, as_df=as_df
+            handler=self._handler, station_id=station_id
         )
         try:
             return self._handle_data(data, as_df, cols=None)
@@ -143,7 +143,7 @@ class NdbcApi(metaclass=Singleton):
         """Get all stations from NDBC."""
         station_id = self._parse_station_id(station_id)
         data = self._stations_api.historical(
-            handler=self._handler, station_id=station_id, as_df=as_df
+            handler=self._handler, station_id=station_id
         )
         try:
             return self._handle_data(data, as_df, cols=None)
@@ -181,6 +181,10 @@ class NdbcApi(metaclass=Singleton):
             )
         except (ValueError, TypeError, KeyError) as e:
             raise ParserException('Failed to handle API call.') from e
+        if use_timestamp:
+            data = self._enforce_timerange(
+                df=data, start_time=start_time, end_time=end_time
+            )
         try:
             return self._handle_data(data, as_df, cols)
         except (ValueError, KeyError) as e:
@@ -229,6 +233,23 @@ class NdbcApi(metaclass=Singleton):
                 return datetime.fromisoformat(str(timestamp))
             except ValueError as e:
                 raise TimestampException from e
+
+    @staticmethod
+    def _enforce_timerange(
+        df: pd.DataFrame, start_time: datetime, end_time: datetime
+    ) -> pd.DataFrame:
+        """Down-select to the data within the specified `datetime` range."""
+        df = df.reset_index()
+        try:
+            df = df.loc[
+                (df.timestamp >= pd.Timestamp(start_time))
+                & (df.timestamp <= pd.Timestamp(end_time))
+            ]
+        except ValueError as e:
+            raise TimestampException(
+                'Failed to enforce `start_time` to `end_time` range.'
+            ) from e
+        return df
 
     @staticmethod
     def _handle_data(
