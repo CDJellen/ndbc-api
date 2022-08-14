@@ -271,7 +271,7 @@ class NdbcApi(metaclass=Singleton):
             except ValueError as e:
                 raise HandlerException(
                     'Failed to convert `pd.DataFrame` to `dict`.'
-                )
+                ) from e
 
 
 if __name__ == '__main__':
