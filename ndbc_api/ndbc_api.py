@@ -9,7 +9,12 @@ from .utilities.singleton import Singleton
 from .utilities.req_handler import RequestHandler
 from .api.handlers.stations import StaitonsHandler
 from .api.handlers.data import DataHandler
-from .exceptions import HandlerException, TimestampException, RequestException, ParserException
+from .exceptions import (
+    HandlerException,
+    TimestampException,
+    RequestException,
+    ParserException,
+)
 from .config import (
     LOGGER_NAME,
     DEFAULT_CACHE_LIMIT,
@@ -226,20 +231,27 @@ class NdbcApi(metaclass=Singleton):
                 raise TimestampException from e
 
     @staticmethod
-    def _handle_data(data: pd.DataFrame, as_df: bool = True, cols: List[str] = None) -> Union[pd.DataFrame, dict]:
+    def _handle_data(
+        data: pd.DataFrame, as_df: bool = True, cols: List[str] = None
+    ) -> Union[pd.DataFrame, dict]:
         """Apply column down selection and return format handling."""
         if cols:
             try:
                 data = data[[*cols]]
             except ValueError as e:
-                raise ParserException('Failed to parse column selection.') from e
+                raise ParserException(
+                    'Failed to parse column selection.'
+                ) from e
         if as_df:
             return data
         else:
             try:
                 return data.to_dict()
             except ValueError as e:
-                raise HandlerException('Failed to convert `pd.DataFrame` to `dict`.')
+                raise HandlerException(
+                    'Failed to convert `pd.DataFrame` to `dict`.'
+                )
+
 
 if __name__ == '__main__':
     api = NdbcApi()

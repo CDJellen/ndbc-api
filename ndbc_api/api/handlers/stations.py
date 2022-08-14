@@ -12,7 +12,11 @@ from ndbc_api.api.parsers.stations import StationsParser
 from ndbc_api.api.parsers.station_metadata import MetadataParser
 from ndbc_api.api.parsers.station_historical import HistoricalParser
 from ndbc_api.api.parsers.station_realtime import RealtimeParser
-from ndbc_api.exceptions import ParserException, RequestException, ResponseException
+from ndbc_api.exceptions import (
+    ParserException,
+    RequestException,
+    ResponseException,
+)
 
 
 class StaitonsHandler(BaseHandler):
@@ -36,7 +40,9 @@ class StaitonsHandler(BaseHandler):
         try:
             resp = handler.handle_request('stn', req)
         except (ValueError, TypeError) as e:
-            raise ResponseException('Failed to execute `station` request.') from e
+            raise ResponseException(
+                'Failed to execute `station` request.'
+            ) from e
         try:
             data = StationsParser.df_from_responses([resp])
         except (ValueError, TypeError) as e:
@@ -56,9 +62,7 @@ class StaitonsHandler(BaseHandler):
         return closest
 
     @classmethod
-    def metadata(
-        cls, handler: Any, station_id: str
-    ) -> pd.DataFrame:
+    def metadata(cls, handler: Any, station_id: str) -> pd.DataFrame:
         """Get station description."""
         try:
             req = MetadataRequest.build_request(station_id=station_id)
@@ -67,7 +71,9 @@ class StaitonsHandler(BaseHandler):
         try:
             resp = handler.handle_request(station_id, req)
         except (ValueError, TypeError) as e:
-            raise ResponseException('Failed to execute `station` request.') from e
+            raise ResponseException(
+                'Failed to execute `station` request.'
+            ) from e
         try:
             data = MetadataParser.metadata(resp)
         except (ValueError, TypeError) as e:
@@ -75,9 +81,7 @@ class StaitonsHandler(BaseHandler):
         return data
 
     @classmethod
-    def realtime(
-        cls, handler: Any, station_id: str
-    ) -> pd.DataFrame:
+    def realtime(cls, handler: Any, station_id: str) -> pd.DataFrame:
         """Get the available realtime measurements for a station."""
         try:
             req = RealtimeRequest.build_request(station_id=station_id)
@@ -86,7 +90,9 @@ class StaitonsHandler(BaseHandler):
         try:
             resp = handler.handle_request(station_id, req)
         except (ValueError, TypeError) as e:
-            raise ResponseException('Failed to execute `station` request.') from e
+            raise ResponseException(
+                'Failed to execute `station` request.'
+            ) from e
         try:
             data = RealtimeParser.available_measurements(resp)
         except (ValueError, TypeError) as e:
@@ -105,7 +111,9 @@ class StaitonsHandler(BaseHandler):
         try:
             resp = handler.handle_request(station_id, req)
         except (ValueError, TypeError) as e:
-            raise ResponseException('Failed to execute `station` request.') from e
+            raise ResponseException(
+                'Failed to execute `station` request.'
+            ) from e
         try:
             data = HistoricalParser.available_measurements(resp)
         except (ValueError, TypeError) as e:
@@ -117,6 +125,7 @@ class StaitonsHandler(BaseHandler):
     @staticmethod
     def _nearest(df: pd.DataFrame, lat_a: float, lon_a: float):
         """Get the nearest station from specified `float`-valued lat/lon."""
+
         def _distance(
             lat_a: float, lon_a: float, lat_b: float, lon_b: float
         ) -> float:

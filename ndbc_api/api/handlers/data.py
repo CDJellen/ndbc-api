@@ -26,7 +26,11 @@ from ndbc_api.api.parsers.swdir import SwdirParser
 from ndbc_api.api.parsers.swdir2 import Swdir2Parser
 from ndbc_api.api.parsers.swr1 import Swr1Parser
 from ndbc_api.api.parsers.swr2 import Swr2Parser
-from ndbc_api.exceptions import RequestException, ResponseException, ParserException
+from ndbc_api.exceptions import (
+    RequestException,
+    ResponseException,
+    ParserException,
+)
 
 
 class DataHandler(BaseHandler):
@@ -55,7 +59,9 @@ class DataHandler(BaseHandler):
                 responses=resps, use_timestamp=use_timestamp
             )
         except (ValueError, KeyError) as e:
-            raise ParserException('Failed to parse responses as `pd.DataFrame`.') from e
+            raise ParserException(
+                'Failed to parse responses as `pd.DataFrame`.'
+            ) from e
 
     @classmethod
     def cwind(
@@ -82,8 +88,9 @@ class DataHandler(BaseHandler):
                 responses=resps, use_timestamp=use_timestamp
             )
         except (ValueError, KeyError) as e:
-            raise ParserException('Failed to parse responses as `pd.DataFrame`.') from e
-
+            raise ParserException(
+                'Failed to parse responses as `pd.DataFrame`.'
+            ) from e
 
     @classmethod
     def ocean(
@@ -110,8 +117,9 @@ class DataHandler(BaseHandler):
                 responses=resps, use_timestamp=use_timestamp
             )
         except (ValueError, KeyError) as e:
-            raise ParserException('Failed to parse responses as `pd.DataFrame`.') from e
-
+            raise ParserException(
+                'Failed to parse responses as `pd.DataFrame`.'
+            ) from e
 
     @classmethod
     def spec(
@@ -138,15 +146,16 @@ class DataHandler(BaseHandler):
                 responses=resps, use_timestamp=use_timestamp
             )
         except (ValueError, KeyError) as e:
-            raise ParserException('Failed to parse responses as `pd.DataFrame`.') from e
-
+            raise ParserException(
+                'Failed to parse responses as `pd.DataFrame`.'
+            ) from e
 
     @classmethod
     def stdmet(
         cls,
         handler: Any,
         station_id: str,
-        start_time:datetime = datetime.now() - timedelta(days=30),
+        start_time: datetime = datetime.now() - timedelta(days=30),
         end_time: datetime = datetime.now(),
         use_timestamp: bool = True,
     ) -> pd.DataFrame:
@@ -166,8 +175,9 @@ class DataHandler(BaseHandler):
                 responses=resps, use_timestamp=use_timestamp
             )
         except (ValueError, KeyError) as e:
-            raise ParserException('Failed to parse responses as `pd.DataFrame`.') from e
-
+            raise ParserException(
+                'Failed to parse responses as `pd.DataFrame`.'
+            ) from e
 
     @classmethod
     def supl(
@@ -194,8 +204,9 @@ class DataHandler(BaseHandler):
                 responses=resps, use_timestamp=use_timestamp
             )
         except (ValueError, KeyError) as e:
-            raise ParserException('Failed to parse responses as `pd.DataFrame`.') from e
-
+            raise ParserException(
+                'Failed to parse responses as `pd.DataFrame`.'
+            ) from e
 
     @classmethod
     def swden(
@@ -222,8 +233,9 @@ class DataHandler(BaseHandler):
                 responses=resps, use_timestamp=use_timestamp
             )
         except (ValueError, KeyError) as e:
-            raise ParserException('Failed to parse responses as `pd.DataFrame`.') from e
-
+            raise ParserException(
+                'Failed to parse responses as `pd.DataFrame`.'
+            ) from e
 
     @classmethod
     def swdir(
@@ -250,8 +262,9 @@ class DataHandler(BaseHandler):
                 responses=resps, use_timestamp=use_timestamp
             )
         except (ValueError, KeyError) as e:
-            raise ParserException('Failed to parse responses as `pd.DataFrame`.') from e
-
+            raise ParserException(
+                'Failed to parse responses as `pd.DataFrame`.'
+            ) from e
 
     @classmethod
     def swdir2(
@@ -278,8 +291,9 @@ class DataHandler(BaseHandler):
                 responses=resps, use_timestamp=use_timestamp
             )
         except (ValueError, KeyError) as e:
-            raise ParserException('Failed to parse responses as `pd.DataFrame`.') from e
-
+            raise ParserException(
+                'Failed to parse responses as `pd.DataFrame`.'
+            ) from e
 
     @classmethod
     def swr1(
@@ -306,8 +320,9 @@ class DataHandler(BaseHandler):
                 responses=resps, use_timestamp=use_timestamp
             )
         except (ValueError, KeyError) as e:
-            raise ParserException('Failed to parse responses as `pd.DataFrame`.') from e
-
+            raise ParserException(
+                'Failed to parse responses as `pd.DataFrame`.'
+            ) from e
 
     @classmethod
     def swr2(
@@ -334,4 +349,6 @@ class DataHandler(BaseHandler):
                 responses=resps, use_timestamp=use_timestamp
             )
         except (ValueError, KeyError) as e:
-            raise ParserException('Failed to parse responses as `pd.DataFrame`.') from e
+            raise ParserException(
+                'Failed to parse responses as `pd.DataFrame`.'
+            ) from e
