@@ -53,7 +53,7 @@ jobs:
           pip install -r requirements.txt
           pip install -r requirements_dev.txt
       - name: Run Tests
-        run: python -m pytest --cov-report xml:coverage.xml
+        run: python -m pytest --cov=. --cov-report xml:coverage.xml
       - name: Coveralls
         uses: coverallsapp/github-action@master
         with:
