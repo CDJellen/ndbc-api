@@ -173,11 +173,9 @@ class NdbcApi(metaclass=Singleton):
             data = data_api_call(
                 self._handler,
                 station_id,
-                cols,
                 start_time,
                 end_time,
                 use_timestamp,
-                as_df,
             )
         except (ValueError, TypeError, KeyError) as e:
             raise ParserException('Failed to handle API call.') from e
@@ -239,11 +237,10 @@ class NdbcApi(metaclass=Singleton):
         df: pd.DataFrame, start_time: datetime, end_time: datetime
     ) -> pd.DataFrame:
         """Down-select to the data within the specified `datetime` range."""
-        df = df.reset_index()
         try:
             df = df.loc[
-                (df.timestamp >= pd.Timestamp(start_time))
-                & (df.timestamp <= pd.Timestamp(end_time))
+                (df.index.values >= pd.Timestamp(start_time))
+                & (df.index.values <= pd.Timestamp(end_time))
             ]
         except ValueError as e:
             raise TimestampException(
@@ -276,5 +273,5 @@ class NdbcApi(metaclass=Singleton):
 
 if __name__ == '__main__':
     api = NdbcApi()
-    df = api.get_data('44095', 'swdir', None, '2022-01-01')
+    df = api.get_data('tplm2', 'stdmet', '2022-01-01')
     print(len(df))

@@ -52,10 +52,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install -r requirements_dev.txt
-      - name: Run Tests
-        run: python -m pytest --cov=. --cov-report xml:coverage.xml
-      - name: Coveralls
-        uses: coverallsapp/github-action@master
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          path--to-lcov: coverage.xml
+      - name: Generate coverage report
+        run: |
+          coverage run --source=ndbc-api -m pytest tests/
+          coveralls --service=github --finish
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
