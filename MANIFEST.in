@@ -1,3 +1,4 @@
+prune tests/
 setup.cfg
 setup.py
 ndbc_api\__init__.py

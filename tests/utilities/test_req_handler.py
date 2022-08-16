@@ -60,4 +60,6 @@ def test_add_station(request_handler):
 def test_get_station(request_handler):
     request_handler.get_station('foo')
     assert len(request_handler.stations) == 1
-    assert isinstance(request_handler.get_station('foo'), RequestHandler.Station)
+    assert isinstance(
+        request_handler.get_station('foo'), RequestHandler.Station
+    )

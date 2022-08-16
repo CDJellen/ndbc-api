@@ -66,11 +66,15 @@ class BaseRequest(CoreRequest):
             ):
                 reqs.append(req_hist_helper_month(hist_month))
             if int(last_available_month) <= (end_time.month):
-                reqs.append(req_hist_helper_month_current(int(last_available_month)))
+                reqs.append(
+                    req_hist_helper_month_current(int(last_available_month))
+                )
 
         if has_realtime:
             reqs.append(
-                cls._build_request_realtime(station_id=station_id)[0]  # only one URL
+                cls._build_request_realtime(station_id=station_id)[
+                    0
+                ]  # only one URL
             )
         return reqs
 

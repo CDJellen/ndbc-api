@@ -99,7 +99,9 @@ class RequestHandler(metaclass=Singleton):
         if isinstance(station_id, int):
             station_id = str(station_id)
         self.stations.append(
-            RequestHandler.Station(station_id=station_id, cache_limit=self._cache_limit)
+            RequestHandler.Station(
+                station_id=station_id, cache_limit=self._cache_limit
+            )
         )
 
     def handle_requests(
@@ -108,7 +110,9 @@ class RequestHandler(metaclass=Singleton):
 
         responses = []
         for req in reqs:
-            responses.append(self.handle_request(station_id=station_id, req=req))
+            responses.append(
+                self.handle_request(station_id=station_id, req=req)
+            )
         return responses
 
     def handle_request(self, station_id: Union[str, int], req: str) -> dict:
@@ -120,7 +124,10 @@ class RequestHandler(metaclass=Singleton):
 
     def execute_request(self, url: str, headers: dict) -> dict:
         response = self._session.get(
-            url=url, headers=headers, allow_redirects=True, verify=self._verify_https
+            url=url,
+            headers=headers,
+            allow_redirects=True,
+            verify=self._verify_https,
         )
         if self._debug:
             self.log.debug(f'GET: {url}\n\theaders: {headers}')

@@ -39,7 +39,9 @@ def test_request_cache_put(request_handler, response_foo):
     assert len(request_handler.cache) == 1
 
 
-def test_request_cache_limit(request_handler, response_foo, response_bar, response_baz):
+def test_request_cache_limit(
+    request_handler, response_foo, response_bar, response_baz
+):
     request_handler.put(request='foo', response=response_foo)
     request_handler.put(request='bar', response=response_bar)
     assert len(request_handler.cache) == 2
@@ -47,7 +49,9 @@ def test_request_cache_limit(request_handler, response_foo, response_bar, respon
     assert len(request_handler.cache) == 2
 
 
-def test_request_cache_overwrite(request_handler, response_foo, response_foobar):
+def test_request_cache_overwrite(
+    request_handler, response_foo, response_foobar
+):
     request_handler.put(request='foo', response=response_foo)
     want = response_foo
     got = request_handler.get('foo')
