@@ -55,6 +55,6 @@ jobs:
       - name: Generate coverage report
         run: |
           coverage run --source=ndbc-api -m pytest tests/
-          coveralls --service=github --finish
+          coveralls --service=github
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
