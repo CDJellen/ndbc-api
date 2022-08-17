@@ -37,3 +37,19 @@ def test_available_measurements(
     assert want.keys() == got.keys()
     for k in want.keys():
         assert want[k] == got[k]
+
+def test_available_measurements_status(
+    stations_historical, historical_response):
+    resp = historical_response.get(list(historical_response.keys())[0])
+    resp['status'] = 404
+    want = dict()
+    got = stations_historical.available_measurements(resp)
+    assert want == got
+
+def test_available_measurements_parse_item(
+    stations_historical, historical_response):
+    resp = historical_response.get(list(historical_response.keys())[0])
+    resp['body'] = resp['body'].split('HISTORY')[0]
+    want = dict()
+    got = stations_historical.available_measurements(resp)
+    assert want == got
