@@ -54,7 +54,8 @@ jobs:
           pip install -r requirements_dev.txt
       - name: Generate coverage report
         run: |
-          coverage run --source=ndbc-api -m pytest tests/
+          coverage run --source ndbc_api -m pytest tests/
+          coverage lcov
           coveralls --service=github
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

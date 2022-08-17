@@ -3,6 +3,7 @@
 .cache/
 .pytest_cache/
 .vscode/
+.coverage
 .DS_Store
 .venv
 *.egg-info
@@ -11,6 +12,7 @@
 *.egg
 *.db
 *.pid
+*.xml
 MANIFEST
 test.conf
 pip-log.txt
