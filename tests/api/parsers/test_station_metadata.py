@@ -41,5 +41,5 @@ def test_station_metadata_status(
     resp = metadata_response.get(list(metadata_response.keys())[0])
     resp['status'] = 404
     want = dict()
-    got = stations_metadata.available_measurements(resp)
+    got = stations_metadata.metadata(resp)
     assert want == got
