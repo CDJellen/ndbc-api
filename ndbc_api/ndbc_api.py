@@ -269,9 +269,3 @@ class NdbcApi(metaclass=Singleton):
                 raise HandlerException(
                     'Failed to convert `pd.DataFrame` to `dict`.'
                 ) from e
-
-
-if __name__ == '__main__':
-    api = NdbcApi()
-    df = api.get_data('tplm2', 'stdmet', '2022-01-01')
-    print(len(df))
