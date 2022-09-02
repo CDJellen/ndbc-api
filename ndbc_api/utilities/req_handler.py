@@ -122,7 +122,9 @@ class RequestHandler(metaclass=Singleton):
             stn.reqs.put(request=req, response=resp)
         return stn.reqs.get(request=req)
 
-    def execute_request(self, url: str, headers: dict) -> dict:  # pragma: no cover
+    def execute_request(
+        self, url: str, headers: dict
+    ) -> dict:  # pragma: no cover
         response = self._session.get(
             url=url,
             headers=headers,

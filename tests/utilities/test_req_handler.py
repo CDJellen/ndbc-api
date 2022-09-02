@@ -67,7 +67,7 @@ def test_get_station(request_handler):
     assert len(request_handler.stations) == 2
     request_handler.get_station('101')
     assert len(request_handler.stations) == 2
-    
+
     want = request_handler.get_station(101)
     got = request_handler.get_station('101')
     assert want == got
