@@ -18,7 +18,7 @@ def metadata_response():
 
 @pytest.fixture
 def parsed_stations_metadata():
-    with open(PARSED_FP, 'r') as f:
+    with open(PARSED_FP) as f:
         data = yaml.safe_load(f)
     yield data
 
@@ -40,6 +40,14 @@ def test_station_metadata_status(
     stations_metadata, metadata_response):
     resp = metadata_response.get(list(metadata_response.keys())[0])
     resp['status'] = 404
+    want = dict()
+    got = stations_metadata.metadata(resp)
+    assert want == got
+
+def test_station_meta_from_response(
+    stations_metadata, metadata_response):
+    resp = metadata_response.get(list(metadata_response.keys())[0])
+    resp['body'] = ''
     want = dict()
     got = stations_metadata.metadata(resp)
     assert want == got

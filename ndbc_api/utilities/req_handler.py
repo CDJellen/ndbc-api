@@ -89,6 +89,8 @@ class RequestHandler(metaclass=Singleton):
         return False
 
     def get_station(self, station_id: Union[str, int]) -> Station:
+        if isinstance(station_id, int):
+            station_id = str(station_id)
         if not self.has_station(station_id):
             self.add_station(station_id=station_id)
         for s in self.stations:
@@ -96,8 +98,6 @@ class RequestHandler(metaclass=Singleton):
                 return s
 
     def add_station(self, station_id: Union[str, int]) -> None:
-        if isinstance(station_id, int):
-            station_id = str(station_id)
         self.stations.append(
             RequestHandler.Station(
                 station_id=station_id, cache_limit=self._cache_limit

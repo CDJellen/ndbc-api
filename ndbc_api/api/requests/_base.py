@@ -45,7 +45,7 @@ class BaseRequest(CoreRequest):
             month = month.capitalize()
             return f'{cls.BASE_URL}data/{cls.FORMAT}/{month}/{station_id.lower()}.txt'
 
-        if not cls.FORMAT:
+        if not cls.FORMAT:  # pragma: no cover
             raise ValueError(
                 'Please provide a format for this historical data requset, or call a formatted child class\'s method.'
             )

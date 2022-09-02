@@ -18,18 +18,16 @@ class MetadataParser(StationParser):
 
     @classmethod
     def _meta_from_respose(cls, soup: bs4.BeautifulSoup):
-        metadata = [{'Name': soup.find('h1').text.strip()}]
+        metadata = []
         try:
+            metadata.append({'Name': soup.find('h1').text.strip()})
             items = soup.find('div', id='stn_metadata').find_all('p')[0].text
             items = items.split('\n\n')
             assert len(items) == 2
-        except (AssertionError, TypeError, ValueError):
+        except (AssertionError, AttributeError):
             return metadata
         metadata.extend(cls._parse_headers(items[0]))
-        try:
-            metadata.extend(cls._parse_attrs(items[1]))
-        except (ValueError, TypeError):
-            pass
+        metadata.extend(cls._parse_attrs(items[1]))
         return metadata
 
     @classmethod
