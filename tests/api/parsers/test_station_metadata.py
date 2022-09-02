@@ -43,3 +43,11 @@ def test_station_metadata_status(
     want = dict()
     got = stations_metadata.metadata(resp)
     assert want == got
+
+def test_station_meta_from_response(
+    stations_metadata, metadata_response):
+    resp = metadata_response.get(list(metadata_response.keys())[0])
+    resp['body'] = ''
+    want = dict()
+    got = stations_metadata.metadata(resp)
+    assert want == got
