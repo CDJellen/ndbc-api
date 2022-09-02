@@ -18,7 +18,7 @@ def metadata_response():
 
 @pytest.fixture
 def parsed_stations_metadata():
-    with open(PARSED_FP, 'r') as f:
+    with open(PARSED_FP) as f:
         data = yaml.safe_load(f)
     yield data
 

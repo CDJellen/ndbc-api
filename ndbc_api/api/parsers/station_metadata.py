@@ -27,6 +27,7 @@ class MetadataParser(StationParser):
         except (AssertionError, AttributeError):
             return metadata
         metadata.extend(cls._parse_headers(items[0]))
+        metadata.extend(cls._parse_attrs(items[1]))
         return metadata
 
     @classmethod
