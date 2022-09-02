@@ -1,6 +1,6 @@
 """Handles requests to the NDBC, caching responses for each station.
 
-This module ddefines the `RequestHandler`, a singleton HTTP cache which serves
+This module defines the `RequestHandler`, a singleton HTTP cache which serves
 to handle requests to the NDBC over HTTP and store requests and responses in a
 cache.  The cache is segregated by station, such that a cache limit can be
 enforced on a station level.
@@ -106,7 +106,7 @@ class RequestHandler(metaclass=Singleton):
 
     def handle_requests(
         self, station_id: Union[str, int], reqs: List[str]
-    ) -> List[str]:
+    ) -> List[str]:  # pragma: no cover
 
         responses = []
         for req in reqs:
@@ -122,7 +122,7 @@ class RequestHandler(metaclass=Singleton):
             stn.reqs.put(request=req, response=resp)
         return stn.reqs.get(request=req)
 
-    def execute_request(self, url: str, headers: dict) -> dict:
+    def execute_request(self, url: str, headers: dict) -> dict:  # pragma: no cover
         response = self._session.get(
             url=url,
             headers=headers,
