@@ -29,7 +29,6 @@ from ndbc_api.api.parsers.swr2 import Swr2Parser
 from ndbc_api.exceptions import (
     RequestException,
     ResponseException,
-    ParserException,
 )
 
 
@@ -78,14 +77,9 @@ class DataHandler(BaseHandler):
             resps = handler.handle_requests(station_id=station_id, reqs=reqs)
         except Exception as e:
             raise ResponseException('Failed to execute requests.') from e
-        try:
-            return CwindParser.df_from_responses(
-                responses=resps, use_timestamp=use_timestamp
-            )
-        except (ValueError, KeyError) as e:
-            raise ParserException(
-                'Failed to parse responses as `pd.DataFrame`.'
-            ) from e
+        return CwindParser.df_from_responses(
+            responses=resps, use_timestamp=use_timestamp
+        )
 
     @classmethod
     def ocean(
@@ -107,14 +101,9 @@ class DataHandler(BaseHandler):
             resps = handler.handle_requests(station_id=station_id, reqs=reqs)
         except Exception as e:
             raise ResponseException('Failed to execute requests.') from e
-        try:
-            return OceanParser.df_from_responses(
-                responses=resps, use_timestamp=use_timestamp
-            )
-        except (ValueError, KeyError) as e:
-            raise ParserException(
-                'Failed to parse responses as `pd.DataFrame`.'
-            ) from e
+        return OceanParser.df_from_responses(
+            responses=resps, use_timestamp=use_timestamp
+        )
 
     @classmethod
     def spec(
@@ -136,14 +125,9 @@ class DataHandler(BaseHandler):
             resps = handler.handle_requests(station_id=station_id, reqs=reqs)
         except Exception as e:
             raise ResponseException('Failed to execute requests.') from e
-        try:
-            return SpecParser.df_from_responses(
-                responses=resps, use_timestamp=use_timestamp
-            )
-        except (ValueError, KeyError) as e:
-            raise ParserException(
-                'Failed to parse responses as `pd.DataFrame`.'
-            ) from e
+        return SpecParser.df_from_responses(
+            responses=resps, use_timestamp=use_timestamp
+        )
 
     @classmethod
     def stdmet(
@@ -165,14 +149,9 @@ class DataHandler(BaseHandler):
             resps = handler.handle_requests(station_id=station_id, reqs=reqs)
         except Exception as e:
             raise ResponseException('Failed to execute requests.') from e
-        try:
-            return StdmetParser.df_from_responses(
-                responses=resps, use_timestamp=use_timestamp
-            )
-        except (ValueError, KeyError) as e:
-            raise ParserException(
-                'Failed to parse responses as `pd.DataFrame`.'
-            ) from e
+        return StdmetParser.df_from_responses(
+            responses=resps, use_timestamp=use_timestamp
+        )
 
     @classmethod
     def supl(
@@ -194,14 +173,9 @@ class DataHandler(BaseHandler):
             resps = handler.handle_requests(station_id=station_id, reqs=reqs)
         except Exception as e:
             raise ResponseException('Failed to execute requests.') from e
-        try:
-            return SuplParser.df_from_responses(
-                responses=resps, use_timestamp=use_timestamp
-            )
-        except (ValueError, KeyError) as e:
-            raise ParserException(
-                'Failed to parse responses as `pd.DataFrame`.'
-            ) from e
+        return SuplParser.df_from_responses(
+            responses=resps, use_timestamp=use_timestamp
+        )
 
     @classmethod
     def swden(
@@ -223,14 +197,9 @@ class DataHandler(BaseHandler):
             resps = handler.handle_requests(station_id=station_id, reqs=reqs)
         except Exception as e:
             raise ResponseException('Failed to execute requests.') from e
-        try:
-            return SwdenParser.df_from_responses(
-                responses=resps, use_timestamp=use_timestamp
-            )
-        except (ValueError, KeyError) as e:
-            raise ParserException(
-                'Failed to parse responses as `pd.DataFrame`.'
-            ) from e
+        return SwdenParser.df_from_responses(
+            responses=resps, use_timestamp=use_timestamp
+        )
 
     @classmethod
     def swdir(
@@ -252,14 +221,9 @@ class DataHandler(BaseHandler):
             resps = handler.handle_requests(station_id=station_id, reqs=reqs)
         except Exception as e:
             raise ResponseException('Failed to execute requests.') from e
-        try:
-            return SwdirParser.df_from_responses(
-                responses=resps, use_timestamp=use_timestamp
-            )
-        except (ValueError, KeyError) as e:
-            raise ParserException(
-                'Failed to parse responses as `pd.DataFrame`.'
-            ) from e
+        return SwdirParser.df_from_responses(
+            responses=resps, use_timestamp=use_timestamp
+        )
 
     @classmethod
     def swdir2(
@@ -281,14 +245,9 @@ class DataHandler(BaseHandler):
             resps = handler.handle_requests(station_id=station_id, reqs=reqs)
         except Exception as e:
             raise ResponseException('Failed to execute requests.') from e
-        try:
-            return Swdir2Parser.df_from_responses(
-                responses=resps, use_timestamp=use_timestamp
-            )
-        except (ValueError, KeyError) as e:
-            raise ParserException(
-                'Failed to parse responses as `pd.DataFrame`.'
-            ) from e
+        return Swdir2Parser.df_from_responses(
+            responses=resps, use_timestamp=use_timestamp
+        )
 
     @classmethod
     def swr1(
@@ -310,14 +269,9 @@ class DataHandler(BaseHandler):
             resps = handler.handle_requests(station_id=station_id, reqs=reqs)
         except Exception as e:
             raise ResponseException('Failed to execute requests.') from e
-        try:
-            return Swr1Parser.df_from_responses(
-                responses=resps, use_timestamp=use_timestamp
-            )
-        except (ValueError, KeyError) as e:
-            raise ParserException(
-                'Failed to parse responses as `pd.DataFrame`.'
-            ) from e
+        return Swr1Parser.df_from_responses(
+            responses=resps, use_timestamp=use_timestamp
+        )
 
     @classmethod
     def swr2(
@@ -339,11 +293,6 @@ class DataHandler(BaseHandler):
             resps = handler.handle_requests(station_id=station_id, reqs=reqs)
         except Exception as e:
             raise ResponseException('Failed to execute requests.') from e
-        try:
-            return Swr2Parser.df_from_responses(
-                responses=resps, use_timestamp=use_timestamp
-            )
-        except (ValueError, KeyError) as e:
-            raise ParserException(
-                'Failed to parse responses as `pd.DataFrame`.'
-            ) from e
+        return Swr2Parser.df_from_responses(
+            responses=resps, use_timestamp=use_timestamp
+        )
