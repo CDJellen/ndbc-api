@@ -1,6 +1,5 @@
 import logging
 from os import path
-from typing import List
 
 import pandas as pd
 import httpretty
