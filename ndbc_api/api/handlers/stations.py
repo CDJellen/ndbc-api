@@ -12,11 +12,7 @@ from ndbc_api.api.parsers.stations import StationsParser
 from ndbc_api.api.parsers.station_metadata import MetadataParser
 from ndbc_api.api.parsers.station_historical import HistoricalParser
 from ndbc_api.api.parsers.station_realtime import RealtimeParser
-from ndbc_api.exceptions import (
-    ParserException,
-    RequestException,
-    ResponseException,
-)
+from ndbc_api.exceptions import ResponseException
 
 
 class StaitonsHandler(BaseHandler):
@@ -33,21 +29,14 @@ class StaitonsHandler(BaseHandler):
     @classmethod
     def stations(cls, handler: Any) -> pd.DataFrame:
         """Get all stations from NDBC."""
-        try:
-            req = StationsRequest.build_request()
-        except ValueError as e:
-            raise RequestException('Failed to build `stations` request.') from e
+        req = StationsRequest.build_request()
         try:
             resp = handler.handle_request('stn', req)
-        except (ValueError, TypeError) as e:
+        except (AttributeError, ValueError, TypeError) as e:
             raise ResponseException(
                 'Failed to execute `station` request.'
             ) from e
-        try:
-            data = StationsParser.df_from_responses([resp])
-        except (ValueError, TypeError) as e:
-            raise ParserException('Failed to handle `station` response.') from e
-        return data
+        return StationsParser.df_from_responses([resp])
 
     @classmethod
     def nearest_station(
@@ -64,61 +53,40 @@ class StaitonsHandler(BaseHandler):
     @classmethod
     def metadata(cls, handler: Any, station_id: str) -> pd.DataFrame:
         """Get station description."""
-        try:
-            req = MetadataRequest.build_request(station_id=station_id)
-        except ValueError as e:
-            raise RequestException('Failed to build `stations` request.') from e
+        req = MetadataRequest.build_request(station_id=station_id)
         try:
             resp = handler.handle_request(station_id, req)
-        except (ValueError, TypeError) as e:
+        except (AttributeError, ValueError, TypeError) as e:
             raise ResponseException(
                 'Failed to execute `station` request.'
             ) from e
-        try:
-            data = MetadataParser.metadata(resp)
-        except (ValueError, TypeError) as e:
-            raise ParserException('Failed to handle `station` response.') from e
-        return data
+        return MetadataParser.metadata(resp)
 
     @classmethod
     def realtime(cls, handler: Any, station_id: str) -> pd.DataFrame:
         """Get the available realtime measurements for a station."""
-        try:
-            req = RealtimeRequest.build_request(station_id=station_id)
-        except ValueError as e:
-            raise RequestException('Failed to build `stations` request.') from e
+        req = RealtimeRequest.build_request(station_id=station_id)
         try:
             resp = handler.handle_request(station_id, req)
-        except (ValueError, TypeError) as e:
+        except (AttributeError, ValueError, TypeError) as e:
             raise ResponseException(
                 'Failed to execute `station` request.'
             ) from e
-        try:
-            data = RealtimeParser.available_measurements(resp)
-        except (ValueError, TypeError) as e:
-            raise ParserException('Failed to handle `station` response.') from e
-        return data
+        return RealtimeParser.available_measurements(resp)
 
     @classmethod
     def historical(
         cls, handler: Any, station_id: str
     ) -> Union[pd.DataFrame, dict]:
         """Get the available historical measurements for a station."""
-        try:
-            req = HistoricalRequest.build_request(station_id=station_id)
-        except ValueError as e:
-            raise RequestException('Failed to build `stations` request.') from e
+        req = HistoricalRequest.build_request(station_id=station_id)
         try:
             resp = handler.handle_request(station_id, req)
-        except (ValueError, TypeError) as e:
+        except (AttributeError, ValueError, TypeError) as e:
             raise ResponseException(
                 'Failed to execute `station` request.'
             ) from e
-        try:
-            data = HistoricalParser.available_measurements(resp)
-        except (ValueError, TypeError) as e:
-            raise ParserException('Failed to handle `station` response.') from e
-        return data
+        return HistoricalParser.available_measurements(resp)
 
     """ PRIVATE """
 
