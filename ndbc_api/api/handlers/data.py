@@ -54,14 +54,9 @@ class DataHandler(BaseHandler):
             resps = handler.handle_requests(station_id=station_id, reqs=reqs)
         except Exception as e:
             raise ResponseException('Failed to execute requests.') from e
-        try:
-            return AdcpParser.df_from_responses(
-                responses=resps, use_timestamp=use_timestamp
-            )
-        except (ValueError, KeyError) as e:
-            raise ParserException(
-                'Failed to parse responses as `pd.DataFrame`.'
-            ) from e
+        return AdcpParser.df_from_responses(
+            responses=resps, use_timestamp=use_timestamp
+        )
 
     @classmethod
     def cwind(

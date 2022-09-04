@@ -1,3 +1,4 @@
+import os
 from calendar import month_abbr
 from datetime import datetime, timedelta
 from typing import List
@@ -21,16 +22,27 @@ class BaseRequest(CoreRequest):
         cls, station_id: str, start_time: datetime, end_time: datetime
     ) -> List[str]:
 
-        is_historical = (datetime.now() - start_time) >= timedelta(days=44)
+        if 'MOCKDATE' in os.environ:
+            now = datetime.strptime(os.getenv('MOCKDATE'), '%Y-%m-%d')
+        else:
+            now = datetime.now()
+        is_historical = (now - start_time) >= timedelta(days=44)
         if is_historical:
             return cls._build_request_historical(
-                station_id=station_id, start_time=start_time, end_time=end_time
+                station_id=station_id,
+                start_time=start_time,
+                end_time=end_time,
+                now=now,
             )
         return cls._build_request_realtime(station_id=station_id)
 
     @classmethod
     def _build_request_historical(
-        cls, station_id: str, start_time: datetime, end_time: datetime
+        cls,
+        station_id: str,
+        start_time: datetime,
+        end_time: datetime,
+        now: datetime,
     ) -> List[str]:
         def req_hist_helper_year(req_year: int) -> str:
             return f'{cls.BASE_URL}{cls.HISTORICAL_URL_PREFIX}{station_id}{cls.HISTORICAL_IDENTIFIER}{req_year}{cls.HISTORICAL_FILE_EXTENSION_SUFFIX}{cls.HISTORICAL_DATA_PREFIX}{cls.HISTORICAL_SUFFIX}{cls.FORMAT}/'
@@ -47,13 +59,13 @@ class BaseRequest(CoreRequest):
 
         if not cls.FORMAT:  # pragma: no cover
             raise ValueError(
-                'Please provide a format for this historical data requset, or call a formatted child class\'s method.'
+                'Please provide a format for this historical data request, or call a formatted child class\'s method.'
             )
 
         reqs = []
-        current_year = datetime.today().year
-        last_available_month = (datetime.today() - timedelta(days=31)).month
-        has_realtime = (datetime.now() - end_time) < timedelta(days=44)
+        current_year = now.year
+        last_available_month = (now - timedelta(days=31)).month
+        has_realtime = (now - end_time) < timedelta(days=44)
 
         for hist_year in range(
             int(start_time.year), min(int(current_year), int(end_time.year) + 1)
@@ -82,7 +94,7 @@ class BaseRequest(CoreRequest):
     def _build_request_realtime(cls, station_id: str) -> List[str]:
         if not cls.FILE_FORMAT:
             raise ValueError(
-                'Please provide a file format for this historical data requset, or call a formatted child class\'s method.'
+                'Please provide a file format for this historical data request, or call a formatted child class\'s method.'
             )
 
         station_id = station_id.upper()
