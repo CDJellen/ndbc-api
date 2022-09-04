@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from typing import Any, Union, List
 
 import pandas as pd
+from pandas.core.frame import DataFrame
 
 from .utilities.singleton import Singleton
 from .utilities.req_handler import RequestHandler
@@ -260,12 +261,19 @@ class NdbcApi(metaclass=Singleton):
                 raise ParserException(
                     'Failed to parse column selection.'
                 ) from e
-        if as_df:
+        if as_df and isinstance(data, pd.DataFrame):
             return data
-        else:
+        elif isinstance(data, pd.DataFrame) and not as_df:
             try:
                 return data.to_dict()
             except ValueError as e:
+                raise HandlerException(
+                    'Failed to convert `pd.DataFrame` to `dict`.'
+                ) from e
+        elif as_df:
+            try:
+                return pd.DataFrame().from_dict(data)
+            except (NotImplementedError, ValueError) as e:
                 raise HandlerException(
                     'Failed to convert `pd.DataFrame` to `dict`.'
                 ) from e

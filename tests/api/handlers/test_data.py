@@ -1,6 +1,5 @@
 import logging
 from os import path
-from typing import List
 
 import pandas as pd
 import httpretty
@@ -24,10 +23,9 @@ from tests.api.handlers._base import (
     PARSED_TESTS_DIR,
     RESPONSES_TESTS_DIR,
     REQUESTS_TESTS_DIR,
-    REALTIME_START,
-    REALTIME_END,
-    HISTORICAL_START,
-    HISTORICAL_END,
+    TEST_START,
+    TEST_END,
+    mock_register_uri,
 )
 from ndbc_api.exceptions import RequestException, ResponseException
 
@@ -110,8 +108,8 @@ def test_attrs(
     for name in [v for v in vars(data_handler) if not v.startswith('_')]:
         reqs = globals()[f'{name.capitalize()}Request'].build_request(
             station_id=globals()[f'TEST_STN_{name.upper()}'],
-            start_time=HISTORICAL_START,
-            end_time=HISTORICAL_END,
+            start_time=TEST_START,
+            end_time=TEST_END,
         )
         assert len(reqs) == len(read_responses[name])
         mock_register_uri(reqs, read_responses[name])
@@ -119,12 +117,12 @@ def test_attrs(
         got = getattr(data_handler, name)(
             handler=request_handler,
             station_id=globals()[f'TEST_STN_{name.upper()}'],
-            start_time=HISTORICAL_START,
-            end_time=HISTORICAL_END,
+            start_time=TEST_START,
+            end_time=TEST_END,
         )
         pd.testing.assert_frame_equal(
-            want[HISTORICAL_START:HISTORICAL_END].sort_index(axis=1),
-            got[HISTORICAL_START:HISTORICAL_END].sort_index(axis=1),
+            want[TEST_START:TEST_END].sort_index(axis=1),
+            got[TEST_START:TEST_END].sort_index(axis=1),
             check_dtype=False,
         )
         with pytest.raises(RequestException):
@@ -138,14 +136,6 @@ def test_attrs(
             _ = getattr(data_handler, name)(
                 handler=None,
                 station_id=globals()[f'TEST_STN_{name.upper()}'],
-                start_time=HISTORICAL_START,
-                end_time=HISTORICAL_END,
+                start_time=TEST_START,
+                end_time=TEST_END,
             )
-
-def mock_register_uri(
-    read_requests: List[str], read_responses: List[str]
-) -> None:
-    for idx in range(len(read_requests)):
-        httpretty.register_uri(
-            httpretty.GET, read_requests[idx], body=read_responses[idx]['body']
-        )
