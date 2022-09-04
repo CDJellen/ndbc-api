@@ -4,6 +4,8 @@ from typing import List, Tuple
 
 import pandas as pd
 
+from ndbc_api.exceptions import ParserException
+
 
 class BaseParser:
 
@@ -30,8 +32,8 @@ class BaseParser:
                 subset='timestamp', keep='first'
             )
             df = df.set_index('timestamp').sort_index()
-        except KeyError:
-            return pd.DataFrame()
+        except KeyError as e:
+            raise ParserException from e
         return df
 
     @classmethod
@@ -41,6 +43,8 @@ class BaseParser:
         body = response.get('body')
         header, data = cls._parse_body(body)
         names = cls._parse_header(header)
+        if not data:
+            return pd.DataFrame()
         # check that parsed names match parsed values or revert
         if len([v.strip() for v in data[0].split(' ') if v]) != len(names):
             names = cls.REVERT_COL_NAMES
@@ -61,8 +65,8 @@ class BaseParser:
                 date_parser=cls.DATE_PARSER,
                 index_col=cls.INDEX_COL,
             )
-        except (NotImplementedError, TypeError, ValueError):
-            df = pd.DataFrame()
+        except (NotImplementedError, TypeError, ValueError) as e:
+            return pd.DataFrame()
 
         return df
 
@@ -84,8 +88,12 @@ class BaseParser:
 
     @staticmethod
     def _parse_header(header: List[str]) -> List[str]:
-        names = [n for n in header[0].strip('#').strip('\n').split(' ') if n]
-        return names or None  # pass 'None' to pd.read_csv on error
+        names = (
+            [n for n in header[0].strip('#').strip('\n').split(' ') if n]
+            if isinstance(header, list) and len(header) > 0
+            else None
+        )
+        return names  # pass 'None' to pd.read_csv on error
 
     @staticmethod
     def _clean_data(data: List[str]) -> List[str]:

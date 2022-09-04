@@ -28,7 +28,7 @@ def request_header_baz():
 
 
 def test_cache_limit(request_handler):
-    assert request_handler.get_cache_limit() == 3
+    assert request_handler.get_cache_limit() > 0
 
 
 def test_set_cache_limit(request_handler):
@@ -52,22 +52,22 @@ def test_update_headers(request_handler, request_header_baz):
 
 
 def test_add_station(request_handler):
-    assert len(request_handler.stations) == 0
+    cur_len = len(request_handler.stations)
     request_handler.add_station('foo')
-    assert len(request_handler.stations) == 1
+    assert len(request_handler.stations) == cur_len + 1
 
 
 def test_get_station(request_handler):
     request_handler.get_station('foo')
-    assert len(request_handler.stations) == 1
+    cur_len = len(request_handler.stations)
     assert isinstance(
         request_handler.get_station('foo'), RequestHandler.Station
     )
     request_handler.get_station(101)
-    assert len(request_handler.stations) == 2
+    assert len(request_handler.stations) == cur_len + 1
     request_handler.get_station('101')
-    assert len(request_handler.stations) == 2
-    
+    assert len(request_handler.stations) == cur_len + 1
+
     want = request_handler.get_station(101)
     got = request_handler.get_station('101')
     assert want == got

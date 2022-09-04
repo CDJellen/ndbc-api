@@ -1,3 +1,4 @@
+import os
 from collections import defaultdict
 from calendar import month_abbr
 from datetime import datetime
@@ -15,7 +16,11 @@ class StationParser:
         cls, urls: List[bs4.element.Tag]
     ) -> List[Tuple[str, str]]:
         parsed = []
-        current_year = datetime.now().year
+        if 'MOCKDATE' in os.environ:
+            now = datetime.strptime(os.getenv('MOCKDATE'), '%Y-%m-%d').date()
+        else:
+            now = datetime.now()
+        current_year = now.year
         for raw_url in urls:
             name = raw_url.text.strip()
             name = f'{name} {current_year}' if name in month_abbr else name
