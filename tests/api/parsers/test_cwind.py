@@ -27,7 +27,7 @@ def parsed_cwind():
 def cwind():
     yield CwindParser
 
-
+@pytest.mark.private
 def test_available_measurements(cwind, cwind_response, parsed_cwind):
     resp = cwind_response
     want = parsed_cwind

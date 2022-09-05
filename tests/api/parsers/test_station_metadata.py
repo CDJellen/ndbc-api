@@ -27,7 +27,7 @@ def parsed_stations_metadata():
 def stations_metadata():
     yield MetadataParser
 
-
+@pytest.mark.private
 def test_station_metadata(
     stations_metadata, metadata_response, parsed_stations_metadata
 ):
@@ -36,7 +36,7 @@ def test_station_metadata(
     got = stations_metadata.metadata(resp)
     assert want == got
 
-
+@pytest.mark.private
 def test_station_metadata_status(stations_metadata, metadata_response):
     resp = metadata_response.get(list(metadata_response.keys())[0])
     resp['status'] = 404
@@ -44,7 +44,7 @@ def test_station_metadata_status(stations_metadata, metadata_response):
     got = stations_metadata.metadata(resp)
     assert want == got
 
-
+@pytest.mark.private
 def test_station_meta_from_response(stations_metadata, metadata_response):
     resp = metadata_response.get(list(metadata_response.keys())[0])
     resp['body'] = ''

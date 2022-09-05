@@ -27,7 +27,7 @@ def parsed_stations_realtime():
 def stations_realtime():
     yield RealtimeParser
 
-
+@pytest.mark.private
 def test_available_measurements(
     stations_realtime, realtime_response, parsed_stations_realtime
 ):
@@ -38,7 +38,7 @@ def test_available_measurements(
     for k in want.keys():
         assert want[k] == got[k]
 
-
+@pytest.mark.private
 def test_available_measurements_status(stations_realtime, realtime_response):
     resp = realtime_response.get(list(realtime_response.keys())[0])
     resp['status'] = 404
@@ -46,7 +46,7 @@ def test_available_measurements_status(stations_realtime, realtime_response):
     got = stations_realtime.available_measurements(resp)
     assert want == got
 
-
+@pytest.mark.private
 def test_available_measurements_parse_item(
     stations_realtime, realtime_response
 ):

@@ -27,7 +27,7 @@ def parsed_spec():
 def spec():
     yield SpecParser
 
-
+@pytest.mark.private
 def test_available_measurements(spec, spec_response, parsed_spec):
     resp = spec_response
     want = parsed_spec

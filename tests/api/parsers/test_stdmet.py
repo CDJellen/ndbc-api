@@ -27,7 +27,7 @@ def parsed_stdmet():
 def stdmet():
     yield StdmetParser
 
-
+@pytest.mark.private
 def test_available_measurements(stdmet, stdmet_response, parsed_stdmet):
     resp = stdmet_response
     want = parsed_stdmet

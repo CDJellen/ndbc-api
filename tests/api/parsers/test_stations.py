@@ -27,7 +27,7 @@ def parsed_stations():
 def stations():
     yield StationsParser
 
-
+@pytest.mark.private
 def test_df_from_responses(stations, stations_response, parsed_stations):
     resp = stations_response.get(list(stations_response.keys())[0])
     want = parsed_stations

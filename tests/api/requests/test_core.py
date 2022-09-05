@@ -8,7 +8,7 @@ from tests.api.requests._base import BASE_URL
 def core():
     yield CoreRequest
 
-
+@pytest.mark.private
 def test_core_request_builder(core):
     want = BASE_URL
     got = core.build_request()

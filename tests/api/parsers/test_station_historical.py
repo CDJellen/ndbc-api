@@ -27,7 +27,7 @@ def parsed_stations_historical():
 def stations_historical():
     yield HistoricalParser
 
-
+@pytest.mark.private
 def test_available_measurements(
     stations_historical, historical_response, parsed_stations_historical
 ):
@@ -38,7 +38,7 @@ def test_available_measurements(
     for k in want.keys():
         assert want[k] == got[k]
 
-
+@pytest.mark.private
 def test_available_measurements_status(
     stations_historical, historical_response
 ):
@@ -48,7 +48,7 @@ def test_available_measurements_status(
     got = stations_historical.available_measurements(resp)
     assert want == got
 
-
+@pytest.mark.private
 def test_available_measurements_parse_item(
     stations_historical, historical_response
 ):

@@ -37,13 +37,13 @@ def adcp_realtime_requests(adcp_requests):
 def adcp_historical_requests(adcp_requests):
     yield adcp_requests.get('historical')
 
-
+@pytest.mark.private
 def test_adcp_realtime(adcp, adcp_realtime_requests):
     want = adcp_realtime_requests
     got = adcp.build_request(TEST_STN, REALTIME_START, REALTIME_END)
     assert want == got
 
-
+@pytest.mark.private
 def test_adcp_historical(adcp, adcp_historical_requests):
     want = adcp_historical_requests
     got = adcp.build_request(TEST_STN, HISTORICAL_START, HISTORICAL_END)

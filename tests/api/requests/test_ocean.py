@@ -37,13 +37,13 @@ def ocean_realtime_requests(ocean_requests):
 def ocean_historical_requests(ocean_requests):
     yield ocean_requests.get('historical')
 
-
+@pytest.mark.private
 def test_ocean_realtime(ocean, ocean_realtime_requests):
     want = ocean_realtime_requests
     got = ocean.build_request(TEST_STN, REALTIME_START, REALTIME_END)
     assert want == got
 
-
+@pytest.mark.private
 def test_ocean_historical(ocean, ocean_historical_requests):
     want = ocean_historical_requests
     got = ocean.build_request(TEST_STN, HISTORICAL_START, HISTORICAL_END)

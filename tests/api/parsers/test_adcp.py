@@ -27,7 +27,7 @@ def parsed_adcp():
 def adcp():
     yield AdcpParser
 
-
+@pytest.mark.private
 def test_available_measurements(adcp, adcp_response, parsed_adcp):
     resp = adcp_response
     want = parsed_adcp

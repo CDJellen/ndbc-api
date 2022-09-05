@@ -37,13 +37,13 @@ def swden_realtime_requests(swden_requests):
 def swden_historical_requests(swden_requests):
     yield swden_requests.get('historical')
 
-
+@pytest.mark.private
 def test_swden_realtime(swden, swden_realtime_requests):
     want = swden_realtime_requests
     got = swden.build_request(TEST_STN, REALTIME_START, REALTIME_END)
     assert want == got
 
-
+@pytest.mark.private
 def test_swden_historical(swden, swden_historical_requests):
     want = swden_historical_requests
     got = swden.build_request(TEST_STN, HISTORICAL_START, HISTORICAL_END)

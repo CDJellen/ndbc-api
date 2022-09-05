@@ -12,10 +12,10 @@ from ndbc_api.api.parsers.stations import StationsParser
 from ndbc_api.api.parsers.station_metadata import MetadataParser
 from ndbc_api.api.parsers.station_historical import HistoricalParser
 from ndbc_api.api.parsers.station_realtime import RealtimeParser
-from ndbc_api.exceptions import ResponseException
+from ndbc_api.exceptions import ResponseException, ParserException
 
 
-class StaitonsHandler(BaseHandler):
+class StationsHandler(BaseHandler):
 
     DEG_TO_RAD = pi / 180
     DIAM_OF_EARTH = 12756
@@ -47,8 +47,16 @@ class StaitonsHandler(BaseHandler):
     ) -> str:
         """Get nearest station from specified lat/lon."""
         df = cls.stations(handler=handler)
-        closest = cls._nearest(df, lat, lon)
-        return closest
+        if isinstance(lat, str):
+            lat = StationsHandler.LAT_MAP(lat)
+        if isinstance(lon, str):
+            lon = StationsHandler.LON_MAP(lon)
+        try:
+            closest = cls._nearest(df, lat, lon)
+        except (TypeError, KeyError, ValueError) as e:
+            raise ParserException from e
+        closest = closest.to_dict().get('Station', {'UNK': 'UNK'})
+        return list(closest.values())[0]
 
     @classmethod
     def metadata(cls, handler: Any, station_id: str) -> pd.DataFrame:
@@ -99,20 +107,20 @@ class StaitonsHandler(BaseHandler):
         ) -> float:
             haversine = (
                 0.5
-                - cos((lat_b - lat_a) * StaitonsHandler.DEG_TO_RAD) / 2
-                + cos(lat_a * StaitonsHandler.DEG_TO_RAD)
-                * cos(lat_b * StaitonsHandler.DEG_TO_RAD)
-                * (1 - cos((lon_b - lon_a) * StaitonsHandler.DEG_TO_RAD))
+                - cos((lat_b - lat_a) * StationsHandler.DEG_TO_RAD) / 2
+                + cos(lat_a * StationsHandler.DEG_TO_RAD)
+                * cos(lat_b * StationsHandler.DEG_TO_RAD)
+                * (1 - cos((lon_b - lon_a) * StationsHandler.DEG_TO_RAD))
                 / 2
             )
-            return StaitonsHandler.DIAM_OF_EARTH * asin(sqrt(haversine))
+            return StationsHandler.DIAM_OF_EARTH * asin(sqrt(haversine))
 
         ls = list(df[['Location Lat/Long']].to_records(index=False))
         ls = [
             (
                 idx,
-                StaitonsHandler.LAT_MAP(r[0].split(' ')[0]),
-                StaitonsHandler.LON_MAP(r[0].split(' ')[1]),
+                StationsHandler.LAT_MAP(r[0].split(' ')[0]),
+                StationsHandler.LON_MAP(r[0].split(' ')[1]),
             )
             for idx, r in enumerate(ls)
         ]
