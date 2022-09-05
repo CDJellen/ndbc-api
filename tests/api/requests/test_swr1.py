@@ -37,13 +37,13 @@ def swr1_realtime_requests(swr1_requests):
 def swr1_historical_requests(swr1_requests):
     yield swr1_requests.get('historical')
 
-
+@pytest.mark.private
 def test_swr1_realtime(swr1, swr1_realtime_requests):
     want = swr1_realtime_requests
     got = swr1.build_request(TEST_STN, REALTIME_START, REALTIME_END)
     assert want == got
 
-
+@pytest.mark.private
 def test_swr1_historical(swr1, swr1_historical_requests):
     want = swr1_historical_requests
     got = swr1.build_request(TEST_STN, HISTORICAL_START, HISTORICAL_END)

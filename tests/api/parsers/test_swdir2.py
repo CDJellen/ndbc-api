@@ -27,7 +27,7 @@ def parsed_swdir2():
 def swdir2():
     yield Swdir2Parser
 
-
+@pytest.mark.private
 def test_available_measurements(swdir2, swdir2_response, parsed_swdir2):
     resp = swdir2_response
     want = parsed_swdir2

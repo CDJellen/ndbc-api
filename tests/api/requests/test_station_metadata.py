@@ -13,7 +13,7 @@ STATIONS_METADATA_URL = (
 def stations_metadata():
     yield MetadataRequest
 
-
+@pytest.mark.private
 def test_historical_request(stations_metadata):
     want = STATIONS_METADATA_URL
     got = stations_metadata.build_request(TEST_STN)

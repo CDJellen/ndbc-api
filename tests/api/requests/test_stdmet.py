@@ -37,13 +37,13 @@ def stdmet_realtime_requests(stdmet_requests):
 def stdmet_historical_requests(stdmet_requests):
     yield stdmet_requests.get('historical')
 
-
+@pytest.mark.private
 def test_stdmet_realtime(stdmet, stdmet_realtime_requests):
     want = stdmet_realtime_requests
     got = stdmet.build_request(TEST_STN, REALTIME_START, REALTIME_END)
     assert want == got
 
-
+@pytest.mark.private
 def test_stdmet_historical(stdmet, stdmet_historical_requests):
     want = stdmet_historical_requests
     got = stdmet.build_request(TEST_STN, HISTORICAL_START, HISTORICAL_END)

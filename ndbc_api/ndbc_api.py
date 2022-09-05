@@ -14,6 +14,7 @@ from .exceptions import (
     TimestampException,
     RequestException,
     ParserException,
+    ResponseException,
 )
 from .config import (
     LOGGER_NAME,
@@ -96,25 +97,22 @@ class NdbcApi(metaclass=Singleton):
         try:
             data = self._stations_api.stations(handler=self._handler)
             return self._handle_data(data, as_df, cols=None)
-        except (ValueError, KeyError) as e:
-            raise HandlerException('Failed to handle returned data.') from e
+        except (ResponseException, ValueError, KeyError) as e:
+            raise ResponseException('Failed to handle returned data.') from e
 
     def nearest_station(
         self,
         lat: Union[str, float] = None,
         lon: Union[str, float] = None,
-        as_df: bool = False,
     ) -> str:
         """Get nearest station."""
         if not (lat and lon):
             raise ValueError('lat and lon must be specified.')
-        data = self._stations_api.nearest_station(
+        nearest_station = self._stations_api.nearest_station(
             handler=self._handler, lat=lat, lon=lon
         )
-        try:
-            return self._handle_data(data, as_df, cols=None)
-        except (ValueError, KeyError) as e:
-            raise HandlerException('Failed to handle returned data.') from e
+        return nearest_station
+
 
     def station(
         self, station_id: Union[str, int], as_df: bool = False
@@ -126,34 +124,34 @@ class NdbcApi(metaclass=Singleton):
                 handler=self._handler, station_id=station_id
             )
             return self._handle_data(data, as_df, cols=None)
-        except (ValueError, KeyError) as e:
-            raise HandlerException('Failed to handle returned data.') from e
+        except (ResponseException, ValueError, KeyError) as e:
+            raise ResponseException('Failed to handle returned data.') from e
 
     def available_realtime(
         self, station_id: Union[str, int], as_df: bool = False
     ) -> Union[pd.DataFrame, dict]:
         """Get all stations from NDBC."""
         station_id = self._parse_station_id(station_id)
-        data = self._stations_api.realtime(
-            handler=self._handler, station_id=station_id
-        )
         try:
+            data = self._stations_api.realtime(
+                handler=self._handler, station_id=station_id
+            )
             return self._handle_data(data, as_df, cols=None)
-        except (ValueError, KeyError) as e:
-            raise HandlerException('Failed to handle returned data.') from e
+        except (ResponseException, ValueError, KeyError) as e:
+            raise ResponseException('Failed to handle returned data.') from e
 
     def available_historical(
         self, station_id: Union[str, int], as_df: bool = False
     ) -> Union[pd.DataFrame, dict]:
         """Get all stations from NDBC."""
         station_id = self._parse_station_id(station_id)
-        data = self._stations_api.historical(
-            handler=self._handler, station_id=station_id
-        )
         try:
+            data = self._stations_api.historical(
+                handler=self._handler, station_id=station_id
+            )
             return self._handle_data(data, as_df, cols=None)
-        except (ValueError, KeyError) as e:
-            raise HandlerException('Failed to handle returned data.') from e
+        except (ResponseException, ValueError, KeyError) as e:
+            raise ResponseException('Failed to handle returned data.') from e
 
     def get_data(
         self,
@@ -182,16 +180,16 @@ class NdbcApi(metaclass=Singleton):
                 end_time,
                 use_timestamp,
             )
-        except (ValueError, TypeError, KeyError) as e:
-            raise ParserException('Failed to handle API call.') from e
+        except (ResponseException, ValueError, TypeError, KeyError) as e:
+            raise ResponseException('Failed to handle API call.') from e
         if use_timestamp:
             data = self._enforce_timerange(
                 df=data, start_time=start_time, end_time=end_time
             )
         try:
             return self._handle_data(data, as_df, cols)
-        except (ValueError, KeyError) as e:
-            raise HandlerException('Failed to handle returned data.') from e
+        except (ValueError, KeyError, AttributeError) as e:
+            raise ParserException('Failed to handle returned data.') from e
 
     def get_modes(self):
         """Get the list of supported modes."""
@@ -261,19 +259,14 @@ class NdbcApi(metaclass=Singleton):
         if cols:
             try:
                 data = data[[*cols]]
-            except ValueError as e:
+            except (KeyError, ValueError) as e:
                 raise ParserException(
                     'Failed to parse column selection.'
                 ) from e
         if as_df and isinstance(data, pd.DataFrame):
             return data
         elif isinstance(data, pd.DataFrame) and not as_df:
-            try:
-                return data.to_dict()
-            except ValueError as e:
-                raise HandlerException(
-                    'Failed to convert `pd.DataFrame` to `dict`.'
-                ) from e
+            return data.to_dict()
         elif as_df:
             try:
                 return pd.DataFrame().from_dict(data)

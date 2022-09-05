@@ -27,7 +27,7 @@ def parsed_supl():
 def supl():
     yield SuplParser
 
-
+@pytest.mark.private
 def test_available_measurements(supl, supl_response, parsed_supl):
     resp = supl_response
     want = parsed_supl

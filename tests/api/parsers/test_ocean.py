@@ -27,7 +27,7 @@ def parsed_ocean():
 def ocean():
     yield OceanParser
 
-
+@pytest.mark.private
 def test_available_measurements(ocean, ocean_response, parsed_ocean):
     resp = ocean_response
     want = parsed_ocean

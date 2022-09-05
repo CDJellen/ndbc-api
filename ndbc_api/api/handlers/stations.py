@@ -12,7 +12,7 @@ from ndbc_api.api.parsers.stations import StationsParser
 from ndbc_api.api.parsers.station_metadata import MetadataParser
 from ndbc_api.api.parsers.station_historical import HistoricalParser
 from ndbc_api.api.parsers.station_realtime import RealtimeParser
-from ndbc_api.exceptions import ResponseException
+from ndbc_api.exceptions import ResponseException, ParserException
 
 
 class StationsHandler(BaseHandler):
@@ -47,8 +47,16 @@ class StationsHandler(BaseHandler):
     ) -> str:
         """Get nearest station from specified lat/lon."""
         df = cls.stations(handler=handler)
-        closest = cls._nearest(df, lat, lon)
-        return closest
+        if isinstance(lat, str):
+            lat = StationsHandler.LAT_MAP(lat)
+        if isinstance(lon, str):
+            lon = StationsHandler.LON_MAP(lon)
+        try:
+            closest = cls._nearest(df, lat, lon)
+        except (TypeError, KeyError, ValueError) as e:
+            raise ParserException from e
+        closest = closest.to_dict().get('Station', {'UNK': 'UNK'})
+        return list(closest.values())[0]
 
     @classmethod
     def metadata(cls, handler: Any, station_id: str) -> pd.DataFrame:

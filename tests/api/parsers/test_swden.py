@@ -27,7 +27,7 @@ def parsed_swden():
 def swden():
     yield SwdenParser
 
-
+@pytest.mark.private
 def test_available_measurements(swden, swden_response, parsed_swden):
     resp = swden_response
     want = parsed_swden

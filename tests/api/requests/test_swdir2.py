@@ -37,13 +37,13 @@ def swdir2_realtime_requests(swdir2_requests):
 def swdir2_historical_requests(swdir2_requests):
     yield swdir2_requests.get('historical')
 
-
+@pytest.mark.private
 def test_swdir2_realtime(swdir2, swdir2_realtime_requests):
     want = swdir2_realtime_requests
     got = swdir2.build_request(TEST_STN, REALTIME_START, REALTIME_END)
     assert want == got
 
-
+@pytest.mark.private
 def test_swdir2_historical(swdir2, swdir2_historical_requests):
     want = swdir2_historical_requests
     got = swdir2.build_request(TEST_STN, HISTORICAL_START, HISTORICAL_END)

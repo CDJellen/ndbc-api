@@ -27,7 +27,7 @@ def parsed_swr2():
 def swr2():
     yield Swr2Parser
 
-
+@pytest.mark.private
 def test_available_measurements(swr2, swr2_response, parsed_swr2):
     resp = swr2_response
     want = parsed_swr2

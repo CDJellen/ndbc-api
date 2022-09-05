@@ -13,7 +13,7 @@ STATIONS_REALTIME_URL = (
 def stations_realtime():
     yield RealtimeRequest
 
-
+@pytest.mark.private
 def test_historical_request(stations_realtime):
     want = STATIONS_REALTIME_URL
     got = stations_realtime.build_request(TEST_STN)

@@ -13,7 +13,7 @@ STATIONS_HISTORICAL_URL = (
 def stations_historical():
     yield HistoricalRequest
 
-
+@pytest.mark.private
 def test_historical_request(stations_historical):
     want = STATIONS_HISTORICAL_URL
     got = stations_historical.build_request(TEST_STN)
