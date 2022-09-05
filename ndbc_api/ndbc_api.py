@@ -4,11 +4,10 @@ from datetime import datetime, timedelta
 from typing import Any, Union, List
 
 import pandas as pd
-from pandas.core.frame import DataFrame
 
 from .utilities.singleton import Singleton
 from .utilities.req_handler import RequestHandler
-from .api.handlers.stations import StaitonsHandler
+from .api.handlers.stations import StationsHandler
 from .api.handlers.data import DataHandler
 from .exceptions import (
     HandlerException,
@@ -51,7 +50,7 @@ class NdbcApi(metaclass=Singleton):
             debug=debug,
             verify_https=verify_https,
         )
-        self._stations_api = StaitonsHandler
+        self._stations_api = StationsHandler
         self._data_api = DataHandler
 
     def dump_cache(self, dest_fp: str = None) -> None:
@@ -59,12 +58,13 @@ class NdbcApi(metaclass=Singleton):
         data = dict()
         ids = [r.id_ for r in self._handler.stations]
         caches = [r.reqs.cache for r in self._handler.stations]
-        for station_id, cache in zip(ids, caches):
-            data[station_id] = dict()
-            reqs = cache.keys()
-            for req in reqs:
-                resp = cache[req].v
-                data[station_id][req] = resp
+        if ids:
+            for station_id, cache in zip(ids, caches):
+                data[station_id] = dict()
+                reqs = cache.keys()
+                for req in reqs:
+                    resp = cache[req].v
+                    data[station_id][req] = resp
         if dest_fp:
             with open(dest_fp, 'wb') as f:
                 pickle.dump(data, f)
@@ -75,7 +75,7 @@ class NdbcApi(metaclass=Singleton):
         """Clear the request cache."""
         del self._handler
         self._handler = self._get_request_handler(
-            cache_limit=self._cache_limit,
+            cache_limit=self.cache_limit,
             delay=HTTP_DELAY,
             retries=HTTP_RETRY,
             backoff_factor=HTTP_BACKOFF_FACTOR,
@@ -83,14 +83,18 @@ class NdbcApi(metaclass=Singleton):
             verify_https=VERIFY_HTTPS,
         )
 
-    def update_cache_limit(self, new_limit: int) -> None:
+    def set_cache_limit(self, new_limit: int) -> None:
         """Change the cache limit for the API's request cache."""
-        self._handler.update_cache_limit(cache_limit=new_limit)
+        self._handler.set_cache_limit(cache_limit=new_limit)
+
+    def get_cache_limit(self) -> int:
+        """Get the cache limit for the API's request cache."""
+        return self._handler.get_cache_limit()
 
     def stations(self, as_df: bool = True) -> Union[pd.DataFrame, dict]:
         """Get all stations from NDBC."""
-        data = self._stations_api.stations(handler=self._handler)
         try:
+            data = self._stations_api.stations(handler=self._handler)
             return self._handle_data(data, as_df, cols=None)
         except (ValueError, KeyError) as e:
             raise HandlerException('Failed to handle returned data.') from e
@@ -117,10 +121,10 @@ class NdbcApi(metaclass=Singleton):
     ) -> Union[pd.DataFrame, dict]:
         """Get all stations from NDBC."""
         station_id = self._parse_station_id(station_id)
-        data = self._stations_api.metadata(
-            handler=self._handler, station_id=station_id
-        )
         try:
+            data = self._stations_api.metadata(
+                handler=self._handler, station_id=station_id
+            )
             return self._handle_data(data, as_df, cols=None)
         except (ValueError, KeyError) as e:
             raise HandlerException('Failed to handle returned data.') from e
@@ -277,3 +281,6 @@ class NdbcApi(metaclass=Singleton):
                 raise HandlerException(
                     'Failed to convert `pd.DataFrame` to `dict`.'
                 ) from e
+        else:
+            return data
+

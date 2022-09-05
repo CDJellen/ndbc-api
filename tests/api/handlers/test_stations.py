@@ -6,7 +6,7 @@ import httpretty
 import pytest
 import yaml
 
-from ndbc_api.api.handlers.stations import StaitonsHandler
+from ndbc_api.api.handlers.stations import StationsHandler
 from ndbc_api.utilities.req_handler import RequestHandler
 from ndbc_api.api.requests.stations import StationsRequest
 from ndbc_api.api.requests.station_historical import HistoricalRequest
@@ -27,7 +27,7 @@ PARSED_FP = list(PARSED_TESTS_DIR.glob('*.yml'))
 STATIONS_DF_FP = PARSED_TESTS_DIR.joinpath('stations.parquet.gzip')
 TEST_STN = 'TPLM2'
 TEST_STN_REALTIME = '41013'
-TEST_LOG = logging.getLogger('TestDataHandler')
+TEST_LOG = logging.getLogger('TestStationsHandler')
 
 
 @pytest.fixture
@@ -74,7 +74,7 @@ def mock_socket():
 
 @pytest.fixture
 def stations_handler():
-    yield StaitonsHandler
+    yield StationsHandler
 
 
 @pytest.fixture
