@@ -5,7 +5,6 @@ import pandas as pd
 from ndbc_api.api.parsers.ocean import OceanParser
 from tests.api.parsers._base import PARSED_TESTS_DIR, RESPONSES_TESTS_DIR
 
-
 TEST_FP = RESPONSES_TESTS_DIR.joinpath('ocean.yml')
 PARSED_FP = PARSED_TESTS_DIR.joinpath('ocean.parquet.gzip')
 
@@ -26,6 +25,7 @@ def parsed_ocean():
 @pytest.fixture
 def ocean():
     yield OceanParser
+
 
 @pytest.mark.private
 def test_available_measurements(ocean, ocean_response, parsed_ocean):

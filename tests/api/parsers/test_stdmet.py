@@ -5,7 +5,6 @@ import pandas as pd
 from ndbc_api.api.parsers.stdmet import StdmetParser
 from tests.api.parsers._base import PARSED_TESTS_DIR, RESPONSES_TESTS_DIR
 
-
 TEST_FP = RESPONSES_TESTS_DIR.joinpath('stdmet.yml')
 PARSED_FP = PARSED_TESTS_DIR.joinpath('stdmet.parquet.gzip')
 
@@ -26,6 +25,7 @@ def parsed_stdmet():
 @pytest.fixture
 def stdmet():
     yield StdmetParser
+
 
 @pytest.mark.private
 def test_available_measurements(stdmet, stdmet_response, parsed_stdmet):

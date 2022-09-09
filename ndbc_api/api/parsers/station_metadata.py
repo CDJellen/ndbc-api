@@ -7,6 +7,7 @@ from ndbc_api.api.parsers._station import StationParser
 
 
 class MetadataParser(StationParser):
+
     @classmethod
     def metadata(cls, response: dict) -> dict:
         if response.get('status') == 200:

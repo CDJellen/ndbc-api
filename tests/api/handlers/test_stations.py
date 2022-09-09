@@ -12,7 +12,6 @@ from ndbc_api.api.requests.station_metadata import MetadataRequest
 from tests.api.handlers._base import mock_register_uri
 from ndbc_api.exceptions import ResponseException
 
-
 TEST_STN = 'TPLM2'
 TEST_STN_REALTIME = '41013'
 TEST_LOG = logging.getLogger('TestStationsHandler')
@@ -25,19 +24,19 @@ def stations_handler():
 
 @pytest.fixture(scope='module')
 def request_handler():
-    yield RequestHandler(
-        cache_limit=10000, log=TEST_LOG, delay=1, retries=1, backoff_factor=0.5
-    )
+    yield RequestHandler(cache_limit=10000,
+                         log=TEST_LOG,
+                         delay=1,
+                         retries=1,
+                         backoff_factor=0.5)
+
 
 @pytest.mark.private
 @pytest.mark.usefixtures('mock_socket', 'read_responses', 'read_parsed_yml')
-def test_station_meta(
-    stations_handler, request_handler, read_parsed_yml, read_responses, mock_socket
-):
+def test_station_meta(stations_handler, request_handler, read_parsed_yml,
+                      read_responses, mock_socket):
     _ = mock_socket
-    reqs = MetadataRequest.build_request(
-        station_id=TEST_STN,
-    )
+    reqs = MetadataRequest.build_request(station_id=TEST_STN,)
     assert len([reqs]) == len(read_responses['metadata'].values())
     mock_register_uri([reqs], list(read_responses['metadata'].values()))
     want = read_parsed_yml['metadata']
@@ -52,15 +51,13 @@ def test_station_meta(
             station_id=TEST_STN,
         )
 
+
 @pytest.mark.private
 @pytest.mark.usefixtures('mock_socket', 'read_responses', 'read_parsed_yml')
-def test_station_realtime(
-    stations_handler, request_handler, read_parsed_yml, read_responses, mock_socket
-):
+def test_station_realtime(stations_handler, request_handler, read_parsed_yml,
+                          read_responses, mock_socket):
     _ = mock_socket
-    reqs = RealtimeRequest.build_request(
-        station_id=TEST_STN,
-    )
+    reqs = RealtimeRequest.build_request(station_id=TEST_STN,)
     assert len([reqs]) == len(read_responses['realtime'].values())
     mock_register_uri([reqs], list(read_responses['realtime'].values()))
     want = read_parsed_yml['realtime']
@@ -75,15 +72,13 @@ def test_station_realtime(
             station_id=TEST_STN_REALTIME,
         )
 
+
 @pytest.mark.private
 @pytest.mark.usefixtures('mock_socket', 'read_responses', 'read_parsed_yml')
-def test_station_historical(
-    stations_handler, request_handler, read_parsed_yml, read_responses, mock_socket
-):
+def test_station_historical(stations_handler, request_handler, read_parsed_yml,
+                            read_responses, mock_socket):
     _ = mock_socket
-    reqs = HistoricalRequest.build_request(
-        station_id=TEST_STN,
-    )
+    reqs = HistoricalRequest.build_request(station_id=TEST_STN,)
     assert len([reqs]) == len(read_responses['historical'].values())
     mock_register_uri([reqs], list(read_responses['historical'].values()))
     want = read_parsed_yml['historical']
@@ -97,6 +92,7 @@ def test_station_historical(
             handler=None,
             station_id=TEST_STN,
         )
+
 
 @pytest.mark.slow
 @pytest.mark.private
@@ -113,9 +109,7 @@ def test_stations(
     assert len([reqs]) == len(read_responses['stations'].values())
     mock_register_uri([reqs], list(read_responses['stations'].values()))
     want = read_parsed_df['stations']
-    got = stations_handler.stations(
-        handler=request_handler,
-    )
+    got = stations_handler.stations(handler=request_handler,)
     pd.testing.assert_frame_equal(want, got)
     with pytest.raises(ResponseException):
         _ = stations_handler.metadata(

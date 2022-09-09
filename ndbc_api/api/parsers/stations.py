@@ -15,11 +15,8 @@ class StationsParser(HtmlParser):
         'D': 'Station disestablished.',
         'R': 'Buoy recovered',
     }
-    APPLY_MAP = (
-        lambda x: StationsParser.DATA_STATUS[x]
-        if str(x) in StationsParser.DATA_STATUS
-        else x
-    )
+    APPLY_MAP = (lambda x: StationsParser.DATA_STATUS[x]
+                 if str(x) in StationsParser.DATA_STATUS else x)
 
     @classmethod
     def df_from_responses(cls, responses: List[dict]) -> pd.DataFrame:

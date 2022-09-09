@@ -5,7 +5,6 @@ import yaml
 from ndbc_api.api.parsers.stations import StationsParser
 from tests.api.parsers._base import PARSED_TESTS_DIR, RESPONSES_TESTS_DIR
 
-
 TEST_FP = RESPONSES_TESTS_DIR.joinpath('stations.yml')
 PARSED_FP = PARSED_TESTS_DIR.joinpath('stations.parquet.gzip')
 
@@ -26,6 +25,7 @@ def parsed_stations():
 @pytest.fixture
 def stations():
     yield StationsParser
+
 
 @pytest.mark.private
 def test_df_from_responses(stations, stations_response, parsed_stations):

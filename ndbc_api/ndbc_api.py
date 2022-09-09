@@ -109,46 +109,41 @@ class NdbcApi(metaclass=Singleton):
         if not (lat and lon):
             raise ValueError('lat and lon must be specified.')
         nearest_station = self._stations_api.nearest_station(
-            handler=self._handler, lat=lat, lon=lon
-        )
+            handler=self._handler, lat=lat, lon=lon)
         return nearest_station
 
-
-    def station(
-        self, station_id: Union[str, int], as_df: bool = False
-    ) -> Union[pd.DataFrame, dict]:
+    def station(self,
+                station_id: Union[str, int],
+                as_df: bool = False) -> Union[pd.DataFrame, dict]:
         """Get all stations from NDBC."""
         station_id = self._parse_station_id(station_id)
         try:
-            data = self._stations_api.metadata(
-                handler=self._handler, station_id=station_id
-            )
+            data = self._stations_api.metadata(handler=self._handler,
+                                               station_id=station_id)
             return self._handle_data(data, as_df, cols=None)
         except (ResponseException, ValueError, KeyError) as e:
             raise ResponseException('Failed to handle returned data.') from e
 
-    def available_realtime(
-        self, station_id: Union[str, int], as_df: bool = False
-    ) -> Union[pd.DataFrame, dict]:
+    def available_realtime(self,
+                           station_id: Union[str, int],
+                           as_df: bool = False) -> Union[pd.DataFrame, dict]:
         """Get all stations from NDBC."""
         station_id = self._parse_station_id(station_id)
         try:
-            data = self._stations_api.realtime(
-                handler=self._handler, station_id=station_id
-            )
+            data = self._stations_api.realtime(handler=self._handler,
+                                               station_id=station_id)
             return self._handle_data(data, as_df, cols=None)
         except (ResponseException, ValueError, KeyError) as e:
             raise ResponseException('Failed to handle returned data.') from e
 
-    def available_historical(
-        self, station_id: Union[str, int], as_df: bool = False
-    ) -> Union[pd.DataFrame, dict]:
+    def available_historical(self,
+                             station_id: Union[str, int],
+                             as_df: bool = False) -> Union[pd.DataFrame, dict]:
         """Get all stations from NDBC."""
         station_id = self._parse_station_id(station_id)
         try:
-            data = self._stations_api.historical(
-                handler=self._handler, station_id=station_id
-            )
+            data = self._stations_api.historical(handler=self._handler,
+                                                 station_id=station_id)
             return self._handle_data(data, as_df, cols=None)
         except (ResponseException, ValueError, KeyError) as e:
             raise ResponseException('Failed to handle returned data.') from e
@@ -170,8 +165,7 @@ class NdbcApi(metaclass=Singleton):
         data_api_call = getattr(self._data_api, mode)
         if not data_api_call:
             raise RequestException(
-                'Please supply a supported mode from `get_modes()`.'
-            )
+                'Please supply a supported mode from `get_modes()`.')
         try:
             data = data_api_call(
                 self._handler,
@@ -183,9 +177,9 @@ class NdbcApi(metaclass=Singleton):
         except (ResponseException, ValueError, TypeError, KeyError) as e:
             raise ResponseException('Failed to handle API call.') from e
         if use_timestamp:
-            data = self._enforce_timerange(
-                df=data, start_time=start_time, end_time=end_time
-            )
+            data = self._enforce_timerange(df=data,
+                                           start_time=start_time,
+                                           end_time=end_time)
         try:
             return self._handle_data(data, as_df, cols)
         except (ValueError, KeyError, AttributeError) as e:
@@ -236,33 +230,28 @@ class NdbcApi(metaclass=Singleton):
                 raise TimestampException from e
 
     @staticmethod
-    def _enforce_timerange(
-        df: pd.DataFrame, start_time: datetime, end_time: datetime
-    ) -> pd.DataFrame:
+    def _enforce_timerange(df: pd.DataFrame, start_time: datetime,
+                           end_time: datetime) -> pd.DataFrame:
         """Down-select to the data within the specified `datetime` range."""
         try:
-            df = df.loc[
-                (df.index.values >= pd.Timestamp(start_time))
-                & (df.index.values <= pd.Timestamp(end_time))
-            ]
+            df = df.loc[(df.index.values >= pd.Timestamp(start_time)) &
+                        (df.index.values <= pd.Timestamp(end_time))]
         except ValueError as e:
             raise TimestampException(
-                'Failed to enforce `start_time` to `end_time` range.'
-            ) from e
+                'Failed to enforce `start_time` to `end_time` range.') from e
         return df
 
     @staticmethod
-    def _handle_data(
-        data: pd.DataFrame, as_df: bool = True, cols: List[str] = None
-    ) -> Union[pd.DataFrame, dict]:
+    def _handle_data(data: pd.DataFrame,
+                     as_df: bool = True,
+                     cols: List[str] = None) -> Union[pd.DataFrame, dict]:
         """Apply column down selection and return format handling."""
         if cols:
             try:
                 data = data[[*cols]]
             except (KeyError, ValueError) as e:
                 raise ParserException(
-                    'Failed to parse column selection.'
-                ) from e
+                    'Failed to parse column selection.') from e
         if as_df and isinstance(data, pd.DataFrame):
             return data
         elif isinstance(data, pd.DataFrame) and not as_df:
@@ -272,8 +261,6 @@ class NdbcApi(metaclass=Singleton):
                 return pd.DataFrame().from_dict(data)
             except (NotImplementedError, ValueError) as e:
                 raise HandlerException(
-                    'Failed to convert `pd.DataFrame` to `dict`.'
-                ) from e
+                    'Failed to convert `pd.DataFrame` to `dict`.') from e
         else:
             return data
-

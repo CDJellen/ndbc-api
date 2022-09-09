@@ -5,7 +5,6 @@ import pandas as pd
 from ndbc_api.api.parsers.swden import SwdenParser
 from tests.api.parsers._base import PARSED_TESTS_DIR, RESPONSES_TESTS_DIR
 
-
 TEST_FP = RESPONSES_TESTS_DIR.joinpath('swden.yml')
 PARSED_FP = PARSED_TESTS_DIR.joinpath('swden.parquet.gzip')
 
@@ -26,6 +25,7 @@ def parsed_swden():
 @pytest.fixture
 def swden():
     yield SwdenParser
+
 
 @pytest.mark.private
 def test_available_measurements(swden, swden_response, parsed_swden):

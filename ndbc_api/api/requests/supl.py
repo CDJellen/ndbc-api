@@ -11,9 +11,7 @@ class SuplRequest(BaseRequest):
     HISTORICAL_IDENTIFIER = 's'
 
     @classmethod
-    def build_request(
-        cls, station_id: str, start_time: datetime, end_time: datetime
-    ) -> List[str]:
-        return super(SuplRequest, cls).build_request(
-            station_id, start_time, end_time
-        )
+    def build_request(cls, station_id: str, start_time: datetime,
+                      end_time: datetime) -> List[str]:
+        return super(SuplRequest, cls).build_request(station_id, start_time,
+                                                     end_time)

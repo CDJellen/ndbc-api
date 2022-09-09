@@ -8,8 +8,7 @@ from ndbc_api.api.parsers._station import StationParser
 class HistoricalParser(StationParser):
 
     LIST_IDENTIFIER = re.compile(
-        'Available historical data for station .{5} include:'
-    )
+        'Available historical data for station .{5} include:')
 
     @classmethod
     def available_measurements(cls, response: dict) -> dict:

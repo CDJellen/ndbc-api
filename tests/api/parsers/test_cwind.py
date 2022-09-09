@@ -5,7 +5,6 @@ import pandas as pd
 from ndbc_api.api.parsers.cwind import CwindParser
 from tests.api.parsers._base import PARSED_TESTS_DIR, RESPONSES_TESTS_DIR
 
-
 TEST_FP = RESPONSES_TESTS_DIR.joinpath('cwind.yml')
 PARSED_FP = PARSED_TESTS_DIR.joinpath('cwind.parquet.gzip')
 
@@ -26,6 +25,7 @@ def parsed_cwind():
 @pytest.fixture
 def cwind():
     yield CwindParser
+
 
 @pytest.mark.private
 def test_available_measurements(cwind, cwind_response, parsed_cwind):

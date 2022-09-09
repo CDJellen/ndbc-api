@@ -4,6 +4,7 @@ from ndbc_api.api.parsers._station import StationParser
 
 
 class RealtimeParser(StationParser):
+
     @classmethod
     def available_measurements(cls, response: dict) -> dict:
         if response.get('status') == 200:

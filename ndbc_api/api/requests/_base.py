@@ -18,9 +18,8 @@ class BaseRequest(CoreRequest):
     FILE_FORMAT = ''
 
     @classmethod
-    def build_request(
-        cls, station_id: str, start_time: datetime, end_time: datetime
-    ) -> List[str]:
+    def build_request(cls, station_id: str, start_time: datetime,
+                      end_time: datetime) -> List[str]:
 
         if 'MOCKDATE' in os.environ:
             now = datetime.strptime(os.getenv('MOCKDATE'), '%Y-%m-%d')
@@ -44,6 +43,7 @@ class BaseRequest(CoreRequest):
         end_time: datetime,
         now: datetime,
     ) -> List[str]:
+
         def req_hist_helper_year(req_year: int) -> str:
             return f'{cls.BASE_URL}{cls.HISTORICAL_URL_PREFIX}{station_id}{cls.HISTORICAL_IDENTIFIER}{req_year}{cls.HISTORICAL_FILE_EXTENSION_SUFFIX}{cls.HISTORICAL_DATA_PREFIX}{cls.HISTORICAL_SUFFIX}{cls.FORMAT}/'
 
@@ -67,26 +67,24 @@ class BaseRequest(CoreRequest):
         last_available_month = (now - timedelta(days=31)).month
         has_realtime = (now - end_time) < timedelta(days=44)
 
-        for hist_year in range(
-            int(start_time.year), min(int(current_year), int(end_time.year) + 1)
-        ):
+        for hist_year in range(int(start_time.year),
+                               min(int(current_year),
+                                   int(end_time.year) + 1)):
             reqs.append(req_hist_helper_year(hist_year))
         if end_time.year == current_year:
             for hist_month in range(
-                int(start_time.month),
-                min(int(end_time.month) + 1, int(last_available_month)),
+                    int(start_time.month),
+                    min(int(end_time.month) + 1, int(last_available_month)),
             ):
                 reqs.append(req_hist_helper_month(hist_month))
             if int(last_available_month) <= (end_time.month):
                 reqs.append(
-                    req_hist_helper_month_current(int(last_available_month))
-                )
+                    req_hist_helper_month_current(int(last_available_month)))
 
         if has_realtime:
             reqs.append(
-                cls._build_request_realtime(station_id=station_id)[
-                    0
-                ]  # only one URL
+                cls._build_request_realtime(
+                    station_id=station_id)[0]  # only one URL
             )
         return reqs
 

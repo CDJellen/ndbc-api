@@ -11,9 +11,7 @@ class Swdir2Request(BaseRequest):
     HISTORICAL_IDENTIFIER = 'i'
 
     @classmethod
-    def build_request(
-        cls, station_id: str, start_time: datetime, end_time: datetime
-    ) -> List[str]:
-        return super(Swdir2Request, cls).build_request(
-            station_id, start_time, end_time
-        )
+    def build_request(cls, station_id: str, start_time: datetime,
+                      end_time: datetime) -> List[str]:
+        return super(Swdir2Request, cls).build_request(station_id, start_time,
+                                                       end_time)

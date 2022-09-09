@@ -12,9 +12,8 @@ class StationParser:
     BASE_URL = 'https://www.ndbc.noaa.gov'
 
     @classmethod
-    def _parse_li_urls(
-        cls, urls: List[bs4.element.Tag]
-    ) -> List[Tuple[str, str]]:
+    def _parse_li_urls(cls,
+                       urls: List[bs4.element.Tag]) -> List[Tuple[str, str]]:
         parsed = []
         if 'MOCKDATE' in os.environ:
             now = datetime.strptime(os.getenv('MOCKDATE'), '%Y-%m-%d').date()
@@ -30,13 +29,11 @@ class StationParser:
 
     @classmethod
     def _build_available_measurements(
-        cls, line_items: List[bs4.element.Tag]
-    ) -> dict:
+            cls, line_items: List[bs4.element.Tag]) -> dict:
         # unpack nested lists
         nested = [li for li in line_items for li in li.find_all('li')]
         nested = [
-            li
-            for li in nested
+            li for li in nested
             if li.get('href') is not None and 'plot' not in li.get('href')
         ]
         line_items = [li for li in line_items if len(li.find_all('li')) == 0]

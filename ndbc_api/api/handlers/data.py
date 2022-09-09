@@ -33,6 +33,7 @@ from ndbc_api.exceptions import (
 
 
 class DataHandler(BaseHandler):
+
     @classmethod
     def adcp(
         cls,
@@ -44,18 +45,17 @@ class DataHandler(BaseHandler):
     ) -> pd.DataFrame:
         """adcp"""
         try:
-            reqs = AdcpRequest.build_request(
-                station_id=station_id, start_time=start_time, end_time=end_time
-            )
+            reqs = AdcpRequest.build_request(station_id=station_id,
+                                             start_time=start_time,
+                                             end_time=end_time)
         except Exception as e:
             raise RequestException('Failed to build request.') from e
         try:
             resps = handler.handle_requests(station_id=station_id, reqs=reqs)
         except Exception as e:
             raise ResponseException('Failed to execute requests.') from e
-        return AdcpParser.df_from_responses(
-            responses=resps, use_timestamp=use_timestamp
-        )
+        return AdcpParser.df_from_responses(responses=resps,
+                                            use_timestamp=use_timestamp)
 
     @classmethod
     def cwind(
@@ -68,18 +68,17 @@ class DataHandler(BaseHandler):
     ) -> pd.DataFrame:
         """cwind"""
         try:
-            reqs = CwindRequest.build_request(
-                station_id=station_id, start_time=start_time, end_time=end_time
-            )
+            reqs = CwindRequest.build_request(station_id=station_id,
+                                              start_time=start_time,
+                                              end_time=end_time)
         except Exception as e:
             raise RequestException('Failed to build request.') from e
         try:
             resps = handler.handle_requests(station_id=station_id, reqs=reqs)
         except Exception as e:
             raise ResponseException('Failed to execute requests.') from e
-        return CwindParser.df_from_responses(
-            responses=resps, use_timestamp=use_timestamp
-        )
+        return CwindParser.df_from_responses(responses=resps,
+                                             use_timestamp=use_timestamp)
 
     @classmethod
     def ocean(
@@ -92,18 +91,17 @@ class DataHandler(BaseHandler):
     ) -> pd.DataFrame:
         """ocean"""
         try:
-            reqs = OceanRequest.build_request(
-                station_id=station_id, start_time=start_time, end_time=end_time
-            )
+            reqs = OceanRequest.build_request(station_id=station_id,
+                                              start_time=start_time,
+                                              end_time=end_time)
         except Exception as e:
             raise RequestException('Failed to build request.') from e
         try:
             resps = handler.handle_requests(station_id=station_id, reqs=reqs)
         except Exception as e:
             raise ResponseException('Failed to execute requests.') from e
-        return OceanParser.df_from_responses(
-            responses=resps, use_timestamp=use_timestamp
-        )
+        return OceanParser.df_from_responses(responses=resps,
+                                             use_timestamp=use_timestamp)
 
     @classmethod
     def spec(
@@ -116,18 +114,17 @@ class DataHandler(BaseHandler):
     ) -> pd.DataFrame:
         """spec"""
         try:
-            reqs = SpecRequest.build_request(
-                station_id=station_id, start_time=start_time, end_time=end_time
-            )
+            reqs = SpecRequest.build_request(station_id=station_id,
+                                             start_time=start_time,
+                                             end_time=end_time)
         except Exception as e:
             raise RequestException('Failed to build request.') from e
         try:
             resps = handler.handle_requests(station_id=station_id, reqs=reqs)
         except Exception as e:
             raise ResponseException('Failed to execute requests.') from e
-        return SpecParser.df_from_responses(
-            responses=resps, use_timestamp=use_timestamp
-        )
+        return SpecParser.df_from_responses(responses=resps,
+                                            use_timestamp=use_timestamp)
 
     @classmethod
     def stdmet(
@@ -140,18 +137,17 @@ class DataHandler(BaseHandler):
     ) -> pd.DataFrame:
         """stdmet"""
         try:
-            reqs = StdmetRequest.build_request(
-                station_id=station_id, start_time=start_time, end_time=end_time
-            )
+            reqs = StdmetRequest.build_request(station_id=station_id,
+                                               start_time=start_time,
+                                               end_time=end_time)
         except Exception as e:
             raise RequestException('Failed to build request.') from e
         try:
             resps = handler.handle_requests(station_id=station_id, reqs=reqs)
         except Exception as e:
             raise ResponseException('Failed to execute requests.') from e
-        return StdmetParser.df_from_responses(
-            responses=resps, use_timestamp=use_timestamp
-        )
+        return StdmetParser.df_from_responses(responses=resps,
+                                              use_timestamp=use_timestamp)
 
     @classmethod
     def supl(
@@ -164,18 +160,17 @@ class DataHandler(BaseHandler):
     ) -> pd.DataFrame:
         """supl"""
         try:
-            reqs = SuplRequest.build_request(
-                station_id=station_id, start_time=start_time, end_time=end_time
-            )
+            reqs = SuplRequest.build_request(station_id=station_id,
+                                             start_time=start_time,
+                                             end_time=end_time)
         except Exception as e:
             raise RequestException('Failed to build request.') from e
         try:
             resps = handler.handle_requests(station_id=station_id, reqs=reqs)
         except Exception as e:
             raise ResponseException('Failed to execute requests.') from e
-        return SuplParser.df_from_responses(
-            responses=resps, use_timestamp=use_timestamp
-        )
+        return SuplParser.df_from_responses(responses=resps,
+                                            use_timestamp=use_timestamp)
 
     @classmethod
     def swden(
@@ -188,18 +183,17 @@ class DataHandler(BaseHandler):
     ) -> pd.DataFrame:
         """swden"""
         try:
-            reqs = SwdenRequest.build_request(
-                station_id=station_id, start_time=start_time, end_time=end_time
-            )
+            reqs = SwdenRequest.build_request(station_id=station_id,
+                                              start_time=start_time,
+                                              end_time=end_time)
         except Exception as e:
             raise RequestException('Failed to build request.') from e
         try:
             resps = handler.handle_requests(station_id=station_id, reqs=reqs)
         except Exception as e:
             raise ResponseException('Failed to execute requests.') from e
-        return SwdenParser.df_from_responses(
-            responses=resps, use_timestamp=use_timestamp
-        )
+        return SwdenParser.df_from_responses(responses=resps,
+                                             use_timestamp=use_timestamp)
 
     @classmethod
     def swdir(
@@ -212,18 +206,17 @@ class DataHandler(BaseHandler):
     ) -> pd.DataFrame:
         """swdir"""
         try:
-            reqs = SwdirRequest.build_request(
-                station_id=station_id, start_time=start_time, end_time=end_time
-            )
+            reqs = SwdirRequest.build_request(station_id=station_id,
+                                              start_time=start_time,
+                                              end_time=end_time)
         except Exception as e:
             raise RequestException('Failed to build request.') from e
         try:
             resps = handler.handle_requests(station_id=station_id, reqs=reqs)
         except Exception as e:
             raise ResponseException('Failed to execute requests.') from e
-        return SwdirParser.df_from_responses(
-            responses=resps, use_timestamp=use_timestamp
-        )
+        return SwdirParser.df_from_responses(responses=resps,
+                                             use_timestamp=use_timestamp)
 
     @classmethod
     def swdir2(
@@ -236,18 +229,17 @@ class DataHandler(BaseHandler):
     ) -> pd.DataFrame:
         """swdir2"""
         try:
-            reqs = Swdir2Request.build_request(
-                station_id=station_id, start_time=start_time, end_time=end_time
-            )
+            reqs = Swdir2Request.build_request(station_id=station_id,
+                                               start_time=start_time,
+                                               end_time=end_time)
         except Exception as e:
             raise RequestException('Failed to build request.') from e
         try:
             resps = handler.handle_requests(station_id=station_id, reqs=reqs)
         except Exception as e:
             raise ResponseException('Failed to execute requests.') from e
-        return Swdir2Parser.df_from_responses(
-            responses=resps, use_timestamp=use_timestamp
-        )
+        return Swdir2Parser.df_from_responses(responses=resps,
+                                              use_timestamp=use_timestamp)
 
     @classmethod
     def swr1(
@@ -260,18 +252,17 @@ class DataHandler(BaseHandler):
     ) -> pd.DataFrame:
         """swr1"""
         try:
-            reqs = Swr1Request.build_request(
-                station_id=station_id, start_time=start_time, end_time=end_time
-            )
+            reqs = Swr1Request.build_request(station_id=station_id,
+                                             start_time=start_time,
+                                             end_time=end_time)
         except Exception as e:
             raise RequestException('Failed to build request.') from e
         try:
             resps = handler.handle_requests(station_id=station_id, reqs=reqs)
         except Exception as e:
             raise ResponseException('Failed to execute requests.') from e
-        return Swr1Parser.df_from_responses(
-            responses=resps, use_timestamp=use_timestamp
-        )
+        return Swr1Parser.df_from_responses(responses=resps,
+                                            use_timestamp=use_timestamp)
 
     @classmethod
     def swr2(
@@ -284,15 +275,14 @@ class DataHandler(BaseHandler):
     ) -> pd.DataFrame:
         """swr2"""
         try:
-            reqs = Swr2Request.build_request(
-                station_id=station_id, start_time=start_time, end_time=end_time
-            )
+            reqs = Swr2Request.build_request(station_id=station_id,
+                                             start_time=start_time,
+                                             end_time=end_time)
         except Exception as e:
             raise RequestException('Failed to build request.') from e
         try:
             resps = handler.handle_requests(station_id=station_id, reqs=reqs)
         except Exception as e:
             raise ResponseException('Failed to execute requests.') from e
-        return Swr2Parser.df_from_responses(
-            responses=resps, use_timestamp=use_timestamp
-        )
+        return Swr2Parser.df_from_responses(responses=resps,
+                                            use_timestamp=use_timestamp)
