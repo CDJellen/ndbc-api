@@ -28,12 +28,12 @@ from tests.api.handlers._base import (
     mock_register_uri,
 )
 from ndbc_api.exceptions import (
+    RequestException,
     HandlerException,
     TimestampException,
     ResponseException,
     ParserException,
 )
-
 
 TEST_STN_ADCP = 41117
 TEST_STN_CWIND = 'TPLM2'
@@ -51,7 +51,6 @@ TEST_CACHE_LIMIT = 10000
 NEW_CACHE_LIMIT = 1000
 
 
-
 @pytest.fixture
 def ndbc_api():
     api = NdbcApi(cache_limit=TEST_CACHE_LIMIT)
@@ -65,18 +64,6 @@ def test_init(ndbc_api):
     assert NdbcApi() == ndbc_api
 
 
-def test_dump_cache(ndbc_api):
-    test_fp = None
-    data = ndbc_api.dump_cache(dest_fp=test_fp)
-    assert isinstance(data, dict)
-    assert len(data) == len(ndbc_api._handler.stations)
-    test_fp = PARSED_TESTS_DIR.joinpath('_dumped_cache.pickle')
-    data = ndbc_api.dump_cache(dest_fp=test_fp)
-    assert data is None
-    assert path.exists(str(test_fp))
-    test_fp.unlink(missing_ok=False)
-
-
 def test_clear_cache(ndbc_api):
     ndbc_api.cache_limit = NEW_CACHE_LIMIT
     ndbc_api.clear_cache()
@@ -88,6 +75,18 @@ def test_set_cache_limit(ndbc_api):
     assert ndbc_api.get_cache_limit() == TEST_CACHE_LIMIT
     ndbc_api.set_cache_limit(NEW_CACHE_LIMIT)
     assert ndbc_api.get_cache_limit() == NEW_CACHE_LIMIT
+
+
+def test_dump_cache_empty(ndbc_api):
+    test_fp = None
+    data = ndbc_api.dump_cache(dest_fp=test_fp)
+    assert isinstance(data, dict)
+    assert len(data) == len(ndbc_api._handler.stations)
+    test_fp = PARSED_TESTS_DIR.joinpath('_dumped_cache.pickle')
+    data = ndbc_api.dump_cache(dest_fp=test_fp)
+    assert data is None
+    assert path.exists(str(test_fp))
+    test_fp.unlink(missing_ok=False)
 
 
 @pytest.mark.usefixtures('mock_socket', 'read_responses', 'read_parsed_df')
@@ -105,12 +104,23 @@ def test_stations(ndbc_api, mock_socket, read_responses, read_parsed_df):
         _ = ndbc_api.stations()
     ndbc_api._handler = handler
 
+
+def test_dump_cache_nonempty(ndbc_api):
+    test_fp = None
+    data = ndbc_api.dump_cache(dest_fp=test_fp)
+    assert isinstance(data, dict)
+    assert len(data) == len(ndbc_api._handler.stations)
+    test_fp = PARSED_TESTS_DIR.joinpath('_dumped_cache.pickle')
+    data = ndbc_api.dump_cache(dest_fp=test_fp)
+    assert data is None
+    assert path.exists(str(test_fp))
+    test_fp.unlink(missing_ok=False)
+
+
 @pytest.mark.usefixtures('mock_socket', 'read_responses', 'read_parsed_yml')
 def test_station(ndbc_api, mock_socket, read_responses, read_parsed_yml):
     _ = mock_socket
-    reqs = MetadataRequest.build_request(
-        station_id=TEST_STN_STDMET,
-    )
+    reqs = MetadataRequest.build_request(station_id=TEST_STN_STDMET,)
     assert len([reqs]) == len(read_responses['metadata'].values())
     mock_register_uri([reqs], list(read_responses['metadata'].values()))
     want = read_parsed_yml['metadata']
@@ -119,36 +129,24 @@ def test_station(ndbc_api, mock_socket, read_responses, read_parsed_yml):
     handler = ndbc_api._handler
     ndbc_api._handler = None
     with pytest.raises(Exception):
-        _ = ndbc_api.station(
-            station_id=TEST_STN_STDMET,
-        )
+        _ = ndbc_api.station(station_id=TEST_STN_STDMET,)
     ndbc_api._handler = handler
     assert want == got
     with pytest.raises(Exception):
-        _ = ndbc_api.nearest_station(
-            lat=None,
-            lon=None
-        )
+        _ = ndbc_api.nearest_station(lat=None, lon=None)
     with pytest.raises(Exception):
-        _ = ndbc_api.nearest_station(
-            lat=None,
-            lon=None
-        )
+        _ = ndbc_api.nearest_station(lat=None, lon=None)
     want = 'TPLM2'
-    got = ndbc_api.nearest_station(
-        lat='38.88N',
-        lon='76.43W'
-    )
+    got = ndbc_api.nearest_station(lat='38.88N', lon='76.43W')
     assert got == want
-    got = ndbc_api.nearest_station(
-        lat=38.88,
-        lon=76.43
-    )
+    got = ndbc_api.nearest_station(lat=38.88, lon=76.43)
     assert got == want
+
 
 @pytest.mark.slow
 @pytest.mark.usefixtures('mock_socket', 'read_responses', 'read_parsed_df')
-def test_get_data(ndbc_api, monkeypatch, mock_socket, read_responses, read_parsed_df):
+def test_get_data(ndbc_api, monkeypatch, mock_socket, read_responses,
+                  read_parsed_df):
     _ = mock_socket
     monkeypatch.setenv('MOCKDATE', '2022-08-13')
     for name in ndbc_api.get_modes():
@@ -213,6 +211,17 @@ def test_get_data(ndbc_api, monkeypatch, mock_socket, read_responses, read_parse
             as_df=True,
             cols=['FOOBAR'],
         )
+    with pytest.raises(RequestException):
+        _ = ndbc_api.get_data(
+            station_id=globals()[f'TEST_STN_{name.upper()}'],
+            mode='foo',
+            start_time=TEST_START,
+            end_time=TEST_END,
+            use_timestamp=True,
+            as_df=True,
+            cols=None,
+        )
+
 
 def test_get_modes(ndbc_api):
     modes = ndbc_api.get_modes()
@@ -222,11 +231,10 @@ def test_get_modes(ndbc_api):
 
 
 @pytest.mark.usefixtures('mock_socket', 'read_responses', 'read_parsed_yml')
-def test_station_realtime(ndbc_api, mock_socket, read_responses, read_parsed_yml):
+def test_station_realtime(ndbc_api, mock_socket, read_responses,
+                          read_parsed_yml):
     _ = mock_socket
-    reqs = RealtimeRequest.build_request(
-        station_id=TEST_STN_REALTIME,
-    )
+    reqs = RealtimeRequest.build_request(station_id=TEST_STN_REALTIME,)
     assert len([reqs]) == len(read_responses['realtime'].values())
     mock_register_uri([reqs], list(read_responses['realtime'].values()))
     want = read_parsed_yml['realtime']
@@ -235,14 +243,21 @@ def test_station_realtime(ndbc_api, mock_socket, read_responses, read_parsed_yml
         as_df=False,
     )
     assert want == got
+    handler = ndbc_api._handler
+    ndbc_api._handler = None
+    with pytest.raises(Exception):
+        _ = ndbc_api.available_realtime(
+            station_id=TEST_STN_REALTIME,
+            as_df=False,
+        )
+    ndbc_api._handler = handler
 
 
 @pytest.mark.usefixtures('mock_socket', 'read_responses', 'read_parsed_yml')
-def test_station_historical(ndbc_api, mock_socket, read_responses, read_parsed_yml):
+def test_station_historical(ndbc_api, mock_socket, read_responses,
+                            read_parsed_yml):
     _ = mock_socket
-    reqs = HistoricalRequest.build_request(
-        station_id=TEST_STN_STDMET,
-    )
+    reqs = HistoricalRequest.build_request(station_id=TEST_STN_STDMET,)
     assert len([reqs]) == len(read_responses['historical'].values())
     mock_register_uri([reqs], list(read_responses['historical'].values()))
     want = read_parsed_yml['historical']
@@ -251,6 +266,15 @@ def test_station_historical(ndbc_api, mock_socket, read_responses, read_parsed_y
         as_df=False,
     )
     assert want == got
+    handler = ndbc_api._handler
+    ndbc_api._handler = None
+    with pytest.raises(Exception):
+        _ = ndbc_api.available_realtime(
+            station_id=TEST_STN_REALTIME,
+            as_df=False,
+        )
+    ndbc_api._handler = handler
+
 
 @pytest.mark.private
 def test_handle_timestamp(ndbc_api):
@@ -261,3 +285,37 @@ def test_handle_timestamp(ndbc_api):
     assert got == want
     got = ndbc_api._handle_timestamp(test_converted_timestamp)
     assert got == want
+    with pytest.raises(TimestampException):
+        _ = ndbc_api._handle_timestamp('foo')
+
+
+@pytest.mark.private
+def test_enfore_timerange(ndbc_api, read_parsed_df):
+    name = ndbc_api.get_modes()[-1]
+    data = read_parsed_df[name]
+    with pytest.raises(TimestampException):
+        _ = ndbc_api._enforce_timerange(data, 'foo', 'bar')
+
+
+@pytest.mark.private
+def test_handle_data(ndbc_api, read_parsed_df):
+    name = ndbc_api.get_modes()[-1]
+    data = read_parsed_df[name]
+    want = data.copy().reset_index()
+    got = ndbc_api._handle_data(data.copy().to_dict(), as_df=True, cols=None)
+    pd.testing.assert_frame_equal(want, got)
+    with pytest.raises(HandlerException):
+        _ = ndbc_api._handle_data(
+            {
+                'foo': ['bar', 'foobar'],
+                'baz': {
+                    'bar': 'bazbar'
+                }
+            },
+            as_df=True,
+            cols=None)
+    want = data.copy().to_dict()
+    got = ndbc_api._handle_data(data.copy().reset_index(),
+                                as_df=False,
+                                cols=None)
+    assert list(want.keys()) == list(got.keys())
