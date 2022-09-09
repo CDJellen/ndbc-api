@@ -301,9 +301,14 @@ def test_enfore_timerange(ndbc_api, read_parsed_df):
 def test_handle_data(ndbc_api, read_parsed_df):
     name = ndbc_api.get_modes()[-1]
     data = read_parsed_df[name]
-    want = data.copy().reset_index()
+    want = data.copy()
     got = ndbc_api._handle_data(data.copy().to_dict(), as_df=True, cols=None)
-    pd.testing.assert_frame_equal(want, got)
+    pd.testing.assert_frame_equal(want,
+                                  got,
+                                  check_dtype=False,
+                                  check_names=False,
+                                  check_index_type=False,
+                                  check_column_type=False)
     with pytest.raises(HandlerException):
         _ = ndbc_api._handle_data(
             {
@@ -315,7 +320,7 @@ def test_handle_data(ndbc_api, read_parsed_df):
             as_df=True,
             cols=None)
     want = data.copy().to_dict()
-    got = ndbc_api._handle_data(data.copy().reset_index(),
-                                as_df=False,
-                                cols=None)
-    assert list(want.keys()) == list(got.keys())
+    got = ndbc_api._handle_data(data.copy(), as_df=False, cols=None)
+    assert isinstance(want, dict)
+    assert isinstance(got, dict)
+    assert len(want.keys()) == len(got.keys())
