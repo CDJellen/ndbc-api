@@ -52,10 +52,10 @@ class NdbcApi(metaclass=Singleton):
 
     Attributes:
         logging_level (:int:): The `logging.Logger`s log level, 1 if the `debug` flag is set in the `__init__` method, and 0 otherwise.
-        cache_limit (:obj:`int`): The handler's global limit for caching 
+        cache_limit (:obj:`int`): The handler's global limit for caching
             `NdbcApi` responses. This is implemented as a least-recently
             used cache, designed to conserve NDBC resources when querying
-            measurements for a given station over similar time ranges. 
+            measurements for a given station over similar time ranges.
         delay (:int:): The HTTP(s) request delay parameter, in seconds.
         retries (:int:): = The number of times to retry a request to the NDBC data service.
         backoff_factor (:float:): The back-off parameter, used in conjunction with `retries` to re-attempt requests to the NDBC data service.
@@ -91,7 +91,7 @@ class NdbcApi(metaclass=Singleton):
 
     def dump_cache(self, dest_fp: Union[str, None] = None) -> Union[dict, None]:
         """Dump the request cache to dict or the specified filepath.
-        
+
         Dump the request, response pairs stored in the `NdbcApi`'s `Request_handler` as a `dict`, either returning the object, if no `dest_fp` is specified, or serializing (pickling) the object and writing it to the specified `dest_fp`.
 
         Args:
@@ -138,7 +138,7 @@ class NdbcApi(metaclass=Singleton):
 
     def stations(self, as_df: bool = True) -> Union[pd.DataFrame, dict]:
         """Get all stations and station metadata from the NDBC.
-        
+
         Query the NDBC data service for the current available data buoys (stations), both those maintained by the NDBC and those whose measurements are managed by the NDBC. Stations are returned by default as rows of a `pandas.DataFrame`, alongside their realtime data coverage for some common measurements, their latitude and longitude, and current station status notes maintained by the NDBC.
 
         Args:
@@ -162,7 +162,7 @@ class NdbcApi(metaclass=Singleton):
         lon: Union[str, float, None] = None,
     ) -> str:
         """Get nearest station to the specified lat/lon.
-        
+
         Use the NDBC data service's current station data to determine the nearest station to the specified latitude and longitude (either as `float` or as DD.dd[E/W] strings).
 
         Args:
@@ -185,7 +185,7 @@ class NdbcApi(metaclass=Singleton):
                 station_id: Union[str, int],
                 as_df: bool = False) -> Union[pd.DataFrame, dict]:
         """Get metadata for the given station from the NDBC.
-        
+
         The NDBC maintains some station-level metadata including status notes, location information, inclement weather warnings, and measurement notes. This method is used to request, handle, and parse the metadata for the given station from the station's NDBC webpage.
 
         Args:
@@ -210,7 +210,7 @@ class NdbcApi(metaclass=Singleton):
                            station_id: Union[str, int],
                            as_df: bool = False) -> Union[pd.DataFrame, dict]:
         """Get the available realtime measurements for a station.
-        
+
         While most data buoy (station) measurements are available over multi-year time ranges, some measurements depreciate or become unavailable for substantial periods of time. This method queries the NDBC station webpage for those measurements, and their links, which are available or were available over the last 45 days.
 
         Args:
@@ -235,7 +235,7 @@ class NdbcApi(metaclass=Singleton):
                              station_id: Union[str, int],
                              as_df: bool = False) -> Union[pd.DataFrame, dict]:
         """Get the available historical measurements for a station.
-        
+
         This method queries the NDBC station webpage for historical, quality controlled measurements and their associated availability time ranges.
 
         Args:
@@ -267,7 +267,7 @@ class NdbcApi(metaclass=Singleton):
         cols: List[str] = None,
     ) -> Union[pd.DataFrame, dict]:
         """Execute data query against the specified NDBC station.
-        
+
         Query the NDBC data service for station-level measurements, using the `mode` parameter to determine the measurement type (e.g. `'stdmet'` for standard meterological data or `'cwind'` for continuous winds data). The time range and data columns of interest may also be specified, such that a tailored set of requests are executed against the NDBC data service to generate a single `pandas.DataFrame` or `dict` matching the conditions specified in the method call.
 
         Args:
@@ -329,7 +329,7 @@ class NdbcApi(metaclass=Singleton):
         verify_https: bool,
     ) -> Any:
         """Build a new `RequestHandler` for the `NdbcApi`.
-        
+
         long.
 
         Args:
@@ -353,7 +353,7 @@ class NdbcApi(metaclass=Singleton):
 
     @staticmethod
     def _parse_station_id(station_id: Union[str, int]) -> str:
-        """Parse station id"""
+        """Parse station id."""
         station_id = str(station_id)  # expect string-valued station id
         station_id = station_id.lower()  # expect lowercased station id
         return station_id
@@ -373,7 +373,7 @@ class NdbcApi(metaclass=Singleton):
     def _enforce_timerange(df: pd.DataFrame, start_time: datetime,
                            end_time: datetime) -> pd.DataFrame:
         """Down-select to the data within the specified `datetime` range.
-        
+
         long.
 
         Args:
@@ -398,7 +398,7 @@ class NdbcApi(metaclass=Singleton):
                      as_df: bool = True,
                      cols: List[str] = None) -> Union[pd.DataFrame, dict]:
         """Apply column down selection and return format handling.
-        
+
         long.
 
         Args:
