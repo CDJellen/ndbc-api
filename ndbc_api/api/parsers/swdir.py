@@ -65,8 +65,7 @@ class SwdirParser(BaseParser):
     ]
 
     @classmethod
-    def df_from_responses(
-        cls, responses: List[dict], use_timestamp: bool
-    ) -> pd.DataFrame:
+    def df_from_responses(cls, responses: List[dict],
+                          use_timestamp: bool) -> pd.DataFrame:
         df = super(SwdirParser, cls).df_from_responses(responses, use_timestamp)
         return df

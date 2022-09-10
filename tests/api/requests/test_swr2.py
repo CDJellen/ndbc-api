@@ -11,7 +11,6 @@ from tests.api.requests._base import (
     REQUESTS_TESTS_DIR,
 )
 
-
 TEST_FP = REQUESTS_TESTS_DIR.joinpath('swr2.yml')
 TEST_STN = '41001'
 
@@ -37,11 +36,13 @@ def swr2_realtime_requests(swr2_requests):
 def swr2_historical_requests(swr2_requests):
     yield swr2_requests.get('historical')
 
+
 @pytest.mark.private
 def test_swr2_realtime(swr2, swr2_realtime_requests):
     want = swr2_realtime_requests
     got = swr2.build_request(TEST_STN, REALTIME_START, REALTIME_END)
     assert want == got
+
 
 @pytest.mark.private
 def test_swr2_historical(swr2, swr2_historical_requests):

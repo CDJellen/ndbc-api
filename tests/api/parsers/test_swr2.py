@@ -5,7 +5,6 @@ import pandas as pd
 from ndbc_api.api.parsers.swr2 import Swr2Parser
 from tests.api.parsers._base import PARSED_TESTS_DIR, RESPONSES_TESTS_DIR
 
-
 TEST_FP = RESPONSES_TESTS_DIR.joinpath('swr2.yml')
 PARSED_FP = PARSED_TESTS_DIR.joinpath('swr2.parquet.gzip')
 
@@ -26,6 +25,7 @@ def parsed_swr2():
 @pytest.fixture
 def swr2():
     yield Swr2Parser
+
 
 @pytest.mark.private
 def test_available_measurements(swr2, swr2_response, parsed_swr2):

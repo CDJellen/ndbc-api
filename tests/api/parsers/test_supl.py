@@ -5,7 +5,6 @@ import pandas as pd
 from ndbc_api.api.parsers.supl import SuplParser
 from tests.api.parsers._base import PARSED_TESTS_DIR, RESPONSES_TESTS_DIR
 
-
 TEST_FP = RESPONSES_TESTS_DIR.joinpath('supl.yml')
 PARSED_FP = PARSED_TESTS_DIR.joinpath('supl.parquet.gzip')
 
@@ -26,6 +25,7 @@ def parsed_supl():
 @pytest.fixture
 def supl():
     yield SuplParser
+
 
 @pytest.mark.private
 def test_available_measurements(supl, supl_response, parsed_supl):

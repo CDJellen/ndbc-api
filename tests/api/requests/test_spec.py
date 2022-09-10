@@ -11,7 +11,6 @@ from tests.api.requests._base import (
     REQUESTS_TESTS_DIR,
 )
 
-
 TEST_FP = REQUESTS_TESTS_DIR.joinpath('spec.yml')
 TEST_STN = '41001'
 
@@ -37,11 +36,13 @@ def spec_realtime_requests(spec_requests):
 def spec_historical_requests(spec_requests):
     yield spec_requests.get('historical')
 
+
 @pytest.mark.private
 def test_spec_realtime(spec, spec_realtime_requests):
     want = spec_realtime_requests
     got = spec.build_request(TEST_STN, REALTIME_START, REALTIME_END)
     assert want == got
+
 
 @pytest.mark.private
 def test_spec_historical(spec, spec_historical_requests):

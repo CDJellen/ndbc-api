@@ -11,7 +11,6 @@ from tests.api.requests._base import (
     REQUESTS_TESTS_DIR,
 )
 
-
 TEST_FP = REQUESTS_TESTS_DIR.joinpath('supl.yml')
 TEST_STN = '41001'
 
@@ -37,11 +36,13 @@ def supl_realtime_requests(supl_requests):
 def supl_historical_requests(supl_requests):
     yield supl_requests.get('historical')
 
+
 @pytest.mark.private
 def test_supl_realtime(supl, supl_realtime_requests):
     want = supl_realtime_requests
     got = supl.build_request(TEST_STN, REALTIME_START, REALTIME_END)
     assert want == got
+
 
 @pytest.mark.private
 def test_supl_historical(supl, supl_historical_requests):

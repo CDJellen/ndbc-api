@@ -5,7 +5,6 @@ import pandas as pd
 from ndbc_api.api.parsers.spec import SpecParser
 from tests.api.parsers._base import PARSED_TESTS_DIR, RESPONSES_TESTS_DIR
 
-
 TEST_FP = RESPONSES_TESTS_DIR.joinpath('spec.yml')
 PARSED_FP = PARSED_TESTS_DIR.joinpath('spec.parquet.gzip')
 
@@ -26,6 +25,7 @@ def parsed_spec():
 @pytest.fixture
 def spec():
     yield SpecParser
+
 
 @pytest.mark.private
 def test_available_measurements(spec, spec_response, parsed_spec):

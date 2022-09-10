@@ -23,7 +23,6 @@ from tests.api.handlers._base import (
 )
 from ndbc_api.exceptions import RequestException, ResponseException
 
-
 TEST_STN_ADCP = '41117'
 TEST_STN_CWIND = 'TPLM2'
 TEST_STN_OCEAN = '41024'
@@ -45,9 +44,12 @@ def data_handler():
 
 @pytest.fixture(scope='module')
 def request_handler():
-    yield RequestHandler(
-        cache_limit=10000, log=TEST_LOG, delay=1, retries=1, backoff_factor=0.5
-    )
+    yield RequestHandler(cache_limit=10000,
+                         log=TEST_LOG,
+                         delay=1,
+                         retries=1,
+                         backoff_factor=0.5)
+
 
 @pytest.mark.slow
 @pytest.mark.private

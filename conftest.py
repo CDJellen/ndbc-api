@@ -10,22 +10,29 @@ from tests.api.handlers._base import (
     RESPONSES_TESTS_DIR,
     REQUESTS_TESTS_DIR,
 )
+
 REQUESTS_FP = list(REQUESTS_TESTS_DIR.glob('*.yml'))
 RESPONSES_FP = list(RESPONSES_TESTS_DIR.glob('*.yml'))
 PARSED_YML_FP = list(PARSED_TESTS_DIR.glob('*.yml'))
 PARSED_DF_FP = list(PARSED_TESTS_DIR.glob('*.parquet.gzip'))
 
+
 def pytest_addoption(parser):
+    parser.addoption('--run-slow',
+                     action='store_true',
+                     default=False,
+                     help='run slow tests.')
     parser.addoption(
-        '--run-slow', action='store_true', default=False, help='run slow tests.'
-    )
-    parser.addoption(
-        '--run-private', action='store_true', default=False, help='run tests across methods which are not publicly exposed.'
-    )
+        '--run-private',
+        action='store_true',
+        default=False,
+        help='run tests across methods which are not publicly exposed.')
+
 
 def pytest_configure(config):
     config.addinivalue_line('markers', 'slow: mark test as slow to run')
-    config.addinivalue_line('markers', 'private: mark test as not publicly exposed')
+    config.addinivalue_line('markers',
+                            'private: mark test as not publicly exposed')
 
 
 def pytest_collection_modifyitems(config, items):
@@ -45,6 +52,7 @@ def pytest_collection_modifyitems(config, items):
             item.add_marker(skip_slow)
         if 'private' in item.keywords and 'private' in skips:
             item.add_marker(skip_private)
+
 
 @pytest.fixture(scope="session")
 def read_responses():

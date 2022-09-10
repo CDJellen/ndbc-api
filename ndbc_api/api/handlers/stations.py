@@ -19,12 +19,10 @@ class StationsHandler(BaseHandler):
 
     DEG_TO_RAD = pi / 180
     DIAM_OF_EARTH = 12756
-    LAT_MAP = (
-        lambda x: -1 * float(x.strip('S')) if 'S' in x else float(x.strip('N'))
-    )
-    LON_MAP = (
-        lambda x: -1 * float(x.strip('E')) if 'E' in x else float(x.strip('W'))
-    )
+    LAT_MAP = (lambda x: -1 * float(x.strip('S'))
+               if 'S' in x else float(x.strip('N')))
+    LON_MAP = (lambda x: -1 * float(x.strip('E'))
+               if 'E' in x else float(x.strip('W')))
 
     @classmethod
     def stations(cls, handler: Any) -> pd.DataFrame:
@@ -34,8 +32,7 @@ class StationsHandler(BaseHandler):
             resp = handler.handle_request('stn', req)
         except (AttributeError, ValueError, TypeError) as e:
             raise ResponseException(
-                'Failed to execute `station` request.'
-            ) from e
+                'Failed to execute `station` request.') from e
         return StationsParser.df_from_responses([resp])
 
     @classmethod
@@ -66,8 +63,7 @@ class StationsHandler(BaseHandler):
             resp = handler.handle_request(station_id, req)
         except (AttributeError, ValueError, TypeError) as e:
             raise ResponseException(
-                'Failed to execute `station` request.'
-            ) from e
+                'Failed to execute `station` request.') from e
         return MetadataParser.metadata(resp)
 
     @classmethod
@@ -78,22 +74,19 @@ class StationsHandler(BaseHandler):
             resp = handler.handle_request(station_id, req)
         except (AttributeError, ValueError, TypeError) as e:
             raise ResponseException(
-                'Failed to execute `station` request.'
-            ) from e
+                'Failed to execute `station` request.') from e
         return RealtimeParser.available_measurements(resp)
 
     @classmethod
-    def historical(
-        cls, handler: Any, station_id: str
-    ) -> Union[pd.DataFrame, dict]:
+    def historical(cls, handler: Any,
+                   station_id: str) -> Union[pd.DataFrame, dict]:
         """Get the available historical measurements for a station."""
         req = HistoricalRequest.build_request(station_id=station_id)
         try:
             resp = handler.handle_request(station_id, req)
         except (AttributeError, ValueError, TypeError) as e:
             raise ResponseException(
-                'Failed to execute `station` request.'
-            ) from e
+                'Failed to execute `station` request.') from e
         return HistoricalParser.available_measurements(resp)
 
     """ PRIVATE """
@@ -102,27 +95,20 @@ class StationsHandler(BaseHandler):
     def _nearest(df: pd.DataFrame, lat_a: float, lon_a: float):
         """Get the nearest station from specified `float`-valued lat/lon."""
 
-        def _distance(
-            lat_a: float, lon_a: float, lat_b: float, lon_b: float
-        ) -> float:
-            haversine = (
-                0.5
-                - cos((lat_b - lat_a) * StationsHandler.DEG_TO_RAD) / 2
-                + cos(lat_a * StationsHandler.DEG_TO_RAD)
-                * cos(lat_b * StationsHandler.DEG_TO_RAD)
-                * (1 - cos((lon_b - lon_a) * StationsHandler.DEG_TO_RAD))
-                / 2
-            )
+        def _distance(lat_a: float, lon_a: float, lat_b: float,
+                      lon_b: float) -> float:
+            haversine = (0.5 - cos(
+                (lat_b - lat_a) * StationsHandler.DEG_TO_RAD) / 2 +
+                         cos(lat_a * StationsHandler.DEG_TO_RAD) *
+                         cos(lat_b * StationsHandler.DEG_TO_RAD) * (1 - cos(
+                             (lon_b - lon_a) * StationsHandler.DEG_TO_RAD)) / 2)
             return StationsHandler.DIAM_OF_EARTH * asin(sqrt(haversine))
 
         ls = list(df[['Location Lat/Long']].to_records(index=False))
-        ls = [
-            (
-                idx,
-                StationsHandler.LAT_MAP(r[0].split(' ')[0]),
-                StationsHandler.LON_MAP(r[0].split(' ')[1]),
-            )
-            for idx, r in enumerate(ls)
-        ]
+        ls = [(
+            idx,
+            StationsHandler.LAT_MAP(r[0].split(' ')[0]),
+            StationsHandler.LON_MAP(r[0].split(' ')[1]),
+        ) for idx, r in enumerate(ls)]
         closest = min(ls, key=lambda p: _distance(lat_a, lon_a, p[1], p[2]))
         return df.iloc[[closest[0]]]

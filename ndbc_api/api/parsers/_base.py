@@ -17,29 +17,26 @@ class BaseParser:
     REVERT_COL_NAMES = []
 
     @classmethod
-    def df_from_responses(
-        cls, responses: List[dict], use_timestamp: bool = True
-    ) -> pd.DataFrame:
+    def df_from_responses(cls,
+                          responses: List[dict],
+                          use_timestamp: bool = True) -> pd.DataFrame:
         components = []
         for response in responses:
             if response.get('status') == 200:
                 components.append(
-                    cls._read_response(response, use_timestamp=use_timestamp)
-                )
+                    cls._read_response(response, use_timestamp=use_timestamp))
         df = pd.concat(components)
         try:
-            df = df.reset_index().drop_duplicates(
-                subset='timestamp', keep='first'
-            )
+            df = df.reset_index().drop_duplicates(subset='timestamp',
+                                                  keep='first')
             df = df.set_index('timestamp').sort_index()
         except KeyError as e:
             raise ParserException from e
         return df
 
     @classmethod
-    def _read_response(
-        cls, response: dict, use_timestamp: bool
-    ) -> pd.DataFrame:
+    def _read_response(cls, response: dict,
+                       use_timestamp: bool) -> pd.DataFrame:
         body = response.get('body')
         header, data = cls._parse_body(body)
         names = cls._parse_header(header)
@@ -88,17 +85,16 @@ class BaseParser:
 
     @staticmethod
     def _parse_header(header: List[str]) -> List[str]:
-        names = (
-            [n for n in header[0].strip('#').strip('\n').split(' ') if n]
-            if isinstance(header, list) and len(header) > 0
-            else None
-        )
+        names = ([n for n in header[0].strip('#').strip('\n').split(' ') if n]
+                 if isinstance(header, list) and len(header) > 0 else None)
         return names  # pass 'None' to pd.read_csv on error
 
     @staticmethod
     def _clean_data(data: List[str]) -> List[str]:
         vals = [
-            ' '.join([v for v in r.split(' ') if v and '(' not in v])
+            ' '.join([v
+                      for v in r.split(' ')
+                      if v and '(' not in v])
             for r in data
         ]
         return vals or None  # pass 'None' to pd.read_csv on error

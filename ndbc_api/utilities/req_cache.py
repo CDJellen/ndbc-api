@@ -1,4 +1,5 @@
 class RequestCache:
+
     class Request:
 
         __slots__ = 'k', 'v', 'next', 'prev'

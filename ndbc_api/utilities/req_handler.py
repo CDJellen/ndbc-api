@@ -99,20 +99,16 @@ class RequestHandler(metaclass=Singleton):
 
     def add_station(self, station_id: Union[str, int]) -> None:
         self.stations.append(
-            RequestHandler.Station(
-                station_id=station_id, cache_limit=self._cache_limit
-            )
-        )
+            RequestHandler.Station(station_id=station_id,
+                                   cache_limit=self._cache_limit))
 
-    def handle_requests(
-        self, station_id: Union[str, int], reqs: List[str]
-    ) -> List[str]:  # pragma: no cover
+    def handle_requests(self, station_id: Union[str, int],
+                        reqs: List[str]) -> List[str]:  # pragma: no cover
 
         responses = []
         for req in reqs:
-            responses.append(
-                self.handle_request(station_id=station_id, req=req)
-            )
+            responses.append(self.handle_request(station_id=station_id,
+                                                 req=req))
         return responses
 
     def handle_request(self, station_id: Union[str, int], req: str) -> dict:
@@ -122,9 +118,8 @@ class RequestHandler(metaclass=Singleton):
             stn.reqs.put(request=req, response=resp)
         return stn.reqs.get(request=req)
 
-    def execute_request(
-        self, url: str, headers: dict
-    ) -> dict:  # pragma: no cover
+    def execute_request(self, url: str,
+                        headers: dict) -> dict:  # pragma: no cover
         response = self._session.get(
             url=url,
             headers=headers,
