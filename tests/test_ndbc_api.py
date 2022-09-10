@@ -214,7 +214,7 @@ def test_get_data(ndbc_api, monkeypatch, mock_socket, read_responses,
     with pytest.raises(RequestException):
         _ = ndbc_api.get_data(
             station_id=globals()[f'TEST_STN_{name.upper()}'],
-            mode=None,
+            mode='foo',
             start_time=TEST_START,
             end_time=TEST_END,
             use_timestamp=True,
