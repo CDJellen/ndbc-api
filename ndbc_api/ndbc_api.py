@@ -1,6 +1,7 @@
 """An API for retrieving data from the NDBC.
 
-This module defines the `NdbcApi`, the top-level object which creates, handles, caches, parses, and returns NDBC data.
+This module defines the `NdbcApi`, the top-level object which creates, handles,
+caches, parses, and returns NDBC data.
 
 Example:
     ```python3
@@ -8,7 +9,13 @@ Example:
     api = NdbcApi()
     available_stations = api.stations()
     modes = api.get_modes()
-    df_stdmet_tplm2 = api.get_data('tplm2', 'stdmet', '2020-01-01', '2022-01-01', as_df=True)
+    df_stdmet_tplm2 = api.get_data(
+        'tplm2',
+        'stdmet',
+        '2020-01-01',
+        '2022-01-01',
+        as_df=True
+    )
     ```
 
 Attributes:
@@ -48,19 +55,28 @@ from .config import (
 class NdbcApi(metaclass=Singleton):
     """An API for querying the National Data Buoy Center.
 
-    The `NdbcApi` is metaclassed as a singleton to conserve NDBC resources. It uses two private handlers to build requests and parse responses to the NDBC over HTTP(s). It also uses a LRU-cached request handler to execute requests against the NDBC, logging response statuses as they are executed.
+    The `NdbcApi` is metaclassed as a singleton to conserve NDBC resources. It
+    uses two private handlers to build requests and parse responses to the NDBC
+    over HTTP(s). It also uses a LRU-cached request handler to execute requests
+    against the NDBC, logging response statuses as they are executed.
 
     Attributes:
-        logging_level (:int:): The `logging.Logger`s log level, 1 if the `debug` flag is set in the `__init__` method, and 0 otherwise.
-        cache_limit (:obj:`int`): The handler's global limit for caching 
+        logging_level: The `logging.Logger`s log level, 1 if the `debug`
+            flag is set in the `__init__` method, and 0 otherwise.
+        cache_limit: The handler's global limit for caching
             `NdbcApi` responses. This is implemented as a least-recently
             used cache, designed to conserve NDBC resources when querying
-            measurements for a given station over similar time ranges. 
-        delay (:int:): The HTTP(s) request delay parameter, in seconds.
-        retries (:int:): = The number of times to retry a request to the NDBC data service.
-        backoff_factor (:float:): The back-off parameter, used in conjunction with `retries` to re-attempt requests to the NDBC data service.
-        verify_https (:bool:): A flag which indicates whether to attempt requests to the NDBC data service over HTTP or HTTPS.
-        debug (:bool:): A flag for verbose logging and response-level status reporting. Affects the instance's `logging.Logger` and the behavior of its private `RequestHandler` instance.
+            measurements for a given station over similar time ranges.
+        delay: The HTTP(s) request delay parameter, in seconds.
+        retries: = The number of times to retry a request to the NDBC data
+            service.
+        backoff_factor: The back-off parameter, used in conjunction with
+            `retries` to re-attempt requests to the NDBC data service.
+        verify_https: A flag which indicates whether to attempt requests to the
+            NDBC data service over HTTP or HTTPS.
+        debug: A flag for verbose logging and response-level status reporting.
+            Affects the instance's `logging.Logger` and the behavior of its
+            private `RequestHandler` instance.
     """
 
     log = logging.getLogger(LOGGER_NAME)
@@ -91,14 +107,19 @@ class NdbcApi(metaclass=Singleton):
 
     def dump_cache(self, dest_fp: Union[str, None] = None) -> Union[dict, None]:
         """Dump the request cache to dict or the specified filepath.
-        
-        Dump the request, response pairs stored in the `NdbcApi`'s `Request_handler` as a `dict`, either returning the object, if no `dest_fp` is specified, or serializing (pickling) the object and writing it to the specified `dest_fp`.
+
+        Dump the request, response pairs stored in the `NdbcApi`'s
+        `Request_handler` as a `dict`, either returning the object, if no
+        `dest_fp` is specified, or serializing (pickling) the object and writing
+        it to the specified `dest_fp`.
 
         Args:
-            dest_fp: The destination filepath for the serialized `RequestsCache` contents.
+            dest_fp: The destination filepath for the serialized `RequestsCache`
+                contents.
 
         Returns:
-            The cached request, response pairs as a `dict`, or `None` if a `dest_fp` is specified when calling the method.
+            The cached request, response pairs as a `dict`, or `None` if a
+            `dest_fp` is specified when calling the method.
         """
         data = dict()
         ids = [r.id_ for r in self._handler.stations]
@@ -138,17 +159,25 @@ class NdbcApi(metaclass=Singleton):
 
     def stations(self, as_df: bool = True) -> Union[pd.DataFrame, dict]:
         """Get all stations and station metadata from the NDBC.
-        
-        Query the NDBC data service for the current available data buoys (stations), both those maintained by the NDBC and those whose measurements are managed by the NDBC. Stations are returned by default as rows of a `pandas.DataFrame`, alongside their realtime data coverage for some common measurements, their latitude and longitude, and current station status notes maintained by the NDBC.
+
+        Query the NDBC data service for the current available data buoys
+        (stations), both those maintained by the NDBC and those whose
+        measurements are managed by the NDBC. Stations are returned by default
+        as rows of a `pandas.DataFrame`, alongside their realtime data coverage
+        for some common measurements, their latitude and longitude, and current
+        station status notes maintained by the NDBC.
 
         Args:
-            as_df: Flag indicating whether to return current station data as a `pandas.DataFrame` if set to `True` or as a `dict` if set to `False`.
+            as_df: Flag indicating whether to return current station data as a
+                `pandas.DataFrame` if set to `True` or as a `dict` if `False`.
 
         Returns:
-            The current station data from the NDBC data service, either as a `pandas.DataFrame`, or as a `dict` depending on the value of `as_df`.
+            The current station data from the NDBC data service, either as a
+            `pandas.DataFrame` or as a `dict` depending on the value of `as_df`.
 
         Raises:
-            ResponseException: An error occurred while retrieving and parsing responses from the NDBC data service.
+            ResponseException: An error occurred while retrieving and parsing
+                responses from the NDBC data service.
         """
         try:
             data = self._stations_api.stations(handler=self._handler)
@@ -162,18 +191,24 @@ class NdbcApi(metaclass=Singleton):
         lon: Union[str, float, None] = None,
     ) -> str:
         """Get nearest station to the specified lat/lon.
-        
-        Use the NDBC data service's current station data to determine the nearest station to the specified latitude and longitude (either as `float` or as DD.dd[E/W] strings).
+
+        Use the NDBC data service's current station data to determine the
+        nearest station to the specified latitude and longitude (either as
+        `float` or as DD.dd[E/W] strings).
 
         Args:
-            lat: The latitude of interest, used to determine the closest maintained station to the given position.
-            lon: The longitude of interest, used to determine the closest maintained station to the given position.
+            lat: The latitude of interest, used to determine the closest
+                maintained station to the given position.
+            lon: The longitude of interest, used to determine the closest
+                maintained station to the given position.
 
         Returns:
-            The station id (e.g. `'tplm2'` or `'41001'`) of the nearest station with active measurements to the specified lat/lon pair.
+            The station id (e.g. `'tplm2'` or `'41001'`) of the nearest station
+            with active measurements to the specified lat/lon pair.
 
         Raises:
-            ValueError: The latitude and longitude were not both specified when querying for the closest station.
+            ValueError: The latitude and longitude were not both specified when
+                querying for the closest station.
         """
         if not (lat and lon):
             raise ValueError('lat and lon must be specified.')
@@ -185,18 +220,25 @@ class NdbcApi(metaclass=Singleton):
                 station_id: Union[str, int],
                 as_df: bool = False) -> Union[pd.DataFrame, dict]:
         """Get metadata for the given station from the NDBC.
-        
-        The NDBC maintains some station-level metadata including status notes, location information, inclement weather warnings, and measurement notes. This method is used to request, handle, and parse the metadata for the given station from the station's NDBC webpage.
+
+        The NDBC maintains some station-level metadata including status notes,
+        location information, inclement weather warnings, and measurement notes.
+        This method is used to request, handle, and parse the metadata for the
+        given station from the station's NDBC webpage.
 
         Args:
-            station_id: The NDBC station ID (e.g. `'tplm2'` or `41001`) for the station of interest.
-            as_df: Whether to return station-level data as a `pandas.DataFrame`, defaults to `False`, and a `dict` is returned.
+            station_id: The NDBC station ID (e.g. `'tplm2'` or `41001`) for the
+                station of interest.
+            as_df: Whether to return station-level data as a `pandas.DataFrame`,
+                defaults to `False`, and a `dict` is returned.
 
         Returns:
-            The station metadata for the given station, either as a `dict` or as a `pandas.DataFrame` if the `as_df` flag is set to `True`.
+            The station metadata for the given station, either as a `dict` or as
+            a `pandas.DataFrame` if the `as_df` flag is set to `True`.
 
         Raises:
-            ResponseException: An error occurred when requesting and parsing responses for the specified station.
+            ResponseException: An error occurred when requesting and parsing
+                responses for the specified station.
         """
         station_id = self._parse_station_id(station_id)
         try:
@@ -210,18 +252,27 @@ class NdbcApi(metaclass=Singleton):
                            station_id: Union[str, int],
                            as_df: bool = False) -> Union[pd.DataFrame, dict]:
         """Get the available realtime measurements for a station.
-        
-        While most data buoy (station) measurements are available over multi-year time ranges, some measurements depreciate or become unavailable for substantial periods of time. This method queries the NDBC station webpage for those measurements, and their links, which are available or were available over the last 45 days.
+
+        While most data buoy (station) measurements are available over
+        multi-year time ranges, some measurements depreciate or become
+        unavailable for substantial periods of time. This method queries the
+        NDBC station webpage for those measurements, and their links, which are
+        available or were available over the last 45 days.
 
         Args:
-            station_id: The NDBC station ID (e.g. `'tplm2'` or `41001`) for the station of interest.
-            as_df: Whether to return station-level data as a `pandas.DataFrame`, defaults to `False`, and a `dict` is returned.
+            station_id: The NDBC station ID (e.g. `'tplm2'` or `41001`) for the
+                station of interest.
+            as_df: Whether to return station-level data as a `pandas.DataFrame`,
+                defaults to `False`, and a `dict` is returned.
 
         Returns:
-            The available realtime measurements for the specified station, alongside their NDBC data links, either as a `dict` or as a `pandas.DataFrame` if the `as_df` flag is set to `True`.
+            The available realtime measurements for the specified station,
+            alongside their NDBC data links, either as a `dict` or as a
+            `pandas.DataFrame` if the `as_df` flag is set to `True`.
 
         Raises:
-            ResponseException: An error occurred when requesting and parsing responses for the specified station.
+            ResponseException: An error occurred when requesting and parsing
+                responses for the specified station.
         """
         station_id = self._parse_station_id(station_id)
         try:
@@ -235,18 +286,24 @@ class NdbcApi(metaclass=Singleton):
                              station_id: Union[str, int],
                              as_df: bool = False) -> Union[pd.DataFrame, dict]:
         """Get the available historical measurements for a station.
-        
-        This method queries the NDBC station webpage for historical, quality controlled measurements and their associated availability time ranges.
+
+        This method queries the NDBC station webpage for historical, quality
+        controlled measurements and their associated availability time ranges.
 
         Args:
-            station_id: The NDBC station ID (e.g. `'tplm2'` or `41001`) for the station of interest.
-            as_df: Whether to return station-level data as a `pandas.DataFrame`, defaults to `False`, and a `dict` is returned.
+            station_id: The NDBC station ID (e.g. `'tplm2'` or `41001`) for the
+                station of interest.
+            as_df: Whether to return station-level data as a `pandas.DataFrame`,
+                defaults to `False`, and a `dict` is returned.
 
         Returns:
-            The available historical measurements for the specified station, alongside their NDBC data links, either as a `dict` or as a `pandas.DataFrame` if the `as_df` flag is set to `True`.
+            The available historical measurements for the specified station,
+            alongside their NDBC data links, either as a `dict` or as a
+            `pandas.DataFrame` if the `as_df` flag is set to `True`.
 
         Raises:
-            ResponseException: An error occurred when requesting and parsing responses for the specified station.
+            ResponseException: An error occurred when requesting and parsing
+                responses for the specified station.
         """
         station_id = self._parse_station_id(station_id)
         try:
@@ -267,25 +324,45 @@ class NdbcApi(metaclass=Singleton):
         cols: List[str] = None,
     ) -> Union[pd.DataFrame, dict]:
         """Execute data query against the specified NDBC station.
-        
-        Query the NDBC data service for station-level measurements, using the `mode` parameter to determine the measurement type (e.g. `'stdmet'` for standard meterological data or `'cwind'` for continuous winds data). The time range and data columns of interest may also be specified, such that a tailored set of requests are executed against the NDBC data service to generate a single `pandas.DataFrame` or `dict` matching the conditions specified in the method call.
+
+        Query the NDBC data service for station-level measurements, using the
+        `mode` parameter to determine the measurement type (e.g. `'stdmet'` for
+        standard meterological data or `'cwind'` for continuous winds data). The
+        time range and data columns of interest may also be specified, such that
+        a tailored set of requests are executed against the NDBC data service to
+        generate a single `pandas.DataFrame` or `dict` matching the conditions
+        specified in the method call.
 
         Args:
-            station_id: The NDBC station ID (e.g. `'tplm2'` or `41001`) for the station of interest.
-            mode: The data measurement type to query for the station (e.g. `'stdmet'` for standard meterological data or `'cwind'` for continuous winds data).
-            start_time: The first timestamp of interest  (in UTC) for the data query, defaulting to 30 days before the current system time.
-            end_time: The last timestamp of interest (in UTC) for the data query, defaulting to the current system time.
-            use_timestamp: A flag indicating whether to parse the NDBC data service column headers as a timestamp, and to use this timestamp as the index.
-            as_df: Whether to return station-level data as a `pandas.DataFrame`, defaults to `False`, and a `dict` is returned.
-            cols: A list of columns of interest which are selected from te available data columns, such that only the desired columns are returned. All columns are returned if `None` is specified.
+            station_id: The NDBC station ID (e.g. `'tplm2'` or `41001`) for the
+                station of interest.
+            mode: The data measurement type to query for the station (e.g.
+                `'stdmet'` for standard meterological data or `'cwind'` for
+                continuous winds data).
+            start_time: The first timestamp of interest  (in UTC) for the data
+                query, defaulting to 30 days before the current system time.
+            end_time: The last timestamp of interest (in UTC) for the data
+                query, defaulting to the current system time.
+            use_timestamp: A flag indicating whether to parse the NDBC data
+                service column headers as a timestamp, and to use this timestamp
+                as the index.
+            as_df: Whether to return station-level data as a `pandas.DataFrame`,
+                defaults to `False`, and a `dict` is returned.
+            cols: A list of columns of interest which are selected from the 
+                available data columns, such that only the desired columns are
+                returned. All columns are returned if `None` is specified.
 
         Returns:
-            The available station measurements for the specified mode, time range, and columns, either as a `dict` or as a `pandas.DataFrame` if the `as_df` flag is set to `True`.
+            The available station measurements for the specified mode, time
+            range, and columns, either as a `dict` or as a `pandas.DataFrame`
+            if the `as_df` flag is set to `True`.
 
         Raises:
             RequestException: The specified mode is not available.
-            ResponseException: There was an error in executing and parsing the required requests against the NDBC data service.
-            HandlerException: There was an error in handling the returned data as a `dict` or `pandas.DataFrame`.
+            ResponseException: There was an error in executing and parsing the
+                required requests against the NDBC data service.
+            HandlerException: There was an error in handling the returned data
+                as a `dict` or `pandas.DataFrame`.
         """
         start_time = self._handle_timestamp(start_time)
         end_time = self._handle_timestamp(end_time)
@@ -328,19 +405,7 @@ class NdbcApi(metaclass=Singleton):
         debug: bool,
         verify_https: bool,
     ) -> Any:
-        """Build a new `RequestHandler` for the `NdbcApi`.
-        
-        long.
-
-        Args:
-            arg
-
-        Returns:
-            ret
-
-        Raises:
-            RequestError?
-        """
+        """Build a new `RequestHandler` for the `NdbcApi`."""
         return RequestHandler(
             cache_limit=cache_limit or self.cache_limit,
             log=self.log,
@@ -353,7 +418,7 @@ class NdbcApi(metaclass=Singleton):
 
     @staticmethod
     def _parse_station_id(station_id: Union[str, int]) -> str:
-        """Parse station id"""
+        """Parse station id."""
         station_id = str(station_id)  # expect string-valued station id
         station_id = station_id.lower()  # expect lowercased station id
         return station_id
@@ -372,19 +437,7 @@ class NdbcApi(metaclass=Singleton):
     @staticmethod
     def _enforce_timerange(df: pd.DataFrame, start_time: datetime,
                            end_time: datetime) -> pd.DataFrame:
-        """Down-select to the data within the specified `datetime` range.
-        
-        long.
-
-        Args:
-            arg
-
-        Returns:
-            ret
-
-        Raises:
-            RequestError?
-        """
+        """Down-select to the data within the specified `datetime` range."""
         try:
             df = df.loc[(df.index.values >= pd.Timestamp(start_time)) &
                         (df.index.values <= pd.Timestamp(end_time))]
@@ -397,19 +450,7 @@ class NdbcApi(metaclass=Singleton):
     def _handle_data(data: pd.DataFrame,
                      as_df: bool = True,
                      cols: List[str] = None) -> Union[pd.DataFrame, dict]:
-        """Apply column down selection and return format handling.
-        
-        long.
-
-        Args:
-            arg
-
-        Returns:
-            ret
-
-        Raises:
-            RequestError?
-        """
+        """Apply column down selection and return format handling."""
         if cols:
             try:
                 data = data[[*cols]]
