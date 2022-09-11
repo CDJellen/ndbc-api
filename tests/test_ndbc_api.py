@@ -117,6 +117,29 @@ def test_dump_cache_nonempty(ndbc_api):
     test_fp.unlink(missing_ok=False)
 
 
+def test_get_headers(ndbc_api):
+    want = {}
+    got = ndbc_api.get_headers()
+    assert want == got
+
+
+def test_update_headers(ndbc_api):
+    current_headers = ndbc_api.get_headers()
+    new_headers = {'foo': 'bar'}
+    want = {**current_headers, **new_headers}
+    ndbc_api.update_headers(new_headers)
+    got = ndbc_api.get_headers()
+    assert want == got
+
+
+def test_set_headers(ndbc_api):
+    new_headers = {'foo': 'bar'}
+    want = new_headers
+    ndbc_api.set_headers(new_headers)
+    got = ndbc_api.get_headers()
+    assert want == got
+
+
 @pytest.mark.usefixtures('mock_socket', 'read_responses', 'read_parsed_yml')
 def test_station(ndbc_api, mock_socket, read_responses, read_parsed_yml):
     _ = mock_socket
