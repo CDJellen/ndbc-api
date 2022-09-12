@@ -20,8 +20,10 @@ Example:
 
 Attributes:
     log (:obj:`logging.Logger`): The logger at which to register HTTP
-            request and response status codes and headers used for debug
-            purposes.
+        request and response status codes and headers used for debug
+        purposes.
+    headers(:dict:): The request headers for use in the NDBC API's request
+        handler.
 """
 import logging
 import pickle
@@ -85,6 +87,7 @@ class NdbcApi(metaclass=Singleton):
         self,
         logging_level: int = logging.WARNING if HTTP_DEBUG else 0,
         cache_limit: int = DEFAULT_CACHE_LIMIT,
+        headers: dict = {},
         delay: int = HTTP_DELAY,
         retries: int = HTTP_RETRY,
         backoff_factor: float = HTTP_BACKOFF_FACTOR,
@@ -94,11 +97,13 @@ class NdbcApi(metaclass=Singleton):
         """Initializes the singleton `NdbcApi`, sets associated handlers."""
         self.log.setLevel(logging_level)
         self.cache_limit = cache_limit
+        self.headers = headers
         self._handler = self._get_request_handler(
             cache_limit=self.cache_limit,
             delay=delay,
             retries=retries,
             backoff_factor=backoff_factor,
+            headers=self.headers,
             debug=debug,
             verify_https=verify_https,
         )
@@ -145,6 +150,7 @@ class NdbcApi(metaclass=Singleton):
             delay=HTTP_DELAY,
             retries=HTTP_RETRY,
             backoff_factor=HTTP_BACKOFF_FACTOR,
+            headers=self.headers,
             debug=HTTP_DEBUG,
             verify_https=VERIFY_HTTPS,
         )
@@ -156,6 +162,18 @@ class NdbcApi(metaclass=Singleton):
     def get_cache_limit(self) -> int:
         """Get the cache limit for the API's request cache."""
         return self._handler.get_cache_limit()
+
+    def get_headers(self) -> dict:
+        """Return the current headers used by the request handler."""
+        return self._handler.get_headers()
+
+    def update_headers(self, new: dict) -> None:
+        """Add new headers to the request handler."""
+        self._handler.update_headers(new)
+
+    def set_headers(self, request_headers: dict) -> None:
+        """Reset the request headers using the new supplied headers."""
+        self._handler.set_headers(request_headers)
 
     def stations(self, as_df: bool = True) -> Union[pd.DataFrame, dict]:
         """Get all stations and station metadata from the NDBC.
@@ -402,6 +420,7 @@ class NdbcApi(metaclass=Singleton):
         delay: int,
         retries: int,
         backoff_factor: float,
+        headers: dict,
         debug: bool,
         verify_https: bool,
     ) -> Any:
@@ -412,6 +431,7 @@ class NdbcApi(metaclass=Singleton):
             delay=delay,
             retries=retries,
             backoff_factor=backoff_factor,
+            headers=headers,
             debug=debug,
             verify_https=verify_https,
         )
