@@ -86,7 +86,7 @@ def test_dump_cache_empty(ndbc_api):
     data = ndbc_api.dump_cache(dest_fp=test_fp)
     assert data is None
     assert path.exists(str(test_fp))
-    test_fp.unlink(missing_ok=False)
+    test_fp.unlink()
 
 
 @pytest.mark.usefixtures('mock_socket', 'read_responses', 'read_parsed_df')
@@ -114,7 +114,7 @@ def test_dump_cache_nonempty(ndbc_api):
     data = ndbc_api.dump_cache(dest_fp=test_fp)
     assert data is None
     assert path.exists(str(test_fp))
-    test_fp.unlink(missing_ok=False)
+    test_fp.unlink()
 
 
 def test_get_headers(ndbc_api):
