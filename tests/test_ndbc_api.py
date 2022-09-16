@@ -86,7 +86,7 @@ def test_dump_cache_empty(ndbc_api):
     data = ndbc_api.dump_cache(dest_fp=test_fp)
     assert data is None
     assert path.exists(str(test_fp))
-    test_fp.unlink(missing_ok=False)
+    test_fp.unlink()
 
 
 @pytest.mark.usefixtures('mock_socket', 'read_responses', 'read_parsed_df')
@@ -114,7 +114,7 @@ def test_dump_cache_nonempty(ndbc_api):
     data = ndbc_api.dump_cache(dest_fp=test_fp)
     assert data is None
     assert path.exists(str(test_fp))
-    test_fp.unlink(missing_ok=False)
+    test_fp.unlink()
 
 
 def test_get_headers(ndbc_api):
@@ -302,7 +302,7 @@ def test_station_historical(ndbc_api, mock_socket, read_responses,
 @pytest.mark.private
 def test_handle_timestamp(ndbc_api):
     test_convert_timestamp = '2020-01-01'
-    test_converted_timestamp = datetime.fromisoformat('2020-01-01')
+    test_converted_timestamp = datetime.strptime('2020-01-01', '%Y-%m-%d')
     want = test_converted_timestamp
     got = ndbc_api._handle_timestamp(test_convert_timestamp)
     assert got == want

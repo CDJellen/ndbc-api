@@ -450,7 +450,7 @@ class NdbcApi(metaclass=Singleton):
             return timestamp
         else:
             try:
-                return datetime.fromisoformat(str(timestamp))
+                return datetime.strptime(timestamp, '%Y-%m-%d')
             except ValueError as e:
                 raise TimestampException from e
 

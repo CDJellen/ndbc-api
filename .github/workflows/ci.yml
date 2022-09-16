@@ -30,7 +30,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install -r requirements_dev.txt
-
+          python -m pytest
   Coverage:
     timeout-minutes: 30
     runs-on: ubuntu-latest
