@@ -8,8 +8,8 @@ from tests._config import TESTS_DATA_DIR
 PARSED_TESTS_DIR = TESTS_DATA_DIR.joinpath('api', 'parsed')
 RESPONSES_TESTS_DIR = TESTS_DATA_DIR.joinpath('api', 'responses')
 REQUESTS_TESTS_DIR = TESTS_DATA_DIR.joinpath('api', 'requests')
-TEST_START = datetime.fromisoformat('2020-01-01')
-TEST_END = datetime.fromisoformat('2022-07-15')
+TEST_START = datetime.strptime('2020-01-01', '%Y-%m-%d')
+TEST_END = datetime.strptime('2022-07-15', '%Y-%m-%d')
 
 
 def mock_register_uri(read_requests: List[str],

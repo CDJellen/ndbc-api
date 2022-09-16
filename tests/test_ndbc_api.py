@@ -302,7 +302,7 @@ def test_station_historical(ndbc_api, mock_socket, read_responses,
 @pytest.mark.private
 def test_handle_timestamp(ndbc_api):
     test_convert_timestamp = '2020-01-01'
-    test_converted_timestamp = datetime.fromisoformat('2020-01-01')
+    test_converted_timestamp = datetime.strptime('2020-01-01', '%Y-%m-%d')
     want = test_converted_timestamp
     got = ndbc_api._handle_timestamp(test_convert_timestamp)
     assert got == want
