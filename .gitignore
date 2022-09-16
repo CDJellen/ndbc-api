@@ -23,3 +23,5 @@ Brewfile.lock.json
 *.pickle
 *.ipynb
 dist/
+build/
+.ipynb_checkpoints/
