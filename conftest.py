@@ -5,11 +5,8 @@ import pandas as pd
 import pytest
 import yaml
 
-from tests.api.handlers._base import (
-    PARSED_TESTS_DIR,
-    RESPONSES_TESTS_DIR,
-    REQUESTS_TESTS_DIR,
-)
+from tests.api.handlers._base import (PARSED_TESTS_DIR, REQUESTS_TESTS_DIR,
+                                      RESPONSES_TESTS_DIR)
 
 REQUESTS_FP = list(REQUESTS_TESTS_DIR.glob('*.yml'))
 RESPONSES_FP = list(RESPONSES_TESTS_DIR.glob('*.yml'))

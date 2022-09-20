@@ -1,15 +1,10 @@
+import pytest
 import yaml
 
-import pytest
-
 from ndbc_api.api.requests.spec import SpecRequest
-from tests.api.requests._base import (
-    REALTIME_START,
-    REALTIME_END,
-    HISTORICAL_START,
-    HISTORICAL_END,
-    REQUESTS_TESTS_DIR,
-)
+from tests.api.requests._base import (HISTORICAL_END, HISTORICAL_START,
+                                      REALTIME_END, REALTIME_START,
+                                      REQUESTS_TESTS_DIR)
 
 TEST_FP = REQUESTS_TESTS_DIR.joinpath('spec.yml')
 TEST_STN = '41001'
