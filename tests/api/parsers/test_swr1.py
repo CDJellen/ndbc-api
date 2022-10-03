@@ -1,6 +1,6 @@
+import pandas as pd
 import pytest
 import yaml
-import pandas as pd
 
 from ndbc_api.api.parsers.swr1 import Swr1Parser
 from tests.api.parsers._base import PARSED_TESTS_DIR, RESPONSES_TESTS_DIR

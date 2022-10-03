@@ -4,13 +4,13 @@ import pandas as pd
 import pytest
 
 from ndbc_api.api.handlers.stations import StationsHandler
-from ndbc_api.utilities.req_handler import RequestHandler
-from ndbc_api.api.requests.stations import StationsRequest
 from ndbc_api.api.requests.station_historical import HistoricalRequest
-from ndbc_api.api.requests.station_realtime import RealtimeRequest
 from ndbc_api.api.requests.station_metadata import MetadataRequest
-from tests.api.handlers._base import mock_register_uri
+from ndbc_api.api.requests.station_realtime import RealtimeRequest
+from ndbc_api.api.requests.stations import StationsRequest
 from ndbc_api.exceptions import ResponseException
+from ndbc_api.utilities.req_handler import RequestHandler
+from tests.api.handlers._base import mock_register_uri
 
 TEST_STN = 'TPLM2'
 TEST_STN_REALTIME = '41013'

@@ -1,5 +1,5 @@
-import pytest
 import pandas as pd
+import pytest
 import yaml
 
 from ndbc_api.api.parsers.stations import StationsParser

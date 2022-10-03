@@ -1,12 +1,6 @@
-from ndbc_api.config import (
-    LOGGER_NAME,
-    DEFAULT_CACHE_LIMIT,
-    HTTP_DEBUG,
-    HTTP_DELAY,
-    VERIFY_HTTPS,
-    HTTP_BACKOFF_FACTOR,
-    HTTP_RETRY,
-)
+from ndbc_api.config import (DEFAULT_CACHE_LIMIT, HTTP_BACKOFF_FACTOR,
+                             HTTP_DEBUG, HTTP_DELAY, HTTP_RETRY, LOGGER_NAME,
+                             VERIFY_HTTPS)
 
 
 def test_logger_name():

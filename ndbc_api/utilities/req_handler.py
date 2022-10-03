@@ -24,13 +24,13 @@ Attributes:
     stations (:obj:`list`): A list of `Station`s to which requests have
         been made.
 """
-from typing import Union, List
+from typing import List, Union
 
 import requests
 from urllib3.util import Retry
 
-from .singleton import Singleton
 from .req_cache import RequestCache
+from .singleton import Singleton
 
 
 class RequestHandler(metaclass=Singleton):

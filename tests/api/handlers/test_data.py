@@ -4,7 +4,6 @@ import pandas as pd
 import pytest
 
 from ndbc_api.api.handlers.data import DataHandler
-from ndbc_api.utilities.req_handler import RequestHandler
 from ndbc_api.api.requests.adcp import AdcpRequest
 from ndbc_api.api.requests.cwind import CwindRequest
 from ndbc_api.api.requests.ocean import OceanRequest
@@ -16,12 +15,9 @@ from ndbc_api.api.requests.swdir import SwdirRequest
 from ndbc_api.api.requests.swdir2 import Swdir2Request
 from ndbc_api.api.requests.swr1 import Swr1Request
 from ndbc_api.api.requests.swr2 import Swr2Request
-from tests.api.handlers._base import (
-    TEST_START,
-    TEST_END,
-    mock_register_uri,
-)
 from ndbc_api.exceptions import RequestException, ResponseException
+from ndbc_api.utilities.req_handler import RequestHandler
+from tests.api.handlers._base import TEST_END, TEST_START, mock_register_uri
 
 TEST_STN_ADCP = '41117'
 TEST_STN_CWIND = 'TPLM2'

@@ -2,10 +2,7 @@ import pytest
 
 from ndbc_api.api.requests._base import BaseRequest
 from ndbc_api.api.requests.adcp import AdcpRequest
-from tests.api.requests._base import (
-    REALTIME_END,
-    HISTORICAL_START,
-)
+from tests.api.requests._base import HISTORICAL_START, REALTIME_END
 
 TEST_STN = '41117'
 
