@@ -21,7 +21,7 @@ The National Oceanic and Atmospheric Association's National Data Buoy Center mai
 
 The ndbc-api is a python library that makes this data more widely accessible.
 
-The ndbc-api is primarily built to parse whitespace-delimited oceanographic and atmospheric data distributed as text files for available time ranges, on a station-by-station basis[^2]. Measurements are typically distributed as `utf-8` encoded text files, on a station-by-station, fixed-period files. More information on the measurements and methodology are available [on the NDBC website](https://www.ndbc.noaa.gov/docs/ndbc_web_data_guide.pdf)[^3].
+The ndbc-api is primarily built to parse whitespace-delimited oceanographic and atmospheric data distributed as text files for available time ranges, on a station-by-station basis[^2]. Measurements are typically distributed as `utf-8` encoded, station-by-station, fixed-period text files. More information on the measurements and methodology are available [on the NDBC website](https://www.ndbc.noaa.gov/docs/ndbc_web_data_guide.pdf)[^3].
 
 Please read the documentation for more information:
 https://ndbc-api.readthedocs.io
