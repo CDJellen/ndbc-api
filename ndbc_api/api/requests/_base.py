@@ -47,10 +47,10 @@ class BaseRequest(CoreRequest):
         def req_hist_helper_year(req_year: int) -> str:
             return f'{cls.BASE_URL}{cls.HISTORICAL_URL_PREFIX}{station_id}{cls.HISTORICAL_IDENTIFIER}{req_year}{cls.HISTORICAL_FILE_EXTENSION_SUFFIX}{cls.HISTORICAL_DATA_PREFIX}{cls.HISTORICAL_SUFFIX}{cls.FORMAT}/'
 
-        def req_hist_helper_month(req_month: int) -> str:
+        def req_hist_helper_month(req_year: int, req_month: int) -> str:
             month = month_abbr[req_month]
             month = month.capitalize()
-            return f'{cls.BASE_URL}{cls.HISTORICAL_URL_PREFIX}{station_id}{req_month}{current_year}{cls.HISTORICAL_FILE_EXTENSION_SUFFIX}{cls.HISTORICAL_DATA_PREFIX}{cls.FORMAT}/{month}/'
+            return f'{cls.BASE_URL}{cls.HISTORICAL_URL_PREFIX}{station_id}{req_month}{req_year}{cls.HISTORICAL_FILE_EXTENSION_SUFFIX}{cls.HISTORICAL_DATA_PREFIX}{cls.FORMAT}/{month}/'
 
         def req_hist_helper_month_current(current_month: int) -> str:
             month = month_abbr[current_month]
@@ -61,25 +61,30 @@ class BaseRequest(CoreRequest):
             raise ValueError(
                 'Please provide a format for this historical data request, or call a formatted child class\'s method.'
             )
-
+        # store request urls
         reqs = []
-        current_year = now.year
-        last_available_month = (now - timedelta(days=31)).month
-        has_realtime = (now - end_time) < timedelta(days=44)
 
+        current_year = now.year
+        has_realtime = (now - end_time) < timedelta(days=44)
+        months_req_year = (now - timedelta(days=44)).year
+        last_avail_month = (now - timedelta(days=44)).month
+
+        # handle year requests
         for hist_year in range(int(start_time.year),
                                min(int(current_year),
                                    int(end_time.year) + 1)):
             reqs.append(req_hist_helper_year(hist_year))
-        if end_time.year == current_year:
+        
+        # handle month requests
+        if end_time.year == months_req_year:
             for hist_month in range(
                     int(start_time.month),
-                    min(int(end_time.month) + 1, int(last_available_month)),
+                    min(int(end_time.month), int(last_avail_month))+1
             ):
-                reqs.append(req_hist_helper_month(hist_month))
-            if int(last_available_month) <= (end_time.month):
+                reqs.append(req_hist_helper_month(months_req_year, hist_month))
+            if int(last_avail_month) <= (end_time.month):
                 reqs.append(
-                    req_hist_helper_month_current(int(last_available_month)))
+                    req_hist_helper_month_current(int(last_avail_month)))
 
         if has_realtime:
             reqs.append(
