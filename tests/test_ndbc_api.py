@@ -246,9 +246,10 @@ def test_get_modes(ndbc_api):
 
 
 @pytest.mark.usefixtures('mock_socket', 'read_responses', 'read_parsed_yml')
-def test_station_realtime(ndbc_api, mock_socket, read_responses,
+def test_station_realtime(ndbc_api, monkeypatch, mock_socket, read_responses,
                           read_parsed_yml):
     _ = mock_socket
+    monkeypatch.setenv('MOCKDATE', '2022-08-13')
     reqs = RealtimeRequest.build_request(station_id=TEST_STN_REALTIME,)
     assert len([reqs]) == len(read_responses['realtime'].values())
     mock_register_uri([reqs], list(read_responses['realtime'].values()))
@@ -269,9 +270,10 @@ def test_station_realtime(ndbc_api, mock_socket, read_responses,
 
 
 @pytest.mark.usefixtures('mock_socket', 'read_responses', 'read_parsed_yml')
-def test_station_historical(ndbc_api, mock_socket, read_responses,
+def test_station_historical(ndbc_api, monkeypatch, mock_socket, read_responses,
                             read_parsed_yml):
     _ = mock_socket
+    monkeypatch.setenv('MOCKDATE', '2022-08-13')
     reqs = HistoricalRequest.build_request(station_id=TEST_STN_STDMET,)
     assert len([reqs]) == len(read_responses['historical'].values())
     mock_register_uri([reqs], list(read_responses['historical'].values()))
