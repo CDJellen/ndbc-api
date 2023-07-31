@@ -11,9 +11,9 @@ class BaseParser:
 
     HEADER_PREFIX = '#'
     NAN_VALUES = ['MM']
-    DATE_PARSER = lambda x: datetime.strptime(x, '%Y %m %d %H %M')
+    DATE_PARSER = '%Y %m %d %H %M'
     PARSE_DATES = ['YY', 'MM', 'DD', 'hh', 'mm']
-    INDEX_COL = None
+    INDEX_COL = False
     REVERT_COL_NAMES = []
 
     @classmethod
@@ -47,24 +47,29 @@ class BaseParser:
             names = cls.REVERT_COL_NAMES
         if '(' in data[0]:
             data = cls._clean_data(data)
-        # check whether to parse dates
-        if use_timestamp:
-            parse_dates = {'timestamp': cls.PARSE_DATES}
-        else:
-            parse_dates = False
+        
         try:
+            parse_dates = False
+            date_format = None
+            if use_timestamp:
+                parse_dates = [cls.PARSE_DATES]
+                date_format = cls.DATE_PARSER
             df = pd.read_csv(
                 StringIO('\n'.join(data)),
                 names=names,
                 delim_whitespace=True,
                 na_values=cls.NAN_VALUES,
-                parse_dates=parse_dates,
-                date_parser=cls.DATE_PARSER,
                 index_col=cls.INDEX_COL,
+                parse_dates=parse_dates,
+                date_format=date_format,
             )
+            if use_timestamp:
+                df.index.name = 'timestamp'
+            
         except (NotImplementedError, TypeError, ValueError) as e:
             return pd.DataFrame()
-
+        
+        # check whether to parse dates
         return df
 
     @staticmethod
