@@ -9,7 +9,8 @@ class RealtimeParser(StationParser):
     def available_measurements(cls, response: dict) -> dict:
         if response.get('status') == 200:
             soup = bs4.BeautifulSoup(response.get('body'), 'html.parser')
-            line_items = soup.find_all('li')
+            items = soup.find('section', {"class": "data"})
+            line_items = items.find_all('li')
             return cls._build_available_measurements(line_items=line_items)
         else:
             return dict()
