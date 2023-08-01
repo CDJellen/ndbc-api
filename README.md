@@ -23,8 +23,7 @@ The ndbc-api is a python library that makes this data more widely accessible.
 
 The ndbc-api is primarily built to parse whitespace-delimited oceanographic and atmospheric data distributed as text files for available time ranges, on a station-by-station basis[^2]. Measurements are typically distributed as `utf-8` encoded, station-by-station, fixed-period text files. More information on the measurements and methodology are available [on the NDBC website](https://www.ndbc.noaa.gov/docs/ndbc_web_data_guide.pdf)[^3].
 
-Please read the documentation for more information:
-https://ndbc-api.readthedocs.io
+Please see [the included example notebook](/notebooks/overview.ipynb) for a more detailed walkthrough of the API's capabilities.
 
 [^1]: https://www.ndbc.noaa.gov/
 [^2]: https://www.ndbc.noaa.gov/obs.shtml
@@ -203,7 +202,7 @@ wspd_df = api.get_data(
 ```
 
 #### More Information
-see the [documentation](https://ndbc-api.readthedocs.io/en/latest/) for more info.
+Please see [the included example notebook](/notebooks/overview.ipynb) for a more detailed walkthrough of the API's capabilities.
 
 
 #### Questions
