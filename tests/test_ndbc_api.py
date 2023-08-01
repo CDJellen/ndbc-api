@@ -307,7 +307,7 @@ def test_handle_timestamp(ndbc_api):
 
 
 @pytest.mark.private
-def test_enfore_timerange(ndbc_api, read_parsed_df):
+def test_enforce_timerange(ndbc_api, read_parsed_df):
     name = ndbc_api.get_modes()[-1]
     data = read_parsed_df[name]
     with pytest.raises(TimestampException):
@@ -318,7 +318,7 @@ def test_enfore_timerange(ndbc_api, read_parsed_df):
 def test_handle_data(ndbc_api, read_parsed_df):
     name = ndbc_api.get_modes()[-1]
     data = read_parsed_df[name]
-    want = data.copy()
+    want = data.copy().T
     got = ndbc_api._handle_data(data.copy().to_dict(), as_df=True, cols=None)
     pd.testing.assert_frame_equal(want,
                                   got,
@@ -332,7 +332,8 @@ def test_handle_data(ndbc_api, read_parsed_df):
                 'foo': ['bar', 'foobar'],
                 'baz': {
                     'bar': 'bazbar'
-                }
+                },
+                'foobar': None
             },
             as_df=True,
             cols=None)
