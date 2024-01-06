@@ -25,4 +25,4 @@ Brewfile.lock.json
 dist/
 build/
 .ipynb_checkpoints/
-!notebooks/example.ipynb
+!notebooks/overview.ipynb

@@ -471,8 +471,8 @@ class NdbcApi(metaclass=Singleton):
             return data.to_dict()
         elif as_df:
             try:
-                return pd.DataFrame().from_dict(data)
-            except (NotImplementedError, ValueError) as e:
+                return pd.DataFrame().from_dict(data, orient='index')
+            except (NotImplementedError, ValueError, TypeError) as e:
                 raise HandlerException(
                     'Failed to convert `pd.DataFrame` to `dict`.') from e
         else:
