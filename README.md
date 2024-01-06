@@ -166,7 +166,7 @@ print(modes)
     'supl',
     'swden',
     'swdir',
-    'swdir2,
+    'swdir2',
     'swr1',
     'swr2'
 ]

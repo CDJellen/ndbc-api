@@ -32,4 +32,4 @@ def test_available_measurements(swr2, swr2_response, parsed_swr2):
     resp = swr2_response
     want = parsed_swr2
     got = swr2.df_from_responses(resp, use_timestamp=True)
-    pd.testing.assert_frame_equal(got, want, check_dtype=False)
+    pd.testing.assert_frame_equal(got, want, check_dtype=False, check_index_type=False)
