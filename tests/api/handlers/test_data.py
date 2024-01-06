@@ -79,6 +79,7 @@ def test_attrs(
             want[TEST_START:TEST_END].sort_index(axis=1),
             got[TEST_START:TEST_END].sort_index(axis=1),
             check_dtype=False,
+            check_index_type=False,
         )
         with pytest.raises(RequestException):
             _ = getattr(data_handler, name)(

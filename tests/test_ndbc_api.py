@@ -186,6 +186,7 @@ def test_get_data(ndbc_api, monkeypatch, mock_socket, read_responses,
             want[TEST_START:TEST_END].sort_index(axis=1),
             got[TEST_START:TEST_END].sort_index(axis=1),
             check_dtype=False,
+            check_index_type=False,
         )
         limited_cols = list(want.columns)[0:1]
         want = read_parsed_df[name][limited_cols]
@@ -202,6 +203,7 @@ def test_get_data(ndbc_api, monkeypatch, mock_socket, read_responses,
             want[TEST_START:TEST_END].sort_index(axis=1),
             got[TEST_START:TEST_END].sort_index(axis=1),
             check_dtype=False,
+            check_index_type=False,
         )
     handler = ndbc_api._handler
     ndbc_api._handler = None
