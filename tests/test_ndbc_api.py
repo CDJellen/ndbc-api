@@ -156,7 +156,15 @@ def test_station(ndbc_api, mock_socket, read_responses, read_parsed_yml):
     assert got == want
     got = ndbc_api.nearest_station(lat=38.88, lon=76.43)
     assert got == want
-
+    with pytest.raises(Exception):
+        _ = ndbc_api.radial_search(lat=None, lon=76.43, radius=100)
+    with pytest.raises(Exception):
+        _ = ndbc_api.nearest_station(lat='38.88N', lon='76.43W', radius=-100)
+    with pytest.raises(Exception):
+        _ = ndbc_api.nearest_station(lat='38.88N', lon='76.43W', radius=100, units='foo')
+    got = ndbc_api.radial_search(lat='38.88N', lon='76.43W', radius=100)
+    assert isinstance(got, pd.DataFrame)
+    assert got.shape[0] > 0
 
 @pytest.mark.slow
 @pytest.mark.usefixtures('mock_socket', 'read_responses', 'read_parsed_df')

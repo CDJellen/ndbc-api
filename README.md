@@ -111,6 +111,23 @@ print(nearest_station)
 'tplm2'
 ```
 
+###### `radial_search`
+
+```python3
+# specify desired latitude, longitude, radius, and units
+lat = '38.88N'
+lon = '76.43W'
+radius = 100
+units = 'km'
+
+# find the station IDs of all NDBC stations within the radius
+nearby_stations_df = api.radial_search(lat=lat, lon=lon, radius=radius, units=units)
+```
+
+```python3
+'tplm2'
+```
+
 ###### `station`
 
 ```python3

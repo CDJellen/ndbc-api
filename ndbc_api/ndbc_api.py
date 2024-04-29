@@ -27,6 +27,7 @@ Attributes:
 """
 import logging
 import pickle
+import warnings
 from datetime import datetime, timedelta
 from typing import Any, List, Union
 
@@ -70,6 +71,7 @@ class NdbcApi(metaclass=Singleton):
     """
 
     log = logging.getLogger(LOGGER_NAME)
+    warnings.simplefilter(action='ignore', category=FutureWarning)
 
     def __init__(
         self,
@@ -221,6 +223,43 @@ class NdbcApi(metaclass=Singleton):
         nearest_station = self._stations_api.nearest_station(
             handler=self._handler, lat=lat, lon=lon)
         return nearest_station
+    
+    def radial_search(
+        self,
+        lat: Union[str, float, None] = None,
+        lon: Union[str, float, None] = None,
+        radius: float = -1,
+        units: str = 'km',
+    ) -> pd.DataFrame:
+        """Get all stations within radius units of the specified lat/lon.
+
+        Use the NDBC data service's current station data to determine the
+        stations within radius of the specified latitude and longitude
+        (passed either as `float` or as DD.dd[E/W] strings).
+
+        Args:
+            lat: The latitude of interest, used to determine the maintained
+                stations within radius units of the given position.
+            lon: The longitude of interest, used to determine the maintained
+                stations within radius units of the given position.
+            radius: The radius in the specified units to search for stations
+                within.
+            units: The units of the radius, either 'nm', 'km', or 'mi'.
+
+        Returns:
+            A `pandas.DataFrame` of the stations within the specified radius of
+            the given lat/lon pair.
+
+        Raises:
+            ValueError: The latitude and longitude were not both specified when
+                querying for the closest station, or the radius or units are
+                invalid.
+        """
+        if not (lat and lon):
+            raise ValueError('lat and lon must be specified.')
+        stations_in_radius = self._stations_api.radial_search(
+            handler=self._handler, lat=lat, lon=lon, radius=radius, units=units)
+        return stations_in_radius
 
     def station(self,
                 station_id: Union[str, int],
