@@ -462,6 +462,9 @@ class NdbcApi(metaclass=Singleton):
                 self.log.error(f'Failed to process request for station_id {station_id} '
                                f'and mode {mode} with error: {e}')
                 continue
+        # check that we have some response
+        if len(accumulated_data) == 0:
+            return pd.DataFrame() if as_df else {}
         # handle the default case where a single station_id and mode are specified
         if len(accumulated_data) == 1:
             return accumulated_data[0][0]
