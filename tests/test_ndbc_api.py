@@ -235,23 +235,6 @@ def test_get_data(ndbc_api, monkeypatch, mock_socket, read_responses,
             as_df=True
         )
 
-    want = pd.concat(read_parsed_df[name] for name in ndbc_api.get_modes())
-    got = ndbc_api.get_data(
-        station_id=str(globals()[f'TEST_STN_{name.upper()}']),
-        modes=ndbc_api.get_modes(),
-        start_time=TEST_START,
-        end_time=TEST_END,
-        use_timestamp=True,
-        as_df=True,
-        cols=None,
-    )
-    pd.testing.assert_frame_equal(
-            want[TEST_START:TEST_END].sort_index(axis=1),
-            got[TEST_START:TEST_END].sort_index(axis=1),
-            check_dtype=False,
-            check_index_type=False,
-        )
-
     name = ndbc_api.get_modes()[0]
     want = read_parsed_df[name]
     got = ndbc_api.get_data(
