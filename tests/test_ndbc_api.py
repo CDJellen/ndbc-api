@@ -213,6 +213,44 @@ def test_get_data(ndbc_api, monkeypatch, mock_socket, read_responses,
             check_dtype=False,
             check_index_type=False,
         )
+
+    want = read_parsed_df[name]
+    got = ndbc_api.get_data(
+        station_ids=[str(globals()[f'TEST_STN_{name.upper()}'])],
+        modes=[name],
+        start_time=TEST_START,
+        end_time=TEST_END,
+        use_timestamp=True,
+        as_df=True,
+    )
+    pd.testing.assert_frame_equal(
+        want[TEST_START:TEST_END].sort_index(axis=1),
+        got[TEST_START:TEST_END].sort_index(axis=1),
+        check_dtype=False,
+        check_index_type=False,
+    )
+    
+    with pytest.raises(ValueError):
+        _ = ndbc_api.get_data(
+            station_id='foo',
+            station_ids=['foo'],
+            mode=name,
+            start_time=TEST_START,
+            end_time=TEST_END,
+            use_timestamp=True,
+            as_df=True
+        )
+    with pytest.raises(ValueError):
+        _ = ndbc_api.get_data(
+            station_ids=[str(globals()[f'TEST_STN_{name.upper()}'])],
+            mode=name,
+            modes=[name],
+            start_time=TEST_START,
+            end_time=TEST_END,
+            use_timestamp=True,
+            as_df=True
+        )
+
     handler = ndbc_api._handler
     ndbc_api._handler = None
     with pytest.raises(ResponseException):
@@ -236,7 +274,7 @@ def test_get_data(ndbc_api, monkeypatch, mock_socket, read_responses,
             as_df=True,
             cols=['FOOBAR'],
         )
-    with pytest.raises(RequestException):
+    with pytest.raises(ResponseException):
         _ = ndbc_api.get_data(
             station_id=globals()[f'TEST_STN_{name.upper()}'],
             mode='foo',
@@ -352,3 +390,21 @@ def test_handle_data(ndbc_api, read_parsed_df):
     assert isinstance(want, dict)
     assert isinstance(got, dict)
     assert len(want.keys()) == len(got.keys())
+
+
+@pytest.mark.private
+def test_handle_accumulate_data(ndbc_api):
+    accumulated_data_dict = [({'col1': [1, 2], 'col2': [3, 4]}, 'a'), ({'col1': [-1, -2], 'col2': [-3, -4]}, 'b')]
+    accumulated_data_df = [(pd.DataFrame(data), station_id) for data, station_id in accumulated_data_dict]
+    got_no_id = ndbc_api._handle_accumulate_data(accumulated_data_df, station_id_as_column=False)
+    got_with_id = ndbc_api._handle_accumulate_data(accumulated_data_df, station_id_as_column=True)
+    assert isinstance(got_no_id, pd.DataFrame)
+    assert isinstance(got_with_id, pd.DataFrame)
+    assert got_no_id.shape[0] == got_with_id.shape[0]
+    assert got_no_id.shape[1] != got_with_id.shape[1]  # we have an extra column
+
+    got_no_id = ndbc_api._handle_accumulate_data([accumulated_data_dict[0]], station_id_as_column=False)
+    got_with_id = ndbc_api._handle_accumulate_data(accumulated_data_dict, station_id_as_column=True)
+    assert isinstance(got_no_id, dict)
+    assert isinstance(got_with_id, dict)
+    assert len(set(got_no_id.keys()) & set(got_with_id.keys())) == 0

@@ -216,6 +216,21 @@ wspd_df = api.get_data(
     as_df=True,
     cols=['WSPD']
 )
+# get all standard meterological measurements for stations tplm2 and apam2
+stdmet_df = api.get_data(
+    station_ids=['tplm2', 'apam2'],
+    mode='stdmet',
+    start_time='2022-01-01',
+    end_time='2023-01-01',
+)
+# get all (available) continuous wind and standard meterological measurements for stations tplm2 and apam2
+# for station apam2, this is unavailable and will log an error but not affect the rest of the results.
+stdmet_df = api.get_data(
+    station_ids=['tplm2', 'apam2'],
+    modes=['stdmet', 'cwind'],
+    start_time='2022-01-01',
+    end_time='2023-01-01',
+)
 ```
 
 #### More Information
