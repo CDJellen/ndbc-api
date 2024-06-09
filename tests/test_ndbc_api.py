@@ -213,6 +213,22 @@ def test_get_data(ndbc_api, monkeypatch, mock_socket, read_responses,
             check_dtype=False,
             check_index_type=False,
         )
+
+    want = read_parsed_df[name]
+    got = ndbc_api.get_data(
+        station_ids=[str(globals()[f'TEST_STN_{name.upper()}'])],
+        modes=[name],
+        start_time=TEST_START,
+        end_time=TEST_END,
+        use_timestamp=True,
+        as_df=True,
+    )
+    pd.testing.assert_frame_equal(
+        want[TEST_START:TEST_END].sort_index(axis=1),
+        got[TEST_START:TEST_END].sort_index(axis=1),
+        check_dtype=False,
+        check_index_type=False,
+    )
     
     with pytest.raises(ValueError):
         _ = ndbc_api.get_data(
@@ -234,23 +250,6 @@ def test_get_data(ndbc_api, monkeypatch, mock_socket, read_responses,
             use_timestamp=True,
             as_df=True
         )
-
-    name = ndbc_api.get_modes()[0]
-    want = read_parsed_df[name]
-    got = ndbc_api.get_data(
-        station_ids=[str(globals()[f'TEST_STN_{name.upper()}'])],
-        modes=[name],
-        start_time=TEST_START,
-        end_time=TEST_END,
-        use_timestamp=True,
-        as_df=True,
-    )
-    pd.testing.assert_frame_equal(
-        want[TEST_START:TEST_END].sort_index(axis=1),
-        got[TEST_START:TEST_END].sort_index(axis=1),
-        check_dtype=False,
-        check_index_type=False,
-    )
 
     handler = ndbc_api._handler
     ndbc_api._handler = None
