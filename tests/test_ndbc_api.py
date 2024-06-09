@@ -244,7 +244,6 @@ def test_get_data(ndbc_api, monkeypatch, mock_socket, read_responses,
         end_time=TEST_END,
         use_timestamp=True,
         as_df=True,
-        cols=limited_cols,
     )
     pd.testing.assert_frame_equal(
         want[TEST_START:TEST_END].sort_index(axis=1),
