@@ -464,7 +464,8 @@ class NdbcApi(metaclass=Singleton):
                 continue
         # check that we have some response
         if len(accumulated_data) == 0:
-            return pd.DataFrame() if as_df else {}
+            raise ResponseException(f'No data was returned for station_ids {handle_station_ids} '
+                                    f'and modes {handle_modes}')
         # handle the default case where a single station_id and mode are specified
         if len(accumulated_data) == 1:
             return accumulated_data[0][0]
