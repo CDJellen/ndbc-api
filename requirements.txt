@@ -1,4 +1,4 @@
 requests>=2.10.0
 pandas
-bs4
+beautifulsoup4
 html5lib>=1.1
