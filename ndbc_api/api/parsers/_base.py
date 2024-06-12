@@ -47,7 +47,7 @@ class BaseParser:
             names = cls.REVERT_COL_NAMES
         if '(' in data[0]:
             data = cls._clean_data(data)
-        
+
         try:
             parse_dates = False
             date_format = None
@@ -65,10 +65,10 @@ class BaseParser:
             )
             if use_timestamp:
                 df.index.name = 'timestamp'
-            
+
         except (NotImplementedError, TypeError, ValueError) as e:
             return pd.DataFrame()
-        
+
         # check whether to parse dates
         return df
 

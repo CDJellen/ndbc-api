@@ -225,7 +225,7 @@ class NdbcApi(metaclass=Singleton):
         nearest_station = self._stations_api.nearest_station(
             handler=self._handler, lat=lat, lon=lon)
         return nearest_station
-    
+
     def radial_search(
         self,
         lat: Union[str, float, None] = None,
@@ -430,7 +430,7 @@ class NdbcApi(metaclass=Singleton):
             raise ValueError('Both `mode` and `modes` are `None`.')
         if mode is not None and modes is not None:
             raise ValueError('`mode` and `modes` cannot both be specified.')
-        
+
         handle_station_ids: List[Union[int, str]] = []
         handle_modes: List[str] = []
         station_id_as_column: bool = True if station_id is None else False
@@ -443,44 +443,46 @@ class NdbcApi(metaclass=Singleton):
             handle_modes.append(mode)
         if modes is not None:
             handle_modes.extend(modes)
-        
+
         # accumulated_data records the handled response and parsed station_id
         # as a tuple, with the data as the first value and the id as the second.
         accumulated_data: List[Tuple[Union[pd.DataFrame, dict], str]] = []
-        with ThreadPoolExecutor(max_workers=len(handle_station_ids) * len(handle_modes)) as executor:
+        with ThreadPoolExecutor(max_workers=len(handle_station_ids) *
+                                len(handle_modes)) as executor:
             futures = [
-                executor.submit(
-                    self._handle_get_data,
-                    station_id=station_id,
-                    mode=mode,
-                    start_time=start_time,
-                    end_time=end_time,
-                    use_timestamp=use_timestamp,
-                    as_df=as_df,
-                    cols=cols
-                )
-                for station_id, mode in itertools.product(handle_station_ids, handle_modes)
+                executor.submit(self._handle_get_data,
+                                station_id=station_id,
+                                mode=mode,
+                                start_time=start_time,
+                                end_time=end_time,
+                                use_timestamp=use_timestamp,
+                                as_df=as_df,
+                                cols=cols)
+                for station_id, mode in itertools.product(
+                    handle_station_ids, handle_modes)
             ]
             for future in futures:
                 try:
                     data = future.result()
                     accumulated_data.append(data)
-                except (RequestException, ResponseException, HandlerException) as e:
+                except (RequestException, ResponseException,
+                        HandlerException) as e:
                     self.log.error(
                         f"Failed to process request for station_id {station_id} "
-                        f"and mode {mode} with error: {e}"
-                    )
+                        f"and mode {mode} with error: {e}")
                     continue
 
         # check that we have some response
         if len(accumulated_data) == 0:
-            raise ResponseException(f'No data was returned for station_ids {handle_station_ids} '
-                                    f'and modes {handle_modes}')
+            raise ResponseException(
+                f'No data was returned for station_ids {handle_station_ids} '
+                f'and modes {handle_modes}')
         # handle the default case where a single station_id and mode are specified
         if len(accumulated_data) == 1:
             return accumulated_data[0][0]
         # handle the case where multiple station_ids and modes are specified
-        return self._handle_accumulate_data(accumulated_data, station_id_as_column)
+        return self._handle_accumulate_data(accumulated_data,
+                                            station_id_as_column)
 
     def get_modes(self):
         """Get the list of supported modes for `get_data(...)`."""
@@ -563,15 +565,14 @@ class NdbcApi(metaclass=Singleton):
                     'Failed to convert `pd.DataFrame` to `dict`.') from e
         else:
             return data
-    
+
     @staticmethod
     def _handle_accumulate_data(
-        accumulated_data: List[Tuple[Union[pd.DataFrame, dict], str]],
-        station_id_as_column: bool = False
-    ) -> Union[pd.DataFrame, dict]:
+            accumulated_data: List[Tuple[Union[pd.DataFrame, dict], str]],
+            station_id_as_column: bool = False) -> Union[pd.DataFrame, dict]:
         return_as_df = isinstance(accumulated_data[0][0], pd.DataFrame)
         data: Union[List[pd.DataFrame], dict] = [] if return_as_df else {}
-   
+
         for d in accumulated_data:
             if return_as_df:
                 if station_id_as_column:
@@ -582,7 +583,9 @@ class NdbcApi(metaclass=Singleton):
                 if station_id_as_column:
                     # the keys need to be updated to include the station_id
                     # as a prefix before we update the `data` dict.
-                    d_data = {f'{d_station_id}_{k}': v for k, v in d_data.items()}
+                    d_data = {
+                        f'{d_station_id}_{k}': v for k, v in d_data.items()
+                    }
                 # the keys across modes should be unique so a simple update
                 # is sufficient.
                 data.update(d_data)
@@ -592,15 +595,14 @@ class NdbcApi(metaclass=Singleton):
         return data
 
     def _handle_get_data(
-        self,
-        mode: str,
-        station_id: str,
-        start_time: datetime,
-        end_time: datetime,
-        use_timestamp: bool,
-        as_df: bool = True,
-        cols: List[str] = None
-    ) -> Tuple[Union[pd.DataFrame, dict], str]:
+            self,
+            mode: str,
+            station_id: str,
+            start_time: datetime,
+            end_time: datetime,
+            use_timestamp: bool,
+            as_df: bool = True,
+            cols: List[str] = None) -> Tuple[Union[pd.DataFrame, dict], str]:
         start_time = self._handle_timestamp(start_time)
         end_time = self._handle_timestamp(end_time)
         station_id = self._parse_station_id(station_id)
@@ -617,7 +619,8 @@ class NdbcApi(metaclass=Singleton):
                 use_timestamp,
             )
         except (ResponseException, ValueError, TypeError, KeyError) as e:
-            raise ResponseException(f'Failed to handle API call.\nRaised from {e}') from e
+            raise ResponseException(
+                f'Failed to handle API call.\nRaised from {e}') from e
         if use_timestamp:
             data = self._enforce_timerange(df=data,
                                            start_time=start_time,
@@ -625,6 +628,7 @@ class NdbcApi(metaclass=Singleton):
         try:
             handled_data = self._handle_data(data, as_df, cols)
         except (ValueError, KeyError, AttributeError) as e:
-            raise ParserException(f'Failed to handle returned data.\nRaised from {e}') from e
+            raise ParserException(
+                f'Failed to handle returned data.\nRaised from {e}') from e
 
         return (handled_data, station_id)
