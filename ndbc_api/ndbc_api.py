@@ -42,6 +42,7 @@ from .exceptions import (HandlerException, ParserException, RequestException,
                          ResponseException, TimestampException)
 from .utilities.req_handler import RequestHandler
 from .utilities.singleton import Singleton
+from concurrent.futures import ThreadPoolExecutor
 
 
 class NdbcApi(metaclass=Singleton):
@@ -446,9 +447,10 @@ class NdbcApi(metaclass=Singleton):
         # accumulated_data records the handled response and parsed station_id
         # as a tuple, with the data as the first value and the id as the second.
         accumulated_data: List[Tuple[Union[pd.DataFrame, dict], str]] = []
-        for station_id, mode in itertools.product(handle_station_ids, handle_modes):
-            try:
-                data = self._handle_get_data(
+        with ThreadPoolExecutor(max_workers=len(handle_station_ids) * len(handle_modes)) as executor:
+            futures = [
+                executor.submit(
+                    self._handle_get_data,
                     station_id=station_id,
                     mode=mode,
                     start_time=start_time,
@@ -457,11 +459,19 @@ class NdbcApi(metaclass=Singleton):
                     as_df=as_df,
                     cols=cols
                 )
-                accumulated_data.append(data)
-            except (RequestException, ResponseException, HandlerException) as e:
-                self.log.error(f'Failed to process request for station_id {station_id} '
-                               f'and mode {mode} with error: {e}')
-                continue
+                for station_id, mode in itertools.product(handle_station_ids, handle_modes)
+            ]
+            for future in futures:
+                try:
+                    data = future.result()
+                    accumulated_data.append(data)
+                except (RequestException, ResponseException, HandlerException) as e:
+                    self.log.error(
+                        f"Failed to process request for station_id {station_id} "
+                        f"and mode {mode} with error: {e}"
+                    )
+                    continue
+
         # check that we have some response
         if len(accumulated_data) == 0:
             raise ResponseException(f'No data was returned for station_ids {handle_station_ids} '
