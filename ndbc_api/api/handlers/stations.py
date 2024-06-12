@@ -55,7 +55,7 @@ class StationsHandler(BaseHandler):
             raise ParserException from e
         closest = closest.to_dict().get('Station', {'UNK': 'UNK'})
         return list(closest.values())[0]
-    
+
     @classmethod
     def radial_search(
         cls,
@@ -67,7 +67,8 @@ class StationsHandler(BaseHandler):
     ) -> pd.DataFrame:
         """Get stations within <radius> of the specified lat/lon."""
         if units not in cls.UNITS:
-            raise ValueError(f'Invalid unit: {units}, must be one of {cls.UNITS}.')
+            raise ValueError(
+                f'Invalid unit: {units}, must be one of {cls.UNITS}.')
         if radius < 0:
             raise ValueError(f'Invalid radius: {radius}, must be non-negative.')
         # pass the radius in km
@@ -75,7 +76,7 @@ class StationsHandler(BaseHandler):
             radius = radius * 1.852
         elif units == 'mi':
             radius = radius * 1.60934
-        
+
         df = cls.stations(handler=handler)
         if isinstance(lat, str):
             lat = StationsHandler.LAT_MAP(lat)
@@ -122,14 +123,15 @@ class StationsHandler(BaseHandler):
         return HistoricalParser.available_measurements(resp)
 
     """ PRIVATE """
+
     def _distance(lat_a: float, lon_a: float, lat_b: float,
-                      lon_b: float) -> float:
-            haversine = (0.5 - cos(
-                (lat_b - lat_a) * StationsHandler.DEG_TO_RAD) / 2 +
-                         cos(lat_a * StationsHandler.DEG_TO_RAD) *
-                         cos(lat_b * StationsHandler.DEG_TO_RAD) * (1 - cos(
-                             (lon_b - lon_a) * StationsHandler.DEG_TO_RAD)) / 2)
-            return StationsHandler.DIAM_OF_EARTH * asin(sqrt(haversine))
+                  lon_b: float) -> float:
+        haversine = (0.5 - cos(
+            (lat_b - lat_a) * StationsHandler.DEG_TO_RAD) / 2 +
+                     cos(lat_a * StationsHandler.DEG_TO_RAD) *
+                     cos(lat_b * StationsHandler.DEG_TO_RAD) * (1 - cos(
+                         (lon_b - lon_a) * StationsHandler.DEG_TO_RAD)) / 2)
+        return StationsHandler.DIAM_OF_EARTH * asin(sqrt(haversine))
 
     @staticmethod
     def _nearest(df: pd.DataFrame, lat_a: float, lon_a: float):
@@ -140,11 +142,14 @@ class StationsHandler(BaseHandler):
             StationsHandler.LAT_MAP(r[0].split(' ')[0]),
             StationsHandler.LON_MAP(r[0].split(' ')[1]),
         ) for idx, r in enumerate(ls)]
-        closest = min(ls, key=lambda p: StationsHandler._distance(lat_a, lon_a, p[1], p[2]))
+        closest = min(
+            ls,
+            key=lambda p: StationsHandler._distance(lat_a, lon_a, p[1], p[2]))
         return df.iloc[[closest[0]]]
 
     @staticmethod
-    def _radial_search(df: pd.DataFrame, lat_a: float, lon_a: float, radius: float):
+    def _radial_search(df: pd.DataFrame, lat_a: float, lon_a: float,
+                       radius: float):
         """Get the stations within radius km from specified `float`-valued lat/lon."""
         ls = list(df[['Location Lat/Long']].to_records(index=False))
         ls = [(
@@ -152,5 +157,8 @@ class StationsHandler(BaseHandler):
             StationsHandler.LAT_MAP(r[0].split(' ')[0]),
             StationsHandler.LON_MAP(r[0].split(' ')[1]),
         ) for idx, r in enumerate(ls)]
-        stations = [p for p in ls if StationsHandler._distance(lat_a, lon_a, p[1], p[2]) <= radius]
+        stations = [
+            p for p in ls
+            if StationsHandler._distance(lat_a, lon_a, p[1], p[2]) <= radius
+        ]
         return df.iloc[[p[0] for p in stations]]

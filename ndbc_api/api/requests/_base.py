@@ -74,17 +74,16 @@ class BaseRequest(CoreRequest):
                                min(int(current_year),
                                    int(end_time.year) + 1)):
             reqs.append(req_hist_helper_year(hist_year))
-        
+
         # handle month requests
         if end_time.year == months_req_year:
             for hist_month in range(
                     int(start_time.month),
-                    min(int(end_time.month), int(last_avail_month))+1
-            ):
+                    min(int(end_time.month), int(last_avail_month)) + 1):
                 reqs.append(req_hist_helper_month(months_req_year, hist_month))
             if int(last_avail_month) <= (end_time.month):
-                reqs.append(
-                    req_hist_helper_month_current(int(last_avail_month)))
+                reqs.append(req_hist_helper_month_current(
+                    int(last_avail_month)))
 
         if has_realtime:
             reqs.append(
