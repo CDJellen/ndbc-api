@@ -1,0 +1,28 @@
+[tool.poetry]
+name = "ndbc-api"
+version = "0.24.06.12.1"
+description = "A Python API for the National Data Buoy Center."
+authors = ["cdjellen <cdjellen@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.8,<3.13"
+requests = ">=2.10.0"
+pandas = ">=1.5.3"
+beautifulsoup4 = "~4"
+html5lib = "^1.1"
+
+[tool.poetry.group.dev.dependencies]
+coveralls = ">=4.0.1"
+httpretty = ">=0.9.1"
+pytest = ">=7.1.2"
+pytest-cov = ">=3.0.0"
+pyyaml = ">=6.0"
+pyarrow = "~16"
+yapf = ">=0.30"
+setuptools = ">=61.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
