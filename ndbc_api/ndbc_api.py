@@ -449,8 +449,8 @@ class NdbcApi(metaclass=Singleton):
         accumulated_data: List[Tuple[Union[pd.DataFrame, dict], str]] = []
         with ThreadPoolExecutor(max_workers=len(handle_station_ids) *
                                 len(handle_modes)) as executor:
-            data_requests = itertools.product(
-                    handle_station_ids, handle_modes)
+            data_requests = list(itertools.product(
+                    handle_station_ids, handle_modes))
             futures = [
                 executor.submit(self._handle_get_data,
                                 station_id=station_id,
