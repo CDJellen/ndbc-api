@@ -449,6 +449,8 @@ class NdbcApi(metaclass=Singleton):
         accumulated_data: List[Tuple[Union[pd.DataFrame, dict], str]] = []
         with ThreadPoolExecutor(max_workers=len(handle_station_ids) *
                                 len(handle_modes)) as executor:
+            data_requests = itertools.product(
+                    handle_station_ids, handle_modes)
             futures = [
                 executor.submit(self._handle_get_data,
                                 station_id=station_id,
@@ -458,18 +460,17 @@ class NdbcApi(metaclass=Singleton):
                                 use_timestamp=use_timestamp,
                                 as_df=as_df,
                                 cols=cols)
-                for station_id, mode in itertools.product(
-                    handle_station_ids, handle_modes)
+                for station_id, mode in data_requests
             ]
-            for future in futures:
+            for i, future in enumerate(futures):
                 try:
                     data = future.result()
                     accumulated_data.append(data)
                 except (RequestException, ResponseException,
                         HandlerException) as e:
                     self.log.error(
-                        f"Failed to process request for station_id {station_id} "
-                        f"and mode {mode} with error: {e}")
+                        f"Failed to process request for station_id {data_requests[i][0]} "
+                        f"and mode {data_requests[i][1]} with error: {e}")
                     continue
 
         # check that we have some response
