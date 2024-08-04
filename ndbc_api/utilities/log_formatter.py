@@ -2,7 +2,6 @@
 A metaclass for singleton types.
 """
 
-
 import pprint
 from logging import Formatter
 

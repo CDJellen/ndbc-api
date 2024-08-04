@@ -144,11 +144,15 @@ class RequestHandler(metaclass=Singleton):
         if isinstance(station_id, int):
             station_id = str(station_id)
         if not self.has_station(station_id):
-            self.log(logging.DEBUG, station_id=station_id, message=f'Adding station {station_id} to cache.')
+            self.log(logging.DEBUG,
+                     station_id=station_id,
+                     message=f'Adding station {station_id} to cache.')
             self.add_station(station_id=station_id)
         for s in self.stations:
             if s.id_ == station_id:
-                self.log(logging.DEBUG, station_id=station_id, message=f'Found station {station_id} in cache.')
+                self.log(logging.DEBUG,
+                         station_id=station_id,
+                         message=f'Found station {station_id} in cache.')
                 return s
 
     def add_station(self, station_id: Union[str, int]) -> None:
@@ -161,7 +165,9 @@ class RequestHandler(metaclass=Singleton):
                         reqs: List[str]) -> List[str]:  # pragma: no cover
         """Handle many string-valued requests against a supplied station."""
         responses = []
-        self.log(logging.INFO, message=f'Handling {len(reqs)} requests for station {station_id}.')
+        self.log(
+            logging.INFO,
+            message=f'Handling {len(reqs)} requests for station {station_id}.')
         for req in reqs:
             responses.append(self.handle_request(station_id=station_id,
                                                  req=req))
@@ -173,31 +179,30 @@ class RequestHandler(metaclass=Singleton):
         self.log(logging.DEBUG, message=f'Handling request {req}.')
         if req not in stn.reqs.cache:
             self.log(logging.DEBUG, message=f'Adding request {req} to cache.')
-            resp = self.execute_request(
-                url=req,
-                station_id=station_id,
-                headers=self._request_headers
-            )
+            resp = self.execute_request(url=req,
+                                        station_id=station_id,
+                                        headers=self._request_headers)
             stn.reqs.put(request=req, response=resp)
         else:
             self.log(logging.DEBUG, message=f'Request {req} already in cache.')
         return stn.reqs.get(request=req)
 
-    def execute_request(
-        self,
-        station_id: Union[str, int],
-        url: str,
-        headers: dict
-    ) -> dict:  # pragma: no cover
+    def execute_request(self, station_id: Union[str, int], url: str,
+                        headers: dict) -> dict:  # pragma: no cover
         """Execute a request with the current headers to NDBC data service."""
-        self.log(logging.DEBUG, station_id=station_id, message=f'GET: {url}', extra_data={'headers': headers})
+        self.log(logging.DEBUG,
+                 station_id=station_id,
+                 message=f'GET: {url}',
+                 extra_data={'headers': headers})
         response = self._session.get(
             url=url,
             headers=headers,
             allow_redirects=True,
             verify=self._verify_https,
         )
-        self.log(logging.DEBUG, station_id=station_id, message=f'Response status: {response.status_code}')
+        self.log(logging.DEBUG,
+                 station_id=station_id,
+                 message=f'Response status: {response.status_code}')
         if response.status_code != 200:  # web request did not succeed
             return dict(status=response.status_code, body='')
         return dict(status=response.status_code, body=response.text)

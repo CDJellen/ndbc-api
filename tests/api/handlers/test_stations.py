@@ -1,4 +1,5 @@
 import logging
+from functools import partial
 
 import pandas as pd
 import pytest
@@ -14,7 +15,7 @@ from tests.api.handlers._base import mock_register_uri
 
 TEST_STN = 'TPLM2'
 TEST_STN_REALTIME = '41013'
-TEST_LOG = logging.getLogger('TestStationsHandler')
+TEST_LOG = partial(logging.getLogger('TestDataHandler').log, msg="")
 
 
 @pytest.fixture
@@ -75,8 +76,8 @@ def test_station_realtime(stations_handler, request_handler, read_parsed_yml,
 
 @pytest.mark.private
 @pytest.mark.usefixtures('mock_socket', 'read_responses', 'read_parsed_yml')
-def test_station_historical(stations_handler, monkeypatch, request_handler, read_parsed_yml,
-                            read_responses, mock_socket):
+def test_station_historical(stations_handler, monkeypatch, request_handler,
+                            read_parsed_yml, read_responses, mock_socket):
     _ = mock_socket
     monkeypatch.setenv('MOCKDATE', '2022-08-13')
     reqs = HistoricalRequest.build_request(station_id=TEST_STN,)

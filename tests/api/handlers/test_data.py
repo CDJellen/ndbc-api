@@ -1,4 +1,5 @@
 import logging
+from functools import partial
 
 import pandas as pd
 import pytest
@@ -30,7 +31,7 @@ TEST_STN_SWDIR = '41001'
 TEST_STN_SWDIR2 = '41001'
 TEST_STN_SWR1 = '41001'
 TEST_STN_SWR2 = '41001'
-TEST_LOG = logging.getLogger('TestDataHandler')
+TEST_LOG = partial(logging.getLogger('TestDataHandler').log, msg="")
 
 
 @pytest.fixture
