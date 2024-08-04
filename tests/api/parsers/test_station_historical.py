@@ -28,7 +28,8 @@ def stations_historical():
 
 
 @pytest.mark.private
-def test_available_measurements(stations_historical, monkeypatch, historical_response,
+def test_available_measurements(stations_historical, monkeypatch,
+                                historical_response,
                                 parsed_stations_historical):
     monkeypatch.setenv('MOCKDATE', '2022-08-13')
     resp = historical_response.get(list(historical_response.keys())[0])

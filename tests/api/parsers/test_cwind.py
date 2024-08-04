@@ -32,4 +32,7 @@ def test_available_measurements(cwind, cwind_response, parsed_cwind):
     resp = cwind_response
     want = parsed_cwind
     got = cwind.df_from_responses(resp, use_timestamp=True)
-    pd.testing.assert_frame_equal(got, want, check_dtype=False, check_index_type=False)
+    pd.testing.assert_frame_equal(got,
+                                  want,
+                                  check_dtype=False,
+                                  check_index_type=False)

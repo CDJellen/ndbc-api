@@ -24,7 +24,8 @@ Attributes:
     stations (:obj:`list`): A list of `Station`s to which requests have
         been made.
 """
-from typing import List, Union
+import logging
+from typing import List, Union, Callable
 
 import requests
 from urllib3.util import Retry
@@ -49,7 +50,7 @@ class RequestHandler(metaclass=Singleton):
             `NdbcApi` responses. This is implemented as a least-recently
             used cache, designed to conserve NDBC resources when querying
             measurements for a given station over similar time ranges.
-        log (:obj:`logging.Logger`): The logger at which to register HTTP
+        logger (:obj:`logging.Logger`): The logger at which to register HTTP
             request and response status codes and headers used for debug
             purposes.
         delay (:int:): The HTTP(s) request delay parameter, in seconds.
@@ -92,7 +93,7 @@ class RequestHandler(metaclass=Singleton):
     def __init__(
         self,
         cache_limit: int,
-        log: 'logging.Logger',
+        log: Callable[[Union[str, int, dict]], None],
         delay: int,
         retries: int,
         backoff_factor: float,
@@ -143,9 +144,15 @@ class RequestHandler(metaclass=Singleton):
         if isinstance(station_id, int):
             station_id = str(station_id)
         if not self.has_station(station_id):
+            self.log(logging.DEBUG,
+                     station_id=station_id,
+                     message=f'Adding station {station_id} to cache.')
             self.add_station(station_id=station_id)
         for s in self.stations:
             if s.id_ == station_id:
+                self.log(logging.DEBUG,
+                         station_id=station_id,
+                         message=f'Found station {station_id} in cache.')
                 return s
 
     def add_station(self, station_id: Union[str, int]) -> None:
@@ -158,6 +165,9 @@ class RequestHandler(metaclass=Singleton):
                         reqs: List[str]) -> List[str]:  # pragma: no cover
         """Handle many string-valued requests against a supplied station."""
         responses = []
+        self.log(
+            logging.INFO,
+            message=f'Handling {len(reqs)} requests for station {station_id}.')
         for req in reqs:
             responses.append(self.handle_request(station_id=station_id,
                                                  req=req))
@@ -166,23 +176,33 @@ class RequestHandler(metaclass=Singleton):
     def handle_request(self, station_id: Union[str, int], req: str) -> dict:
         """Handle a string-valued requests against a supplied station."""
         stn = self.get_station(station_id=station_id)
+        self.log(logging.DEBUG, message=f'Handling request {req}.')
         if req not in stn.reqs.cache:
-            resp = self.execute_request(url=req, headers=self._request_headers)
+            self.log(logging.DEBUG, message=f'Adding request {req} to cache.')
+            resp = self.execute_request(url=req,
+                                        station_id=station_id,
+                                        headers=self._request_headers)
             stn.reqs.put(request=req, response=resp)
+        else:
+            self.log(logging.DEBUG, message=f'Request {req} already in cache.')
         return stn.reqs.get(request=req)
 
-    def execute_request(self, url: str,
+    def execute_request(self, station_id: Union[str, int], url: str,
                         headers: dict) -> dict:  # pragma: no cover
         """Execute a request with the current headers to NDBC data service."""
+        self.log(logging.DEBUG,
+                 station_id=station_id,
+                 message=f'GET: {url}',
+                 extra_data={'headers': headers})
         response = self._session.get(
             url=url,
             headers=headers,
             allow_redirects=True,
             verify=self._verify_https,
         )
-        if self._debug:
-            self.log.debug(f'GET: {url}\n\theaders: {headers}')
-            self.log.debug(f'response: {response.status_code}.')
+        self.log(logging.DEBUG,
+                 station_id=station_id,
+                 message=f'Response status: {response.status_code}')
         if response.status_code != 200:  # web request did not succeed
             return dict(status=response.status_code, body='')
         return dict(status=response.status_code, body=response.text)
@@ -191,6 +211,7 @@ class RequestHandler(metaclass=Singleton):
 
     def _create_session(self) -> requests.Session:
         """create a new `Session` using `RequestHandler` configuration."""
+        self.log(logging.DEBUG, message='Creating new session.')
         session = requests.Session()
         retry = Retry(
             backoff_factor=self._backoff_factor,
@@ -199,4 +220,5 @@ class RequestHandler(metaclass=Singleton):
         http_adapter = requests.adapters.HTTPAdapter(max_retries=retry)
         session.mount('https://', http_adapter)
         session.mount('http://', http_adapter)
+        self.log(logging.INFO, message='Created session.')
         return session

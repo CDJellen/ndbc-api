@@ -42,6 +42,7 @@ from .exceptions import (HandlerException, ParserException, RequestException,
                          ResponseException, TimestampException)
 from .utilities.req_handler import RequestHandler
 from .utilities.singleton import Singleton
+from .utilities.log_formatter import LogFormatter
 from concurrent.futures import ThreadPoolExecutor
 
 
@@ -72,12 +73,13 @@ class NdbcApi(metaclass=Singleton):
             private `RequestHandler` instance.
     """
 
-    log = logging.getLogger(LOGGER_NAME)
+    logger = logging.getLogger(LOGGER_NAME)
     warnings.simplefilter(action='ignore', category=FutureWarning)
 
     def __init__(
         self,
-        logging_level: int = logging.WARNING if HTTP_DEBUG else 0,
+        logging_level: int = logging.WARNING if HTTP_DEBUG else logging.ERROR,
+        filename: Any = None,
         cache_limit: int = DEFAULT_CACHE_LIMIT,
         headers: dict = {},
         delay: int = HTTP_DELAY,
@@ -87,7 +89,6 @@ class NdbcApi(metaclass=Singleton):
         debug: bool = HTTP_DEBUG,
     ):
         """Initializes the singleton `NdbcApi`, sets associated handlers."""
-        self.log.setLevel(logging_level)
         self.cache_limit = cache_limit
         self.headers = headers
         self._handler = self._get_request_handler(
@@ -101,6 +102,7 @@ class NdbcApi(metaclass=Singleton):
         )
         self._stations_api = StationsHandler
         self._data_api = DataHandler
+        self.configure_logging(level=logging_level, filename=filename)
 
     def dump_cache(self, dest_fp: Union[str, None] = None) -> Union[dict, None]:
         """Dump the request cache to dict or the specified filepath.
@@ -166,6 +168,58 @@ class NdbcApi(metaclass=Singleton):
     def set_headers(self, request_headers: dict) -> None:
         """Reset the request headers using the new supplied headers."""
         self._handler.set_headers(request_headers)
+
+    def configure_logging(self, level=logging.WARNING, filename=None) -> None:
+        """Configures logging for the NdbcApi.
+
+        Args:
+            level (int, optional): The logging level. Defaults to logging.WARNING.
+            filename (str, optional): If provided, logs to the specified file.
+        """
+        self.logger.setLevel(level)
+
+        handler: logging.Handler
+        formatter: logging.Formatter
+
+        for handler in self.logger.handlers[:]:
+            self.logger.removeHandler(handler)
+
+        if filename:
+            handler = logging.FileHandler(filename)
+            formatter = logging.Formatter(
+                '[%(asctime)s][%(levelname)s]: %(message)s')
+        else:
+            handler = logging.StreamHandler()
+            formatter = LogFormatter('[%(levelname)s]: %(message)s')
+
+        handler.setFormatter(formatter)
+        self.logger.addHandler(handler)
+
+    def log(self,
+            level: int,
+            station_id: Union[int, str, None] = None,
+            mode: Union[str, None] = None,
+            message: Union[str, None] = None,
+            **extra_data) -> None:
+        """Logs a structured message with metadata.
+
+        Args:
+            level (int): The logging level.
+            station_id (str, optional): The NDBC station ID.
+            mode (str, optional): The data mode.
+            message (str, optional): The log message.
+            **extra_data: Additional key-value pairs to include in the log.
+        """
+        log_data = {}
+        if station_id:
+            log_data['station_id'] = station_id
+        if mode:
+            log_data['mode'] = mode
+        if message:
+            log_data['message'] = message
+        for k, v in extra_data.items():
+            log_data[k] = v
+        self.logger.log(level, log_data)
 
     def stations(self, as_df: bool = True) -> Union[pd.DataFrame, dict]:
         """Get all stations and station metadata from the NDBC.
@@ -421,6 +475,8 @@ class NdbcApi(metaclass=Singleton):
             HandlerException: There was an error in handling the returned data
                 as a `dict` or `pandas.DataFrame`.
         """
+        self.log(logging.DEBUG,
+                 message=f"`get_data` called with arguments: {locals()}")
         if station_id is None and station_ids is None:
             raise ValueError('Both `station_id` and `station_ids` are `None`.')
         if station_id is not None and station_ids is not None:
@@ -444,13 +500,18 @@ class NdbcApi(metaclass=Singleton):
         if modes is not None:
             handle_modes.extend(modes)
 
+        self.log(logging.INFO,
+                 message=(f"Processing request for station_ids "
+                          f"{handle_station_ids} and modes "
+                          f"{handle_modes}"))
+
         # accumulated_data records the handled response and parsed station_id
         # as a tuple, with the data as the first value and the id as the second.
         accumulated_data: List[Tuple[Union[pd.DataFrame, dict], str]] = []
         with ThreadPoolExecutor(max_workers=len(handle_station_ids) *
                                 len(handle_modes)) as executor:
-            data_requests = list(itertools.product(
-                    handle_station_ids, handle_modes))
+            data_requests = list(
+                itertools.product(handle_station_ids, handle_modes))
             futures = [
                 executor.submit(self._handle_get_data,
                                 station_id=station_id,
@@ -459,29 +520,58 @@ class NdbcApi(metaclass=Singleton):
                                 end_time=end_time,
                                 use_timestamp=use_timestamp,
                                 as_df=as_df,
-                                cols=cols)
-                for station_id, mode in data_requests
+                                cols=cols) for station_id, mode in data_requests
             ]
             for i, future in enumerate(futures):
                 try:
                     data = future.result()
+                    self.log(
+                        level=logging.DEBUG,
+                        station_id=data_requests[i][0],
+                        mode=data_requests[i][1],
+                        message=(
+                            f"Successfully processed request for station_id "
+                            f"{data_requests[i][0]} and mode "
+                            f"{data_requests[i][1]}"))
                     accumulated_data.append(data)
                 except (RequestException, ResponseException,
                         HandlerException) as e:
-                    self.log.error(
-                        f"Failed to process request for station_id {data_requests[i][0]} "
-                        f"and mode {data_requests[i][1]} with error: {e}")
+                    self.log(
+                        level=logging.WARN,
+                        station_id=data_requests[i][0],
+                        mode=data_requests[i][1],
+                        message=(f"Failed to process request for station_id "
+                                 f"{data_requests[i][0]} and mode "
+                                 f"{data_requests[i][1]} with error: {e}"))
                     continue
+
+        self.log(logging.INFO,
+                 message=(f"Finished processing request for "
+                          f"station_ids {handle_station_ids} and "
+                          f"modes {handle_modes} with "
+                          f"{len(accumulated_data)} results"))
 
         # check that we have some response
         if len(accumulated_data) == 0:
+            self.log(logging.WARN,
+                     message=(f"No data was returned for station_ids "
+                              f"{handle_station_ids} and modes "
+                              f"{handle_modes}"))
             raise ResponseException(
                 f'No data was returned for station_ids {handle_station_ids} '
                 f'and modes {handle_modes}')
         # handle the default case where a single station_id and mode are specified
         if len(accumulated_data) == 1:
+            self.log(logging.DEBUG,
+                     message=(f"Returning data for single station_id "
+                              f"{handle_station_ids[0]} and mode "
+                              f"{handle_modes[0]}"))
             return accumulated_data[0][0]
         # handle the case where multiple station_ids and modes are specified
+        self.log(logging.DEBUG,
+                 message=(f"Returning data for multiple station_ids "
+                          f"{handle_station_ids} and modes "
+                          f"{handle_modes}"))
         return self._handle_accumulate_data(accumulated_data,
                                             station_id_as_column)
 

@@ -32,4 +32,7 @@ def test_available_measurements(swdir, swdir_response, parsed_swdir):
     resp = swdir_response
     want = parsed_swdir
     got = swdir.df_from_responses(resp, use_timestamp=True)
-    pd.testing.assert_frame_equal(got, want, check_dtype=False, check_index_type=False)
+    pd.testing.assert_frame_equal(got,
+                                  want,
+                                  check_dtype=False,
+                                  check_index_type=False)

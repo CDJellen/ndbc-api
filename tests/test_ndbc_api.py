@@ -45,13 +45,15 @@ NEW_CACHE_LIMIT = 1000
 
 @pytest.fixture
 def ndbc_api():
-    api = NdbcApi(cache_limit=TEST_CACHE_LIMIT)
+    api = NdbcApi(logging_level=logging.DEBUG,
+                  filename=None,
+                  cache_limit=TEST_CACHE_LIMIT)
     yield api
 
 
 def test_init(ndbc_api):
     assert isinstance(ndbc_api, NdbcApi)
-    assert isinstance(ndbc_api.log, logging.Logger)
+    assert isinstance(ndbc_api.logger, logging.Logger)
     assert ndbc_api.cache_limit == TEST_CACHE_LIMIT
     assert NdbcApi() == ndbc_api
 
@@ -79,6 +81,19 @@ def test_dump_cache_empty(ndbc_api):
     assert data is None
     assert path.exists(str(test_fp))
     test_fp.unlink()
+
+
+def test_configure_logging(ndbc_api):
+    ndbc_api.configure_logging(level=logging.INFO)
+    assert ndbc_api.logger.level == logging.INFO
+    ndbc_api.configure_logging(level=logging.WARNING)
+    assert ndbc_api.logger.level == logging.WARNING
+    ndbc_api.configure_logging(level=logging.ERROR, filename='foo.log')
+    assert ndbc_api.logger.level == logging.ERROR
+    ndbc_api.configure_logging(level=logging.DEBUG, filename=None)
+    assert ndbc_api.logger.level == logging.DEBUG
+    with pytest.raises(ValueError):
+        _ = ndbc_api.configure_logging(level='foo')
 
 
 @pytest.mark.usefixtures('mock_socket', 'read_responses', 'read_parsed_df')
@@ -161,10 +176,14 @@ def test_station(ndbc_api, mock_socket, read_responses, read_parsed_yml):
     with pytest.raises(Exception):
         _ = ndbc_api.nearest_station(lat='38.88N', lon='76.43W', radius=-100)
     with pytest.raises(Exception):
-        _ = ndbc_api.nearest_station(lat='38.88N', lon='76.43W', radius=100, units='foo')
+        _ = ndbc_api.nearest_station(lat='38.88N',
+                                     lon='76.43W',
+                                     radius=100,
+                                     units='foo')
     got = ndbc_api.radial_search(lat='38.88N', lon='76.43W', radius=100)
     assert isinstance(got, pd.DataFrame)
     assert got.shape[0] > 0
+
 
 @pytest.mark.slow
 @pytest.mark.usefixtures('mock_socket', 'read_responses', 'read_parsed_df')
@@ -229,17 +248,15 @@ def test_get_data(ndbc_api, monkeypatch, mock_socket, read_responses,
         check_dtype=False,
         check_index_type=False,
     )
-    
+
     with pytest.raises(ValueError):
-        _ = ndbc_api.get_data(
-            station_id='foo',
-            station_ids=['foo'],
-            mode=name,
-            start_time=TEST_START,
-            end_time=TEST_END,
-            use_timestamp=True,
-            as_df=True
-        )
+        _ = ndbc_api.get_data(station_id='foo',
+                              station_ids=['foo'],
+                              mode=name,
+                              start_time=TEST_START,
+                              end_time=TEST_END,
+                              use_timestamp=True,
+                              as_df=True)
     with pytest.raises(ValueError):
         _ = ndbc_api.get_data(
             station_ids=[str(globals()[f'TEST_STN_{name.upper()}'])],
@@ -248,8 +265,7 @@ def test_get_data(ndbc_api, monkeypatch, mock_socket, read_responses,
             start_time=TEST_START,
             end_time=TEST_END,
             use_timestamp=True,
-            as_df=True
-        )
+            as_df=True)
 
     handler = ndbc_api._handler
     ndbc_api._handler = None
@@ -394,17 +410,28 @@ def test_handle_data(ndbc_api, read_parsed_df):
 
 @pytest.mark.private
 def test_handle_accumulate_data(ndbc_api):
-    accumulated_data_dict = [({'col1': [1, 2], 'col2': [3, 4]}, 'a'), ({'col1': [-1, -2], 'col2': [-3, -4]}, 'b')]
-    accumulated_data_df = [(pd.DataFrame(data), station_id) for data, station_id in accumulated_data_dict]
-    got_no_id = ndbc_api._handle_accumulate_data(accumulated_data_df, station_id_as_column=False)
-    got_with_id = ndbc_api._handle_accumulate_data(accumulated_data_df, station_id_as_column=True)
+    accumulated_data_dict = [({
+        'col1': [1, 2],
+        'col2': [3, 4]
+    }, 'a'), ({
+        'col1': [-1, -2],
+        'col2': [-3, -4]
+    }, 'b')]
+    accumulated_data_df = [(pd.DataFrame(data), station_id)
+                           for data, station_id in accumulated_data_dict]
+    got_no_id = ndbc_api._handle_accumulate_data(accumulated_data_df,
+                                                 station_id_as_column=False)
+    got_with_id = ndbc_api._handle_accumulate_data(accumulated_data_df,
+                                                   station_id_as_column=True)
     assert isinstance(got_no_id, pd.DataFrame)
     assert isinstance(got_with_id, pd.DataFrame)
     assert got_no_id.shape[0] == got_with_id.shape[0]
     assert got_no_id.shape[1] != got_with_id.shape[1]  # we have an extra column
 
-    got_no_id = ndbc_api._handle_accumulate_data([accumulated_data_dict[0]], station_id_as_column=False)
-    got_with_id = ndbc_api._handle_accumulate_data(accumulated_data_dict, station_id_as_column=True)
+    got_no_id = ndbc_api._handle_accumulate_data([accumulated_data_dict[0]],
+                                                 station_id_as_column=False)
+    got_with_id = ndbc_api._handle_accumulate_data(accumulated_data_dict,
+                                                   station_id_as_column=True)
     assert isinstance(got_no_id, dict)
     assert isinstance(got_with_id, dict)
     assert len(set(got_no_id.keys()) & set(got_with_id.keys())) == 0

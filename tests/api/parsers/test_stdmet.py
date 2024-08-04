@@ -32,4 +32,7 @@ def test_available_measurements(stdmet, stdmet_response, parsed_stdmet):
     resp = stdmet_response
     want = parsed_stdmet
     got = stdmet.df_from_responses(resp, use_timestamp=True)
-    pd.testing.assert_frame_equal(got, want, check_dtype=False, check_index_type=False)
+    pd.testing.assert_frame_equal(got,
+                                  want,
+                                  check_dtype=False,
+                                  check_index_type=False)
