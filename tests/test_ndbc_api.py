@@ -53,7 +53,7 @@ def ndbc_api():
 
 def test_init(ndbc_api):
     assert isinstance(ndbc_api, NdbcApi)
-    assert isinstance(ndbc_api.log, logging.Logger)
+    assert isinstance(ndbc_api.logger, logging.Logger)
     assert ndbc_api.cache_limit == TEST_CACHE_LIMIT
     assert NdbcApi() == ndbc_api
 
