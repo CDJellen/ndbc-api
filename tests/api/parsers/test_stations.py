@@ -2,7 +2,7 @@ import pandas as pd
 import pytest
 import yaml
 
-from ndbc_api.api.parsers.stations import StationsParser
+from ndbc_api.api.parsers.active_stations import StationsParser
 from tests.api.parsers._base import PARSED_TESTS_DIR, RESPONSES_TESTS_DIR
 
 TEST_FP = RESPONSES_TESTS_DIR.joinpath('stations.yml')

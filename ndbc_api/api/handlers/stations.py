@@ -7,11 +7,13 @@ from ndbc_api.api.handlers._base import BaseHandler
 from ndbc_api.api.parsers.station_historical import HistoricalParser
 from ndbc_api.api.parsers.station_metadata import MetadataParser
 from ndbc_api.api.parsers.station_realtime import RealtimeParser
-from ndbc_api.api.parsers.stations import StationsParser
+from ndbc_api.api.parsers.active_stations import ActiveStationsParser
+from ndbc_api.api.parsers.historical_stations import HistoricalStationsParser
 from ndbc_api.api.requests.station_historical import HistoricalRequest
 from ndbc_api.api.requests.station_metadata import MetadataRequest
 from ndbc_api.api.requests.station_realtime import RealtimeRequest
-from ndbc_api.api.requests.stations import StationsRequest
+from ndbc_api.api.requests.active_stations import ActiveStationsRequest
+from ndbc_api.api.requests.historical_stations import HistoricalStationsRequest
 from ndbc_api.exceptions import ParserException, ResponseException
 
 
@@ -27,14 +29,25 @@ class StationsHandler(BaseHandler):
 
     @classmethod
     def stations(cls, handler: Any) -> pd.DataFrame:
-        """Get all stations from NDBC."""
-        req = StationsRequest.build_request()
+        """Get all active stations from NDBC."""
+        req = ActiveStationsRequest.build_request()
         try:
             resp = handler.handle_request('stn', req)
         except (AttributeError, ValueError, TypeError) as e:
             raise ResponseException(
                 'Failed to execute `station` request.') from e
-        return StationsParser.df_from_responses([resp])
+        return ActiveStationsParser.df_from_response(resp, use_timestamp=False)
+
+    @classmethod
+    def historical_stations(cls, handler: Any) -> pd.DataFrame:
+        """Get historical stations from NDBC."""
+        req = HistoricalStationsRequest.build_request()
+        try:
+            resp = handler.handle_request('stn', req)
+        except (AttributeError, ValueError, TypeError) as e:
+            raise ResponseException(
+                'Failed to execute `station` request.') from e
+        return HistoricalStationsParser.df_from_response(resp, use_timestamp=False)
 
     @classmethod
     def nearest_station(

@@ -249,6 +249,34 @@ class NdbcApi(metaclass=Singleton):
         except (ResponseException, ValueError, KeyError) as e:
             raise ResponseException('Failed to handle returned data.') from e
 
+    def historical_stations(self, as_df: bool = True) -> Union[pd.DataFrame, dict]:
+        """Get historical stations and station metadata from the NDBC.
+
+        Query the NDBC data service for the historical data buoys
+        (stations), both those maintained by the NDBC and those which are not. 
+        Stations are returned by default as rows of a `pandas.DataFrame`, 
+        alongside their historical data coverage, with one row per tuple of 
+        (station, historical deployment).
+
+        Args:
+            as_df: Flag indicating whether to return current station data as a
+                `pandas.DataFrame` if set to `True` or as a `dict` if `False`.
+
+        Returns:
+            The current station data from the NDBC data service, either as a
+            `pandas.DataFrame` or as a `dict` depending on the value of `as_df`.
+
+        Raises:
+            ResponseException: An error occurred while retrieving and parsing
+                responses from the NDBC data service.
+        """
+        try:
+            data = self._stations_api.historical_stations(handler=self._handler)
+            return self._handle_data(data, as_df, cols=None)
+        except (ResponseException, ValueError, KeyError) as e:
+            raise ResponseException('Failed to handle returned data.') from e
+
+
     def nearest_station(
         self,
         lat: Union[str, float, None] = None,
