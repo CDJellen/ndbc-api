@@ -23,8 +23,8 @@ class StationsHandler(BaseHandler):
     DIAM_OF_EARTH = 12756  # km
     LAT_MAP = (lambda x: -1 * float(x.strip('S'))
                if 'S' in x else float(x.strip('N')))
-    LON_MAP = (lambda x: -1 * float(x.strip('E'))
-               if 'E' in x else float(x.strip('W')))
+    LON_MAP = (lambda x: -1 * float(x.strip('W'))
+               if 'E' in x else float(x.strip('E')))
     UNITS = ('nm', 'km', 'mi')
 
     @classmethod
@@ -149,29 +149,37 @@ class StationsHandler(BaseHandler):
     @staticmethod
     def _nearest(df: pd.DataFrame, lat_a: float, lon_a: float):
         """Get the nearest station from specified `float`-valued lat/lon."""
-        ls = list(df[['Location Lat/Long']].to_records(index=False))
-        ls = [(
-            idx,
-            StationsHandler.LAT_MAP(r[0].split(' ')[0]),
-            StationsHandler.LON_MAP(r[0].split(' ')[1]),
-        ) for idx, r in enumerate(ls)]
-        closest = min(
-            ls,
-            key=lambda p: StationsHandler._distance(lat_a, lon_a, p[1], p[2]))
-        return df.iloc[[closest[0]]]
+        # Drop rows with missing latitude or longitude
+        df_filtered = df.dropna(subset=['Lat', 'Lon'])
+
+        # Calculate distances using Haversine formula
+        df_filtered['distance'] = df_filtered.apply(
+            lambda row: StationsHandler._distance(lat_a, lon_a, row['Lat'], row['Lon']),
+            axis=1
+        )
+
+        # Find the index of the closest row
+        smallest_distance = df_filtered['distance'].min()
+
+        # Return the row corresponding to the nearest station
+        return df_filtered.loc[df_filtered['distance'] == smallest_distance]
 
     @staticmethod
     def _radial_search(df: pd.DataFrame, lat_a: float, lon_a: float,
                        radius: float):
         """Get the stations within radius km from specified `float`-valued lat/lon."""
-        ls = list(df[['Location Lat/Long']].to_records(index=False))
-        ls = [(
-            idx,
-            StationsHandler.LAT_MAP(r[0].split(' ')[0]),
-            StationsHandler.LON_MAP(r[0].split(' ')[1]),
-        ) for idx, r in enumerate(ls)]
-        stations = [
-            p for p in ls
-            if StationsHandler._distance(lat_a, lon_a, p[1], p[2]) <= radius
-        ]
-        return df.iloc[[p[0] for p in stations]]
+        # Drop rows with missing latitude or longitude
+        df_filtered = df.dropna(subset=['Lat', 'Lon'])
+
+        # Calculate distances using Haversine formula
+        df_filtered['distance'] = df_filtered.apply(
+            lambda row: StationsHandler._distance(lat_a, lon_a, row['Lat'], row['Lon']),
+            axis=1
+        )
+
+        df_filtered.sort_values(by='distance', inplace=True)
+
+        # Filter rows within the radius
+        stations_within_radius = df_filtered[df_filtered['distance'] <= radius]
+
+        return stations_within_radius
