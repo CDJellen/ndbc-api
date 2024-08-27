@@ -24,7 +24,7 @@ class StationsHandler(BaseHandler):
     LAT_MAP = (lambda x: -1 * float(x.strip('S'))
                if 'S' in x else float(x.strip('N')))
     LON_MAP = (lambda x: -1 * float(x.strip('W'))
-               if 'E' in x else float(x.strip('E')))
+               if 'W' in x else float(x.strip('E')))
     UNITS = ('nm', 'km', 'mi')
 
     @classmethod

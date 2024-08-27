@@ -2,11 +2,11 @@ import pandas as pd
 import pytest
 import yaml
 
-from ndbc_api.api.parsers.active_stations import ActiveStationsParser
+from ndbc_api.api.parsers.historical_stations import HistoricalStationsParser
 from tests.api.parsers._base import PARSED_TESTS_DIR, RESPONSES_TESTS_DIR
 
-TEST_FP = RESPONSES_TESTS_DIR.joinpath('stations.yml')
-PARSED_FP = PARSED_TESTS_DIR.joinpath('stations.parquet.gzip')
+TEST_FP = RESPONSES_TESTS_DIR.joinpath('stations_historical.yml')
+PARSED_FP = PARSED_TESTS_DIR.joinpath('stations_historical.parquet.gzip')
 
 
 @pytest.fixture
@@ -24,7 +24,7 @@ def parsed_stations():
 
 @pytest.fixture
 def stations():
-    yield ActiveStationsParser
+    yield HistoricalStationsParser
 
 
 @pytest.mark.private

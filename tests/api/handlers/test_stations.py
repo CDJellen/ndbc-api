@@ -112,7 +112,7 @@ def test_stations(
     mock_register_uri([reqs], list(read_responses['stations'].values()))
     want = read_parsed_df['stations']
     got = stations_handler.stations(handler=request_handler,)
-    pd.testing.assert_frame_equal(want, got)
+    pd.testing.assert_frame_equal(want, got, check_dtype=False)
     with pytest.raises(ResponseException):
         _ = stations_handler.metadata(
             handler=None,

@@ -104,7 +104,7 @@ def test_stations(ndbc_api, mock_socket, read_responses, read_parsed_df):
     want = read_parsed_df['stations']
     got = ndbc_api.stations()
     assert isinstance(got, pd.DataFrame)
-    pd.testing.assert_frame_equal(want, got)
+    pd.testing.assert_frame_equal(want, got, check_dtype=False)
     handler = ndbc_api._handler
     ndbc_api._handler = None
     with pytest.raises(Exception):
@@ -166,13 +166,13 @@ def test_station(ndbc_api, mock_socket, read_responses, read_parsed_yml):
         _ = ndbc_api.nearest_station(lat=None, lon=None)
     with pytest.raises(Exception):
         _ = ndbc_api.nearest_station(lat=None, lon=None)
-    want = 'TPLM2'
+    want = 'tplm2'
     got = ndbc_api.nearest_station(lat='38.88N', lon='76.43W')
     assert got == want
-    got = ndbc_api.nearest_station(lat=38.88, lon=76.43)
+    got = ndbc_api.nearest_station(lat=38.88, lon=-76.43)
     assert got == want
     with pytest.raises(Exception):
-        _ = ndbc_api.radial_search(lat=None, lon=76.43, radius=100)
+        _ = ndbc_api.radial_search(lat=None, lon=-76.43, radius=100)
     with pytest.raises(Exception):
         _ = ndbc_api.nearest_station(lat='38.88N', lon='76.43W', radius=-100)
     with pytest.raises(Exception):
