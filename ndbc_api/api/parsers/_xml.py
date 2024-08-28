@@ -19,13 +19,9 @@ class XMLParser(BaseParser):
         """
 
         body = response.get('body')
-        cleaned_body = body.replace('\n', '').strip() 
-        cleaned_body = cleaned_body.replace('<?xml version="1.0" encoding="UTF-8"?>', '')
-        cleaned_body = re.sub('', '', cleaned_body) 
+
         try:
-            root = ET.fromstring(cleaned_body)
+            root = ET.fromstring(body)
             return ET.ElementTree(root) 
         except Exception as e:
             raise ParserException("failed to obtain XML root from response body") from e
-
-        return root
