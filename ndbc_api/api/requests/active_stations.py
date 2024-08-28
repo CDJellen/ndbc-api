@@ -1,9 +1,9 @@
 from ndbc_api.api.requests._core import CoreRequest
 
 
-class StationsRequest(CoreRequest):
+class ActiveStationsRequest(CoreRequest):
 
-    STATIONS_URL = 'wstat.shtml'
+    STATIONS_URL = 'activestations.xml'
 
     @classmethod
     def build_request(cls) -> str:

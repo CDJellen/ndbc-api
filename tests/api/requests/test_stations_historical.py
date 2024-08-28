@@ -1,13 +1,13 @@
 import pytest
 
-from ndbc_api.api.requests.active_stations import ActiveStationsRequest
+from ndbc_api.api.requests.historical_stations import HistoricalStationsRequest
 
-STATIONS_URL = 'https://www.ndbc.noaa.gov/activestations.xml'
+STATIONS_URL = 'https://www.ndbc.noaa.gov/metadata/stationmetadata.xml'
 
 
 @pytest.fixture
 def stations():
-    yield ActiveStationsRequest
+    yield HistoricalStationsRequest
 
 
 @pytest.mark.private

@@ -26,12 +26,13 @@ class BaseParser:
                 components.append(
                     cls._read_response(response, use_timestamp=use_timestamp))
         df = pd.concat(components)
-        try:
-            df = df.reset_index().drop_duplicates(subset='timestamp',
-                                                  keep='first')
-            df = df.set_index('timestamp').sort_index()
-        except KeyError as e:
-            raise ParserException from e
+        if use_timestamp:
+            try:
+                df = df.reset_index().drop_duplicates(subset='timestamp',
+                                                    keep='first')
+                df = df.set_index('timestamp').sort_index()
+            except KeyError as e:
+                raise ParserException from e
         return df
 
     @classmethod

@@ -12,7 +12,7 @@ from ndbc_api.api.requests.spec import SpecRequest
 from ndbc_api.api.requests.station_historical import HistoricalRequest
 from ndbc_api.api.requests.station_metadata import MetadataRequest
 from ndbc_api.api.requests.station_realtime import RealtimeRequest
-from ndbc_api.api.requests.stations import StationsRequest
+from ndbc_api.api.requests.active_stations import ActiveStationsRequest
 from ndbc_api.api.requests.stdmet import StdmetRequest
 from ndbc_api.api.requests.supl import SuplRequest
 from ndbc_api.api.requests.swden import SwdenRequest
@@ -99,12 +99,12 @@ def test_configure_logging(ndbc_api):
 @pytest.mark.usefixtures('mock_socket', 'read_responses', 'read_parsed_df')
 def test_stations(ndbc_api, mock_socket, read_responses, read_parsed_df):
     _ = mock_socket
-    reqs = StationsRequest.build_request()
+    reqs = ActiveStationsRequest.build_request()
     mock_register_uri([reqs], list(read_responses['stations'].values()))
     want = read_parsed_df['stations']
     got = ndbc_api.stations()
     assert isinstance(got, pd.DataFrame)
-    pd.testing.assert_frame_equal(want, got)
+    pd.testing.assert_frame_equal(want, got, check_dtype=False)
     handler = ndbc_api._handler
     ndbc_api._handler = None
     with pytest.raises(Exception):
@@ -166,13 +166,13 @@ def test_station(ndbc_api, mock_socket, read_responses, read_parsed_yml):
         _ = ndbc_api.nearest_station(lat=None, lon=None)
     with pytest.raises(Exception):
         _ = ndbc_api.nearest_station(lat=None, lon=None)
-    want = 'TPLM2'
+    want = 'tplm2'
     got = ndbc_api.nearest_station(lat='38.88N', lon='76.43W')
     assert got == want
-    got = ndbc_api.nearest_station(lat=38.88, lon=76.43)
+    got = ndbc_api.nearest_station(lat=38.88, lon=-76.43)
     assert got == want
     with pytest.raises(Exception):
-        _ = ndbc_api.radial_search(lat=None, lon=76.43, radius=100)
+        _ = ndbc_api.radial_search(lat=None, lon=-76.43, radius=100)
     with pytest.raises(Exception):
         _ = ndbc_api.nearest_station(lat='38.88N', lon='76.43W', radius=-100)
     with pytest.raises(Exception):

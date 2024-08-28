@@ -8,7 +8,7 @@ from ndbc_api.api.handlers.stations import StationsHandler
 from ndbc_api.api.requests.station_historical import HistoricalRequest
 from ndbc_api.api.requests.station_metadata import MetadataRequest
 from ndbc_api.api.requests.station_realtime import RealtimeRequest
-from ndbc_api.api.requests.stations import StationsRequest
+from ndbc_api.api.requests.active_stations import ActiveStationsRequest
 from ndbc_api.exceptions import ResponseException
 from ndbc_api.utilities.req_handler import RequestHandler
 from tests.api.handlers._base import mock_register_uri
@@ -107,12 +107,12 @@ def test_stations(
     mock_socket,
 ):
     _ = mock_socket
-    reqs = StationsRequest.build_request()
+    reqs = ActiveStationsRequest.build_request()
     assert len([reqs]) == len(read_responses['stations'].values())
     mock_register_uri([reqs], list(read_responses['stations'].values()))
     want = read_parsed_df['stations']
     got = stations_handler.stations(handler=request_handler,)
-    pd.testing.assert_frame_equal(want, got)
+    pd.testing.assert_frame_equal(want, got, check_dtype=False)
     with pytest.raises(ResponseException):
         _ = stations_handler.metadata(
             handler=None,

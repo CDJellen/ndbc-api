@@ -7,11 +7,13 @@ from ndbc_api.api.handlers._base import BaseHandler
 from ndbc_api.api.parsers.station_historical import HistoricalParser
 from ndbc_api.api.parsers.station_metadata import MetadataParser
 from ndbc_api.api.parsers.station_realtime import RealtimeParser
-from ndbc_api.api.parsers.stations import StationsParser
+from ndbc_api.api.parsers.active_stations import ActiveStationsParser
+from ndbc_api.api.parsers.historical_stations import HistoricalStationsParser
 from ndbc_api.api.requests.station_historical import HistoricalRequest
 from ndbc_api.api.requests.station_metadata import MetadataRequest
 from ndbc_api.api.requests.station_realtime import RealtimeRequest
-from ndbc_api.api.requests.stations import StationsRequest
+from ndbc_api.api.requests.active_stations import ActiveStationsRequest
+from ndbc_api.api.requests.historical_stations import HistoricalStationsRequest
 from ndbc_api.exceptions import ParserException, ResponseException
 
 
@@ -21,20 +23,31 @@ class StationsHandler(BaseHandler):
     DIAM_OF_EARTH = 12756  # km
     LAT_MAP = (lambda x: -1 * float(x.strip('S'))
                if 'S' in x else float(x.strip('N')))
-    LON_MAP = (lambda x: -1 * float(x.strip('E'))
-               if 'E' in x else float(x.strip('W')))
+    LON_MAP = (lambda x: -1 * float(x.strip('W'))
+               if 'W' in x else float(x.strip('E')))
     UNITS = ('nm', 'km', 'mi')
 
     @classmethod
     def stations(cls, handler: Any) -> pd.DataFrame:
-        """Get all stations from NDBC."""
-        req = StationsRequest.build_request()
+        """Get all active stations from NDBC."""
+        req = ActiveStationsRequest.build_request()
         try:
             resp = handler.handle_request('stn', req)
         except (AttributeError, ValueError, TypeError) as e:
             raise ResponseException(
                 'Failed to execute `station` request.') from e
-        return StationsParser.df_from_responses([resp])
+        return ActiveStationsParser.df_from_response(resp, use_timestamp=False)
+
+    @classmethod
+    def historical_stations(cls, handler: Any) -> pd.DataFrame:
+        """Get historical stations from NDBC."""
+        req = HistoricalStationsRequest.build_request()
+        try:
+            resp = handler.handle_request('stn', req)
+        except (AttributeError, ValueError, TypeError) as e:
+            raise ResponseException(
+                'Failed to execute `station` request.') from e
+        return HistoricalStationsParser.df_from_response(resp, use_timestamp=False)
 
     @classmethod
     def nearest_station(
@@ -136,29 +149,37 @@ class StationsHandler(BaseHandler):
     @staticmethod
     def _nearest(df: pd.DataFrame, lat_a: float, lon_a: float):
         """Get the nearest station from specified `float`-valued lat/lon."""
-        ls = list(df[['Location Lat/Long']].to_records(index=False))
-        ls = [(
-            idx,
-            StationsHandler.LAT_MAP(r[0].split(' ')[0]),
-            StationsHandler.LON_MAP(r[0].split(' ')[1]),
-        ) for idx, r in enumerate(ls)]
-        closest = min(
-            ls,
-            key=lambda p: StationsHandler._distance(lat_a, lon_a, p[1], p[2]))
-        return df.iloc[[closest[0]]]
+        # Drop rows with missing latitude or longitude
+        df_filtered = df.dropna(subset=['Lat', 'Lon'])
+
+        # Calculate distances using Haversine formula
+        df_filtered['distance'] = df_filtered.apply(
+            lambda row: StationsHandler._distance(lat_a, lon_a, row['Lat'], row['Lon']),
+            axis=1
+        )
+
+        # Find the index of the closest row
+        smallest_distance = df_filtered['distance'].min()
+
+        # Return the row corresponding to the nearest station
+        return df_filtered.loc[df_filtered['distance'] == smallest_distance]
 
     @staticmethod
     def _radial_search(df: pd.DataFrame, lat_a: float, lon_a: float,
                        radius: float):
         """Get the stations within radius km from specified `float`-valued lat/lon."""
-        ls = list(df[['Location Lat/Long']].to_records(index=False))
-        ls = [(
-            idx,
-            StationsHandler.LAT_MAP(r[0].split(' ')[0]),
-            StationsHandler.LON_MAP(r[0].split(' ')[1]),
-        ) for idx, r in enumerate(ls)]
-        stations = [
-            p for p in ls
-            if StationsHandler._distance(lat_a, lon_a, p[1], p[2]) <= radius
-        ]
-        return df.iloc[[p[0] for p in stations]]
+        # Drop rows with missing latitude or longitude
+        df_filtered = df.dropna(subset=['Lat', 'Lon'])
+
+        # Calculate distances using Haversine formula
+        df_filtered['distance'] = df_filtered.apply(
+            lambda row: StationsHandler._distance(lat_a, lon_a, row['Lat'], row['Lon']),
+            axis=1
+        )
+
+        df_filtered.sort_values(by='distance', inplace=True)
+
+        # Filter rows within the radius
+        stations_within_radius = df_filtered[df_filtered['distance'] <= radius]
+
+        return stations_within_radius
