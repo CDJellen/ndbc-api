@@ -1,8 +1,8 @@
 import pytest
 
-from ndbc_api.api.requests.http._base import BaseRequest
-from ndbc_api.api.requests.http.adcp import AdcpRequest
-from tests.api.requests.http._base import HISTORICAL_START, REALTIME_END
+from ndbc_api.api.requests.opendap._base import BaseRequest
+from ndbc_api.api.requests.opendap.adcp import AdcpRequest
+from tests.api.requests.opendap._base import HISTORICAL_START, REALTIME_END
 
 TEST_STN = '41117'
 

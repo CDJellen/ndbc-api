@@ -1,4 +1,4 @@
-import pandas as pd
+import xarray as xr
 import pytest
 import yaml
 
@@ -31,7 +31,7 @@ def adcp():
 def test_available_measurements(adcp, adcp_response, parsed_adcp):
     resp = adcp_response
     want = parsed_adcp
-    got = adcp.df_from_responses(resp, use_timestamp=True)
+    got = adcp.xr_from_responses(resp)
     pd.testing.assert_frame_equal(got,
                                   want,
                                   check_dtype=False,

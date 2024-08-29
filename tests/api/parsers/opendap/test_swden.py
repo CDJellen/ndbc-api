@@ -1,9 +1,9 @@
-import pandas as pd
+import xarray as xr
 import pytest
 import yaml
 
-from ndbc_api.api.parsers.http.swden import SwdenParser
-from tests.api.parsers.http._base import PARSED_TESTS_DIR, RESPONSES_TESTS_DIR
+from ndbc_api.api.parsers.opendap.swden import SwdenParser
+from tests.api.parsers.opendap._base import PARSED_TESTS_DIR, RESPONSES_TESTS_DIR
 
 TEST_FP = RESPONSES_TESTS_DIR.joinpath('swden.yml')
 PARSED_FP = PARSED_TESTS_DIR.joinpath('swden.parquet.gzip')
@@ -31,7 +31,7 @@ def swden():
 def test_available_measurements(swden, swden_response, parsed_swden):
     resp = swden_response
     want = parsed_swden
-    got = swden.df_from_responses(resp, use_timestamp=True)
+    got = swden.xr_from_responses(resp, use_timestamp=True)
     pd.testing.assert_frame_equal(got,
                                   want,
                                   check_dtype=False,

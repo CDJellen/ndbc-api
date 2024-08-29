@@ -1,9 +1,9 @@
-import pandas as pd
+import xarray as xr
 import pytest
 import yaml
 
-from ndbc_api.api.parsers.http.stdmet import StdmetParser
-from tests.api.parsers.http._base import PARSED_TESTS_DIR, RESPONSES_TESTS_DIR
+from ndbc_api.api.parsers.opendap.stdmet import StdmetParser
+from tests.api.parsers.opendap._base import PARSED_TESTS_DIR, RESPONSES_TESTS_DIR
 
 TEST_FP = RESPONSES_TESTS_DIR.joinpath('stdmet.yml')
 PARSED_FP = PARSED_TESTS_DIR.joinpath('stdmet.parquet.gzip')
@@ -31,7 +31,7 @@ def stdmet():
 def test_available_measurements(stdmet, stdmet_response, parsed_stdmet):
     resp = stdmet_response
     want = parsed_stdmet
-    got = stdmet.df_from_responses(resp, use_timestamp=True)
+    got = stdmet.xr_from_responses(resp, use_timestamp=True)
     pd.testing.assert_frame_equal(got,
                                   want,
                                   check_dtype=False,

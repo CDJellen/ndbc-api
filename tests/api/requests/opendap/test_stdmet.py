@@ -1,8 +1,8 @@
 import pytest
 import yaml
 
-from ndbc_api.api.requests.http.stdmet import StdmetRequest
-from tests.api.requests.http._base import (HISTORICAL_END, HISTORICAL_START,
+from ndbc_api.api.requests.opendap.stdmet import StdmetRequest
+from tests.api.requests.opendap._base import (HISTORICAL_END, HISTORICAL_START,
                                       REALTIME_END, REALTIME_START,
                                       REQUESTS_TESTS_DIR)
 

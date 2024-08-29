@@ -2,36 +2,36 @@ import xarray as xr
 import pytest
 import yaml
 
-from ndbc_api.api.parsers.opendap.cwind import CwindParser
+from ndbc_api.api.parsers.opendap.pwind import PwindParser
 from tests.api.parsers.opendap._base import PARSED_TESTS_DIR, RESPONSES_TESTS_DIR
 
-TEST_FP = RESPONSES_TESTS_DIR.joinpath('cwind.yml')
-PARSED_FP = PARSED_TESTS_DIR.joinpath('cwind.parquet.gzip')
+TEST_FP = RESPONSES_TESTS_DIR.joinpath('pwind.yml')
+PARSED_FP = PARSED_TESTS_DIR.joinpath('pwind.parquet.gzip')
 
 
 @pytest.fixture
-def cwind_response():
+def pwind_response():
     with open(TEST_FP, 'r') as f:
         data = yaml.safe_load(f)
     yield data
 
 
 @pytest.fixture
-def parsed_cwind():
+def parsed_pwind():
     df = pd.read_parquet(PARSED_FP)
     yield df
 
 
 @pytest.fixture
-def cwind():
-    yield CwindParser
+def pwind():
+    yield PwindParser
 
 
 @pytest.mark.private
-def test_available_measurements(cwind, cwind_response, parsed_cwind):
-    resp = cwind_response
-    want = parsed_cwind
-    got = cwind.xr_from_responses(resp, use_timestamp=True)
+def test_available_measurements(pwind, pwind_response, parsed_pwind):
+    resp = pwind_response
+    want = parsed_pwind
+    got = pwind.xr_from_responses(resp, use_timestamp=True)
     pd.testing.assert_frame_equal(got,
                                   want,
                                   check_dtype=False,

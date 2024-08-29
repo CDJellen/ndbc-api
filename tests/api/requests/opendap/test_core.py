@@ -1,7 +1,7 @@
 import pytest
 
-from ndbc_api.api.requests.http._core import CoreRequest
-from tests.api.requests.http._base import BASE_URL
+from ndbc_api.api.requests.opendap._core import CoreRequest
+from tests.api.requests.opendap._base import BASE_URL
 
 
 @pytest.fixture
