@@ -33,9 +33,11 @@ from datetime import datetime, timedelta
 from typing import Any, List, Tuple, Union
 
 import pandas as pd
+import xarray as xr
 
-from .api.handlers.data import DataHandler
-from .api.handlers.stations import StationsHandler
+from .api.handlers.http.data import DataHandler
+from .api.handlers.http.stations import StationsHandler
+from .api.handlers.opendap.data import OpenDapDataHandler
 from .config import (DEFAULT_CACHE_LIMIT, HTTP_BACKOFF_FACTOR, HTTP_DEBUG,
                      HTTP_DELAY, HTTP_RETRY, LOGGER_NAME, VERIFY_HTTPS)
 from .exceptions import (HandlerException, ParserException, RequestException,
@@ -102,6 +104,7 @@ class NdbcApi(metaclass=Singleton):
         )
         self._stations_api = StationsHandler
         self._data_api = DataHandler
+        self._opendap_data_api = OpenDapDataHandler
         self.configure_logging(level=logging_level, filename=filename)
 
     def dump_cache(self, dest_fp: Union[str, None] = None) -> Union[dict, None]:
@@ -453,7 +456,8 @@ class NdbcApi(metaclass=Singleton):
         cols: List[str] = None,
         station_ids: Union[List[Union[int, str]], None] = None,
         modes: Union[List[str], None] = None,
-    ) -> Union[pd.DataFrame, dict]:
+        use_opendap: bool = False
+    ) -> Union[pd.DataFrame, xr.Dataset, dict]:
         """Execute data query against the specified NDBC station(s).
 
         Query the NDBC data service for station-level measurements, using the
@@ -603,8 +607,18 @@ class NdbcApi(metaclass=Singleton):
         return self._handle_accumulate_data(accumulated_data,
                                             station_id_as_column)
 
-    def get_modes(self):
-        """Get the list of supported modes for `get_data(...)`."""
+    def get_modes(self, use_opendap: bool = False) -> List[str]:
+        """Get the list of supported modes for `get_data(...)`.
+        
+        Args:
+            use_opendap (bool): Whether to return the available
+                modes for opendap (NetCDF) data.
+        
+        Returns:
+            (List[str]) the available modalities.
+        """
+        if use_opendap:
+            return [v for v in vars(self._opendap_data_api) if not v.startswith('_')]
         return [v for v in vars(self._data_api) if not v.startswith('_')]
 
     """ PRIVATE """

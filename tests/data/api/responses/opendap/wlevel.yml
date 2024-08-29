@@ -1,0 +1,5 @@
+historical:
+- https://www.ndbc.noaa.gov/view_text_file.php?filename=41001s2020.txt.gz&dir=data/historical/supl/
+- https://www.ndbc.noaa.gov/view_text_file.php?filename=41001s2021.txt.gz&dir=data/historical/supl/
+realtime:
+- https://www.ndbc.noaa.gov/data/realtime2/41001.supl

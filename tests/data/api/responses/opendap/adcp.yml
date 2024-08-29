@@ -1,0 +1,5 @@
+historical:
+- https://www.ndbc.noaa.gov/view_text_file.php?filename=41117a2020.txt.gz&dir=data/historical/adcp/
+- https://www.ndbc.noaa.gov/view_text_file.php?filename=41117a2021.txt.gz&dir=data/historical/adcp/
+realtime:
+- https://www.ndbc.noaa.gov/data/realtime2/41117.adcp

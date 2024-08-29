@@ -4,7 +4,7 @@ from functools import partial
 import pandas as pd
 import pytest
 
-from ndbc_api.api.handlers.data import DataHandler
+from ndbc_api.api.handlers.http.data import DataHandler
 from ndbc_api.api.requests.adcp import AdcpRequest
 from ndbc_api.api.requests.cwind import CwindRequest
 from ndbc_api.api.requests.ocean import OceanRequest

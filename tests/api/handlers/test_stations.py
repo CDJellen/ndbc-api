@@ -4,7 +4,7 @@ from functools import partial
 import pandas as pd
 import pytest
 
-from ndbc_api.api.handlers.stations import StationsHandler
+from ndbc_api.api.handlers.http.stations import StationsHandler
 from ndbc_api.api.requests.station_historical import HistoricalRequest
 from ndbc_api.api.requests.station_metadata import MetadataRequest
 from ndbc_api.api.requests.station_realtime import RealtimeRequest
