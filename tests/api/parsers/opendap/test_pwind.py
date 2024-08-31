@@ -1,4 +1,5 @@
-import xarray as xr
+import netCDF4 as nc
+
 import pytest
 import yaml
 
@@ -31,7 +32,7 @@ def pwind():
 def test_available_measurements(pwind, pwind_response, parsed_pwind):
     resp = pwind_response
     want = parsed_pwind
-    got = pwind.xr_from_responses(resp, use_timestamp=True)
+    got = pwind.nc_from_responses(resp, use_timestamp=True)
     pd.testing.assert_frame_equal(got,
                                   want,
                                   check_dtype=False,

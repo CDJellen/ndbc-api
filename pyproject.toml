@@ -10,10 +10,10 @@ readme = "README.md"
 python = ">=3.8,<3.13"
 requests = ">=2.10.0"
 pandas = ">=1.5.3"
-xarray = "~0.19"
 numpy  = "^1.24.3"
 beautifulsoup4 = "~4"
 html5lib = "^1.1"
+netcdf4 = "^1.7.1.post2"
 
 [tool.poetry.group.dev.dependencies]
 coveralls = ">=4.0.1"

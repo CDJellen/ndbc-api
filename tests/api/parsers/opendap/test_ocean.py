@@ -1,4 +1,5 @@
-import xarray as xr
+import netCDF4 as nc
+
 import pytest
 import yaml
 
@@ -31,7 +32,7 @@ def ocean():
 def test_available_measurements(ocean, ocean_response, parsed_ocean):
     resp = ocean_response
     want = parsed_ocean
-    got = ocean.xr_from_responses(resp, use_timestamp=True)
+    got = ocean.nc_from_responses(resp, use_timestamp=True)
     pd.testing.assert_frame_equal(got,
                                   want,
                                   check_dtype=False,

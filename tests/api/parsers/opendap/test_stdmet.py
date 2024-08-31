@@ -1,4 +1,5 @@
-import xarray as xr
+import netCDF4 as nc
+
 import pytest
 import yaml
 
@@ -31,7 +32,7 @@ def stdmet():
 def test_available_measurements(stdmet, stdmet_response, parsed_stdmet):
     resp = stdmet_response
     want = parsed_stdmet
-    got = stdmet.xr_from_responses(resp, use_timestamp=True)
+    got = stdmet.nc_from_responses(resp, use_timestamp=True)
     pd.testing.assert_frame_equal(got,
                                   want,
                                   check_dtype=False,

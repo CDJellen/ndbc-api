@@ -1,7 +1,9 @@
+import tempfile
 from datetime import datetime, timedelta
-from typing import Any
+from typing import List, Any
 
-import xarray as xr
+import netCDF4 as nc
+import numpy as np
 
 from ndbc_api.api.handlers._base import BaseHandler
 from ndbc_api.api.parsers.opendap.adcp import AdcpParser
@@ -37,7 +39,7 @@ class OpenDapDataHandler(BaseHandler):
         start_time: datetime = datetime.now() - timedelta(days=30),
         end_time: datetime = datetime.now(),
         use_timestamp: bool = True,
-    ) -> xr.Dataset:
+    ) -> 'nc.Dataset':
         """adcp"""
         try:
             reqs = AdcpRequest.build_request(station_id=station_id,
@@ -49,7 +51,7 @@ class OpenDapDataHandler(BaseHandler):
             resps = handler.handle_requests(station_id=station_id, reqs=reqs)
         except Exception as e:
             raise ResponseException('Failed to execute requests.') from e
-        return AdcpParser.xr_from_responses(responses=resps,
+        return AdcpParser.nc_from_responses(responses=resps,
                                             use_timestamp=use_timestamp)
 
     @classmethod
@@ -60,7 +62,7 @@ class OpenDapDataHandler(BaseHandler):
         start_time: datetime = datetime.now() - timedelta(days=30),
         end_time: datetime = datetime.now(),
         use_timestamp: bool = True,
-    ) -> xr.Dataset:
+    ) -> 'nc.Dataset':
         """adcp2"""
         try:
             reqs = Adcp2Request.build_request(station_id=station_id,
@@ -72,7 +74,7 @@ class OpenDapDataHandler(BaseHandler):
             resps = handler.handle_requests(station_id=station_id, reqs=reqs)
         except Exception as e:
             raise ResponseException('Failed to execute requests.') from e
-        return Adcp2Parser.xr_from_responses(responses=resps,
+        return Adcp2Parser.nc_from_responses(responses=resps,
                                             use_timestamp=use_timestamp)
 
     @classmethod
@@ -83,7 +85,7 @@ class OpenDapDataHandler(BaseHandler):
         start_time: datetime = datetime.now() - timedelta(days=30),
         end_time: datetime = datetime.now(),
         use_timestamp: bool = True,
-    ) -> xr.Dataset:
+    ) -> 'nc.Dataset':
         """cwind"""
         try:
             reqs = CwindRequest.build_request(station_id=station_id,
@@ -95,7 +97,7 @@ class OpenDapDataHandler(BaseHandler):
             resps = handler.handle_requests(station_id=station_id, reqs=reqs)
         except Exception as e:
             raise ResponseException('Failed to execute requests.') from e
-        return CwindParser.xr_from_responses(responses=resps,
+        return CwindParser.nc_from_responses(responses=resps,
                                              use_timestamp=use_timestamp)
 
     @classmethod
@@ -106,7 +108,7 @@ class OpenDapDataHandler(BaseHandler):
         start_time: datetime = datetime.now() - timedelta(days=30),
         end_time: datetime = datetime.now(),
         use_timestamp: bool = True,
-    ) -> xr.Dataset:
+    ) -> 'nc.Dataset':
         """dart"""
         try:
             reqs = DartRequest.build_request(station_id=station_id,
@@ -118,7 +120,7 @@ class OpenDapDataHandler(BaseHandler):
             resps = handler.handle_requests(station_id=station_id, reqs=reqs)
         except Exception as e:
             raise ResponseException('Failed to execute requests.') from e
-        return DartParser.xr_from_responses(responses=resps,
+        return DartParser.nc_from_responses(responses=resps,
                                              use_timestamp=use_timestamp)
 
     @classmethod
@@ -129,7 +131,7 @@ class OpenDapDataHandler(BaseHandler):
         start_time: datetime = datetime.now() - timedelta(days=30),
         end_time: datetime = datetime.now(),
         use_timestamp: bool = True,
-    ) -> xr.Dataset:
+    ) -> 'nc.Dataset':
         """mmcbcur"""
         try:
             reqs = MmcbcurRequest.build_request(station_id=station_id,
@@ -141,7 +143,7 @@ class OpenDapDataHandler(BaseHandler):
             resps = handler.handle_requests(station_id=station_id, reqs=reqs)
         except Exception as e:
             raise ResponseException('Failed to execute requests.') from e
-        return MmcbcurParser.xr_from_responses(responses=resps,
+        return MmcbcurParser.nc_from_responses(responses=resps,
                                              use_timestamp=use_timestamp)
 
     @classmethod
@@ -152,7 +154,7 @@ class OpenDapDataHandler(BaseHandler):
         start_time: datetime = datetime.now() - timedelta(days=30),
         end_time: datetime = datetime.now(),
         use_timestamp: bool = True,
-    ) -> xr.Dataset:
+    ) -> 'nc.Dataset':
         """ocean"""
         try:
             reqs = OceanRequest.build_request(station_id=station_id,
@@ -164,7 +166,7 @@ class OpenDapDataHandler(BaseHandler):
             resps = handler.handle_requests(station_id=station_id, reqs=reqs)
         except Exception as e:
             raise ResponseException('Failed to execute requests.') from e
-        return OceanParser.xr_from_responses(responses=resps,
+        return OceanParser.nc_from_responses(responses=resps,
                                              use_timestamp=use_timestamp)
 
     @classmethod
@@ -175,7 +177,7 @@ class OpenDapDataHandler(BaseHandler):
         start_time: datetime = datetime.now() - timedelta(days=30),
         end_time: datetime = datetime.now(),
         use_timestamp: bool = True,
-    ) -> xr.Dataset:
+    ) -> 'nc.Dataset':
         """pwind"""
         try:
             reqs = PwindRequest.build_request(station_id=station_id,
@@ -187,7 +189,7 @@ class OpenDapDataHandler(BaseHandler):
             resps = handler.handle_requests(station_id=station_id, reqs=reqs)
         except Exception as e:
             raise ResponseException('Failed to execute requests.') from e
-        return PwindParser.xr_from_responses(responses=resps,
+        return PwindParser.nc_from_responses(responses=resps,
                                             use_timestamp=use_timestamp)
 
     @classmethod
@@ -198,7 +200,7 @@ class OpenDapDataHandler(BaseHandler):
         start_time: datetime = datetime.now() - timedelta(days=30),
         end_time: datetime = datetime.now(),
         use_timestamp: bool = True,
-    ) -> xr.Dataset:
+    ) -> 'nc.Dataset':
         """stdmet"""
         try:
             reqs = StdmetRequest.build_request(station_id=station_id,
@@ -210,7 +212,7 @@ class OpenDapDataHandler(BaseHandler):
             resps = handler.handle_requests(station_id=station_id, reqs=reqs)
         except Exception as e:
             raise ResponseException('Failed to execute requests.') from e
-        return StdmetParser.xr_from_responses(responses=resps,
+        return StdmetParser.nc_from_responses(responses=resps,
                                               use_timestamp=use_timestamp)
 
     @classmethod
@@ -221,7 +223,7 @@ class OpenDapDataHandler(BaseHandler):
         start_time: datetime = datetime.now() - timedelta(days=30),
         end_time: datetime = datetime.now(),
         use_timestamp: bool = True,
-    ) -> xr.Dataset:
+    ) -> 'nc.Dataset':
         """swden"""
         try:
             reqs = SwdenRequest.build_request(station_id=station_id,
@@ -233,7 +235,7 @@ class OpenDapDataHandler(BaseHandler):
             resps = handler.handle_requests(station_id=station_id, reqs=reqs)
         except Exception as e:
             raise ResponseException('Failed to execute requests.') from e
-        return SwdenParser.xr_from_responses(responses=resps,
+        return SwdenParser.nc_from_responses(responses=resps,
                                             use_timestamp=use_timestamp)
 
     @classmethod
@@ -244,7 +246,7 @@ class OpenDapDataHandler(BaseHandler):
         start_time: datetime = datetime.now() - timedelta(days=30),
         end_time: datetime = datetime.now(),
         use_timestamp: bool = True,
-    ) -> xr.Dataset:
+    ) -> 'nc.Dataset':
         """wlevel"""
         try:
             reqs = WlevelRequest.build_request(station_id=station_id,
@@ -256,5 +258,5 @@ class OpenDapDataHandler(BaseHandler):
             resps = handler.handle_requests(station_id=station_id, reqs=reqs)
         except Exception as e:
             raise ResponseException('Failed to execute requests.') from e
-        return WlevelParser.xr_from_responses(responses=resps,
+        return WlevelParser.nc_from_responses(responses=resps,
                                              use_timestamp=use_timestamp)

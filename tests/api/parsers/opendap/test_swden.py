@@ -1,4 +1,5 @@
-import xarray as xr
+import netCDF4 as nc
+
 import pytest
 import yaml
 
@@ -31,7 +32,7 @@ def swden():
 def test_available_measurements(swden, swden_response, parsed_swden):
     resp = swden_response
     want = parsed_swden
-    got = swden.xr_from_responses(resp, use_timestamp=True)
+    got = swden.nc_from_responses(resp, use_timestamp=True)
     pd.testing.assert_frame_equal(got,
                                   want,
                                   check_dtype=False,

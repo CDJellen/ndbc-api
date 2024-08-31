@@ -1,4 +1,5 @@
-import xarray as xr
+import netCDF4 as nc
+
 import pytest
 import yaml
 
@@ -31,7 +32,7 @@ def mmcbcur():
 def test_available_measurements(mmcbcur, mmcbcur_response, parsed_mmcbcur):
     resp = mmcbcur_response
     want = parsed_mmcbcur
-    got = mmcbcur.xr_from_responses(resp, use_timestamp=True)
+    got = mmcbcur.nc_from_responses(resp, use_timestamp=True)
     pd.testing.assert_frame_equal(got,
                                   want,
                                   check_dtype=False,

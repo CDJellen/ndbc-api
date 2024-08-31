@@ -1,15 +1,14 @@
 from typing import List
 
-import xarray as xr
+import netCDF4 as nc
+
 
 from ndbc_api.api.parsers.opendap._base import BaseParser
 
 
 class PwindParser(BaseParser):
 
-    INDEX_COL = 0
-
     @classmethod
-    def xr_from_responses(cls, responses: List[dict]) -> xr.Dataset:
+    def nc_from_responses(cls, responses: List[dict], use_timestamp: bool = False) -> 'nc.Dataset':
         return super(PwindParser,
-                     cls).xr_from_responses(responses)
+                     cls).nc_from_responses(responses)

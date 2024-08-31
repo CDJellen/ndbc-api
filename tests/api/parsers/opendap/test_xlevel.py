@@ -1,4 +1,5 @@
-import xarray as xr
+import netCDF4 as nc
+
 import pytest
 import yaml
 
@@ -31,7 +32,7 @@ def wlevel():
 def test_available_measurements(wlevel, wlevel_response, parsed_wlevel):
     resp = wlevel_response
     want = parsed_wlevel
-    got = wlevel.xr_from_responses(resp, use_timestamp=True)
+    got = wlevel.nc_from_responses(resp, use_timestamp=True)
     pd.testing.assert_frame_equal(got,
                                   want,
                                   check_dtype=False,

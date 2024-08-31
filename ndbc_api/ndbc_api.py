@@ -25,15 +25,18 @@ Attributes:
     headers(:dict:): The request headers for use in the NDBC API's request
         handler.
 """
+import os
 import logging
 import itertools
 import pickle
 import warnings
+import tempfile
 from datetime import datetime, timedelta
 from typing import Any, List, Tuple, Union
 
 import pandas as pd
-import xarray as xr
+import numpy as np
+import netCDF4 as nc
 
 from .api.handlers.http.data import DataHandler
 from .api.handlers.http.stations import StationsHandler
@@ -457,7 +460,7 @@ class NdbcApi(metaclass=Singleton):
         station_ids: Union[List[Union[int, str]], None] = None,
         modes: Union[List[str], None] = None,
         use_opendap: bool = False
-    ) -> Union[pd.DataFrame, xr.Dataset, dict]:
+    ) -> Union[pd.DataFrame, 'nc.Dataset', dict]:
         """Execute data query against the specified NDBC station(s).
 
         Query the NDBC data service for station-level measurements, using the
@@ -552,7 +555,9 @@ class NdbcApi(metaclass=Singleton):
                                 end_time=end_time,
                                 use_timestamp=use_timestamp,
                                 as_df=as_df,
-                                cols=cols) for station_id, mode in data_requests
+                                cols=cols,
+                                use_opendap=use_opendap,
+                                ) for station_id, mode in data_requests
             ]
             for i, future in enumerate(futures):
                 try:
@@ -605,7 +610,8 @@ class NdbcApi(metaclass=Singleton):
                           f"{handle_station_ids} and modes "
                           f"{handle_modes}"))
         return self._handle_accumulate_data(accumulated_data,
-                                            station_id_as_column)
+                                            station_id_as_column,
+                                            use_opendap=use_opendap)
 
     def get_modes(self, use_opendap: bool = False) -> List[str]:
         """Get the list of supported modes for `get_data(...)`.
@@ -699,17 +705,23 @@ class NdbcApi(metaclass=Singleton):
         else:
             return data
 
-    @staticmethod
     def _handle_accumulate_data(
+            self,
             accumulated_data: List[Tuple[Union[pd.DataFrame, dict], str]],
-            station_id_as_column: bool = False) -> Union[pd.DataFrame, dict]:
-        return_as_df = isinstance(accumulated_data[0][0], pd.DataFrame)
-        data: Union[List[pd.DataFrame], dict] = [] if return_as_df else {}
+            station_id_as_column: bool = False,
+            use_opendap: bool = False,
+        ) -> Union[pd.DataFrame, dict]:
+        """Accumulate the data from multiple stations and modes."""
+        return_as_df = isinstance(accumulated_data[0][0], pd.DataFrame) and not use_opendap
+
+        data: Union[List[pd.DataFrame], List['nc.Dataset'], dict] = [] if return_as_df or use_opendap else {}
 
         for d in accumulated_data:
             if return_as_df:
                 if station_id_as_column:
                     d[0].insert(0, 'station_id', d[1])
+                data.append(d[0])
+            elif use_opendap:
                 data.append(d[0])
             else:
                 d_data, d_station_id = d[0], d[1]
@@ -725,6 +737,8 @@ class NdbcApi(metaclass=Singleton):
 
         if return_as_df:
             return pd.concat(data)
+        elif use_opendap:
+            return self._join_netcdf4(data)
         return data
 
     def _handle_get_data(
@@ -735,11 +749,16 @@ class NdbcApi(metaclass=Singleton):
             end_time: datetime,
             use_timestamp: bool,
             as_df: bool = True,
-            cols: List[str] = None) -> Tuple[Union[pd.DataFrame, dict], str]:
+            cols: List[str] = None,
+            use_opendap: bool = False,
+            ) -> Tuple[Union[pd.DataFrame, 'nc.Dataset', dict], str]:
         start_time = self._handle_timestamp(start_time)
         end_time = self._handle_timestamp(end_time)
         station_id = self._parse_station_id(station_id)
-        data_api_call = getattr(self._data_api, mode, None)
+        if use_opendap:
+            data_api_call = getattr(self._opendap_data_api, mode, None)
+        else:
+            data_api_call = getattr(self._data_api, mode, None)
         if not data_api_call:
             raise RequestException(
                 'Please supply a supported mode from `get_modes()`.')
@@ -755,13 +774,193 @@ class NdbcApi(metaclass=Singleton):
             raise ResponseException(
                 f'Failed to handle API call.\nRaised from {e}') from e
         if use_timestamp:
-            data = self._enforce_timerange(df=data,
-                                           start_time=start_time,
-                                           end_time=end_time)
+            if use_opendap:
+                data = self._filter_netcdf4_by_time_range(data, start_time, end_time)
+            else:
+                data = self._enforce_timerange(df=data,
+                                            start_time=start_time,
+                                            end_time=end_time)
         try:
-            handled_data = self._handle_data(data, as_df, cols)
+            if use_opendap:
+                handled_data = self._filter_netcdf4_by_variable(data, cols)
+            else:
+                handled_data = self._handle_data(data, as_df, cols)
         except (ValueError, KeyError, AttributeError) as e:
             raise ParserException(
                 f'Failed to handle returned data.\nRaised from {e}') from e
 
         return (handled_data, station_id)
+
+    @staticmethod
+    def _join_netcdf4(
+            datasets: List['nc.Dataset'],
+            temporal_dim_name: str = 'time',
+            spatial_dim_names: List[str] = ['latitude', 'longitude']
+        ) -> 'nc.Dataset':
+        """Joins multiple netCDF4 datasets using their shared dimensions.
+
+        Handles cases where datasets might not have the same variables, 
+        but requires that all datasets share the same dimensions. For
+        data stored on the THREDDS server, all datasets are expected to
+        have `time`, `latitude`, and `longitude` dimensions.
+
+        Args:
+            datasets (List[netCDF4.Dataset]): A list of netCDF4 datasets
+                to join.
+            dimension_names (List[str]): A list of dimension names to join
+                the datasets on. Defaults to `['time', 'latitude', 'longitude']`.
+        
+        Returns:
+            A netCDF4.Dataset object containing the joined data.
+        """
+        unique_dim_values = {}
+        for dim_name in [temporal_dim_name] + spatial_dim_names:
+            all_values = np.concatenate([ds.variables[dim_name][:] for ds in datasets])
+            unique_values, indices = np.unique(all_values, return_inverse=True)
+            unique_dim_values[dim_name] = unique_values
+
+        with tempfile.NamedTemporaryFile(delete=True, suffix='.nc', dir=os.getcwd()) as temp_file:
+            output_ds = nc.Dataset(temp_file.name, 'w', format='NETCDF4')
+
+        # create time dimension
+        output_ds.createDimension(temporal_dim_name, len(unique_dim_values[temporal_dim_name]))
+        time_var = output_ds.createVariable(temporal_dim_name, 'f8', (temporal_dim_name,))
+        time_var[:] = unique_dim_values[temporal_dim_name]
+        time_var.units = datasets[0].variables[temporal_dim_name].units 
+
+        # create spatial dimensions
+        for dim_name in spatial_dim_names:
+            output_ds.createDimension(dim_name, len(unique_dim_values[dim_name]))
+            dim_var = output_ds.createVariable(dim_name, 'f8', (dim_name,))
+            dim_var[:] = unique_dim_values[dim_name]
+            dim_var.units = datasets[0].variables[dim_name].units
+        
+        all_variables = set()
+        for ds in datasets:
+            all_variables.update(ds.variables.keys())
+        
+        # remove the dimensions from the list of variables
+        all_variables -= {temporal_dim_name, *spatial_dim_names}
+
+        for var_name in all_variables:
+            datasets_with_var = [ds for ds in datasets if var_name in ds.variables]
+            if not datasets_with_var:
+                continue
+
+            var1 = datasets_with_var[0].variables[var_name]
+            fill_value = getattr(var1, '_FillValue', np.nan) 
+
+            out_var = output_ds.createVariable(var_name, var1.datatype, var1.dimensions, fill_value=fill_value)
+            out_var.setncatts(var1.__dict__)
+
+            # create an empty array to store the merged data
+            combined_data = np.full((len(unique_dim_values[temporal_dim_name]),) + var1.shape[1:], fill_value, dtype=var1.datatype)
+
+            # fill in data from each dataset based on their time indices
+            for ds in datasets_with_var:
+                var = ds.variables[var_name]
+                time_values = ds.variables[temporal_dim_name][:]
+                indices = np.where(np.in1d(unique_dim_values[temporal_dim_name], time_values))[0]
+                combined_data[indices, ...] = var[:]
+
+            out_var[:] = combined_data
+
+        return output_ds
+    
+    @staticmethod
+    def _filter_netcdf4_by_time_range(
+            dataset: nc.Dataset,
+            start_time: datetime,
+            end_time: datetime,
+            temporal_dim_name: str = 'time',
+            spatial_dim_names: List[str] = ['latitude', 'longitude'],
+    ) -> nc.Dataset:
+        """
+        Filters a netCDF4 Dataset to keep only data within a specified time range.
+
+        Args:
+            dataset: The netCDF4 Dataset object.
+            start_time: The start of the time range (inclusive) as an ISO 8601 string (e.g., '2023-01-01T00:00:00Z').
+            end_time: The end of the time range (inclusive) as an ISO 8601 string.
+
+        Returns:
+            The modified netCDF4 Dataset object with data outside the time range removed.
+        """
+        with tempfile.NamedTemporaryFile(delete=True, suffix='.nc', dir=os.getcwd()) as temp_file:
+            output_ds = nc.Dataset(temp_file.name, 'w', format='NETCDF4')
+
+        time_var = dataset.variables[temporal_dim_name]
+        time_units = time_var.units
+
+        start_time_num = nc.date2num(start_time, time_units)
+        end_time_num = nc.date2num(end_time, time_units)
+
+        time_values = time_var[:].squeeze()
+        time_indices = np.where((time_values >= start_time_num) & (time_values <= end_time_num))[0]
+
+        output_ds.createDimension(temporal_dim_name, len(time_indices))
+        new_time_var = output_ds.createVariable(temporal_dim_name, time_var.datatype, (temporal_dim_name,))
+        new_time_var.units = time_var.units
+        new_time_var[:] = time_values[time_indices]
+
+        # copy the spatial dimensions
+        for dim_name in spatial_dim_names:
+            dim_var = dataset.variables[dim_name]
+            output_ds.createDimension(dim_name, len(dim_var))
+            out_var = output_ds.createVariable(dim_name, dim_var.datatype, (dim_name,))
+            out_var.units = dim_var.units
+            out_var[:] = dim_var[:]
+
+        for var_name, var in dataset.variables.items():
+            if var_name in spatial_dim_names + [temporal_dim_name]:
+                continue
+            if temporal_dim_name in var.dimensions:
+                var_data = var[:]
+                if var_data.ndim > 1:
+                    filtered_data = var_data[time_indices, ...]
+                    new_shape = (len(time_indices),) + var_data.shape[1:]
+                else:
+                    filtered_data = var_data[time_indices]
+                    new_shape = (len(time_indices),)
+                new_var = output_ds.createVariable(var_name, var.datatype, var.dimensions, fill_value=getattr(var, '_FillValue', None))
+                new_var.setncatts(var.__dict__)
+                new_var[:] = filtered_data.reshape(new_shape)
+
+        return output_ds
+
+    @staticmethod
+    def _filter_netcdf4_by_variable(
+            dataset: nc.Dataset,
+            cols: List[str],
+            temporal_dim_name: str = 'time',
+            spatial_dim_names: List[str] = ['latitude', 'longitude']
+        ) -> nc.Dataset:
+        """
+        Filters a netCDF4 Dataset to keep only data with variables whose names are in cols.
+
+        Args:
+            dataset: The netCDF4 Dataset object.
+            cols: A list of variable names to keep.
+
+        Returns:
+            The modified netCDF4 Dataset object with data with variables not in cols removed.
+        """
+        with tempfile.NamedTemporaryFile(delete=True, suffix='.nc', dir=os.getcwd()) as temp_file:
+            output_ds = nc.Dataset(temp_file.name, 'w', format='NETCDF4')
+        
+        # copy dimensions
+        for dim_name in [temporal_dim_name] + spatial_dim_names:
+            dim_var = dataset.variables[dim_name]
+            output_ds.createDimension(dim_name, len(dim_var))
+            out_var = output_ds.createVariable(dim_name, dim_var.datatype, (dim_name,))
+            out_var.units = dim_var.units
+            out_var[:] = dim_var[:]
+        
+        # copy variables
+        for var_name in cols:
+            var = dataset.variables[var_name]
+            out_var = output_ds.createVariable(var_name, var.datatype, var.dimensions)
+            out_var.setncatts(var.__dict__)
+            out_var[:] = var[:]
+        
+        return output_ds

@@ -1,4 +1,5 @@
-import xarray as xr
+import netCDF4 as nc
+
 import pytest
 import yaml
 
@@ -31,7 +32,7 @@ def adcp2():
 def test_available_measurements(adcp2, adcp2_response, parsed_adcp2):
     resp = adcp2_response
     want = parsed_adcp2
-    got = adcp2.xr_from_responses(resp)
+    got = adcp2.nc_from_responses(resp)
     pd.testing.assert_frame_equal(got,
                                   want,
                                   check_dtype=False,

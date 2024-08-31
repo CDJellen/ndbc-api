@@ -1,7 +1,8 @@
 import logging
 from functools import partial
 
-import xarray as xr
+import netCDF4 as nc
+
 import pytest
 
 from ndbc_api.api.handlers.opendap.data import OpenDapDataHandler
