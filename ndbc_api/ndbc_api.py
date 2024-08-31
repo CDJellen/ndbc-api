@@ -964,3 +964,28 @@ class NdbcApi(metaclass=Singleton):
             out_var[:] = var[:]
         
         return output_ds
+
+    @staticmethod
+    def save_netcdf_dataset(temp_dataset: nc.Dataset, output_filepath: str):
+        """
+        Saves a netCDF4 dataset from a temporary file to a user-specified file path.
+
+        Args:
+            temp_dataset: The netCDF4.Dataset object opened from the temporary file.
+            output_filepath: The desired file path to save the dataset.
+        
+        Returns:
+            None: The dataset is saved to the specified location.
+        """
+        new_dataset = nc.Dataset(output_filepath, 'w', format='NETCDF4', diskless=True, persist=True)
+        
+        for dim_name, dim in temp_dataset.dimensions.items():
+            new_dataset.createDimension(dim_name, len(dim) if not dim.isunlimited() else None)
+        
+        for var_name, var in temp_dataset.variables.items():
+            new_var = new_dataset.createVariable(var_name, var.datatype, var.dimensions)
+            new_var.setncatts(var.__dict__)
+            new_var[:] = var[:]
+        
+        new_dataset.close()
+        temp_dataset.close()
