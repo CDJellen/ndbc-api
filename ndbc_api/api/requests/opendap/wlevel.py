@@ -6,7 +6,7 @@ from ndbc_api.api.requests.opendap._base import BaseRequest
 
 class WlevelRequest(BaseRequest):
 
-    FORMAT = 'swdir'
+    FORMAT = 'wlevel'
     HISTORICAL_IDENTIFIER = 'l'
 
     @classmethod

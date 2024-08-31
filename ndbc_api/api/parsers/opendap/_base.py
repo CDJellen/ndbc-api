@@ -10,6 +10,9 @@ from ndbc_api.exceptions import ParserException
 
 class BaseParser:
 
+    TEMPORAL_DIM = 'time'
+    SPATIAL_DIMS = ['latitude', 'longitude']
+
     @classmethod
     def nc_from_responses(cls,
                           responses: List[dict],
@@ -48,8 +51,6 @@ class BaseParser:
     def _join_netcdf4(
             cls,
             datasets: List['nc.Dataset'],
-            temporal_dim_name: str = 'time',
-            spatial_dim_names: List[str] = ['latitude', 'longitude']
         ) -> 'nc.Dataset':
         """Joins multiple netCDF4 datasets using their shared dimensions.
 
@@ -68,7 +69,7 @@ class BaseParser:
             A netCDF4.Dataset object containing the joined data.
         """
         unique_dim_values = {}
-        for dim_name in [temporal_dim_name] + spatial_dim_names:
+        for dim_name in [cls.TEMPORAL_DIM] + cls.SPATIAL_DIMS:
             all_values = np.concatenate([ds.variables[dim_name][:] for ds in datasets])
             unique_values, indices = np.unique(all_values, return_inverse=True)
             unique_dim_values[dim_name] = unique_values
@@ -77,24 +78,25 @@ class BaseParser:
             output_ds = nc.Dataset(temp_file.name, 'w', format='NETCDF4')
 
         # create time dimension
-        output_ds.createDimension(temporal_dim_name, len(unique_dim_values[temporal_dim_name]))
-        time_var = output_ds.createVariable(temporal_dim_name, 'f8', (temporal_dim_name,))
-        time_var[:] = unique_dim_values[temporal_dim_name]
-        time_var.units = datasets[0].variables[temporal_dim_name].units 
+        output_ds.createDimension(cls.TEMPORAL_DIM, len(unique_dim_values[cls.TEMPORAL_DIM]))
+        time_var = output_ds.createVariable(cls.TEMPORAL_DIM, 'f8', (cls.TEMPORAL_DIM,))
+        time_var[:] = unique_dim_values[cls.TEMPORAL_DIM]
+        time_var.units = datasets[0].variables[cls.TEMPORAL_DIM].units 
 
         # create spatial dimensions
-        for dim_name in spatial_dim_names:
+        for dim_name in cls.SPATIAL_DIMS:
             output_ds.createDimension(dim_name, len(unique_dim_values[dim_name]))
             dim_var = output_ds.createVariable(dim_name, 'f8', (dim_name,))
             dim_var[:] = unique_dim_values[dim_name]
-            dim_var.units = datasets[0].variables[dim_name].units
+            if hasattr(datasets[0].variables[dim_name], 'units'):
+                dim_var.units = datasets[0].variables[dim_name].units
         
         all_variables = set()
         for ds in datasets:
             all_variables.update(ds.variables.keys())
         
         # remove the dimensions from the list of variables
-        all_variables -= {temporal_dim_name, *spatial_dim_names}
+        all_variables -= {cls.TEMPORAL_DIM, *cls.SPATIAL_DIMS}
 
         for var_name in all_variables:
             datasets_with_var = [ds for ds in datasets if var_name in ds.variables]
@@ -108,13 +110,13 @@ class BaseParser:
             out_var.setncatts(var1.__dict__)
 
             # create an empty array to store the merged data
-            combined_data = np.full((len(unique_dim_values[temporal_dim_name]),) + var1.shape[1:], fill_value, dtype=var1.datatype)
+            combined_data = np.full((len(unique_dim_values[cls.TEMPORAL_DIM]),) + var1.shape[1:], fill_value, dtype=var1.datatype)
 
             # fill in data from each dataset based on their time indices
             for ds in datasets_with_var:
                 var = ds.variables[var_name]
-                time_values = ds.variables[temporal_dim_name][:]
-                indices = np.where(np.in1d(unique_dim_values[temporal_dim_name], time_values))[0]
+                time_values = ds.variables[cls.TEMPORAL_DIM][:]
+                indices = np.where(np.in1d(unique_dim_values[cls.TEMPORAL_DIM], time_values))[0]
                 combined_data[indices, ...] = var[:]
 
             out_var[:] = combined_data

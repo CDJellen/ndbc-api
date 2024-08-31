@@ -1,5 +1,5 @@
 historical:
-- https://www.ndbc.noaa.gov/view_text_file.php?filename=41001w2020.txt.gz&dir=data/historical/swden/
-- https://www.ndbc.noaa.gov/view_text_file.php?filename=41001w2021.txt.gz&dir=data/historical/swden/
+- 'https://dods.ndbc.noaa.gov/thredds/fileServer/data/swden/41001/41001w2020.nc'
+- 'https://dods.ndbc.noaa.gov/thredds/fileServer/data/swden/41001/41001w2021.nc'
 realtime:
-- https://www.ndbc.noaa.gov/data/realtime2/41001.swden
+- https://dods.ndbc.noaa.gov/thredds/fileServer/data/swden/41001/41001w9999.nc

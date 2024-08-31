@@ -7,7 +7,7 @@ from tests.api.requests.opendap._base import (HISTORICAL_END, HISTORICAL_START,
                                       REQUESTS_TESTS_DIR)
 
 TEST_FP = REQUESTS_TESTS_DIR.joinpath('adcp2.yml')
-TEST_STN = '41117'
+TEST_STN = '41001'
 
 
 @pytest.fixture

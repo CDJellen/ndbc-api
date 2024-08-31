@@ -7,7 +7,7 @@ from tests.api.requests.opendap._base import (HISTORICAL_END, HISTORICAL_START,
                                       REQUESTS_TESTS_DIR)
 
 TEST_FP = REQUESTS_TESTS_DIR.joinpath('dart.yml')
-TEST_STN = '41001'
+TEST_STN = '41420'
 
 
 @pytest.fixture

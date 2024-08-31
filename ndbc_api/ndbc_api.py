@@ -873,7 +873,6 @@ class NdbcApi(metaclass=Singleton):
             start_time: datetime,
             end_time: datetime,
             temporal_dim_name: str = 'time',
-            spatial_dim_names: List[str] = ['latitude', 'longitude'],
     ) -> nc.Dataset:
         """
         Filters a netCDF4 Dataset to keep only data within a specified time range.
@@ -904,7 +903,9 @@ class NdbcApi(metaclass=Singleton):
         new_time_var[:] = time_values[time_indices]
 
         # copy the spatial dimensions
-        for dim_name in spatial_dim_names:
+        for dim_name in dataset.dimensions.keys():
+            if dim_name == temporal_dim_name:
+                continue
             dim_var = dataset.variables[dim_name]
             output_ds.createDimension(dim_name, len(dim_var))
             out_var = output_ds.createVariable(dim_name, dim_var.datatype, (dim_name,))
@@ -912,7 +913,7 @@ class NdbcApi(metaclass=Singleton):
             out_var[:] = dim_var[:]
 
         for var_name, var in dataset.variables.items():
-            if var_name in spatial_dim_names + [temporal_dim_name]:
+            if var_name in dataset.dimensions:
                 continue
             if temporal_dim_name in var.dimensions:
                 var_data = var[:]
@@ -931,9 +932,7 @@ class NdbcApi(metaclass=Singleton):
     @staticmethod
     def _filter_netcdf4_by_variable(
             dataset: nc.Dataset,
-            cols: List[str],
-            temporal_dim_name: str = 'time',
-            spatial_dim_names: List[str] = ['latitude', 'longitude']
+            cols: Union[List[str], None] = None,
         ) -> nc.Dataset:
         """
         Filters a netCDF4 Dataset to keep only data with variables whose names are in cols.
@@ -949,7 +948,7 @@ class NdbcApi(metaclass=Singleton):
             output_ds = nc.Dataset(temp_file.name, 'w', format='NETCDF4')
         
         # copy dimensions
-        for dim_name in [temporal_dim_name] + spatial_dim_names:
+        for dim_name in dataset.dimensions.keys():
             dim_var = dataset.variables[dim_name]
             output_ds.createDimension(dim_name, len(dim_var))
             out_var = output_ds.createVariable(dim_name, dim_var.datatype, (dim_name,))
@@ -957,7 +956,11 @@ class NdbcApi(metaclass=Singleton):
             out_var[:] = dim_var[:]
         
         # copy variables
+        if not cols:
+            cols = dataset.variables.keys()
         for var_name in cols:
+            if var_name in dataset.dimensions.keys():
+                continue
             var = dataset.variables[var_name]
             out_var = output_ds.createVariable(var_name, var.datatype, var.dimensions)
             out_var.setncatts(var.__dict__)

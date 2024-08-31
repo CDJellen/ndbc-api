@@ -10,7 +10,7 @@ from ndbc_api.api.requests.opendap.adcp import AdcpRequest
 from ndbc_api.api.requests.opendap.adcp2 import Adcp2Request
 from ndbc_api.api.requests.opendap.cwind import CwindRequest
 from ndbc_api.api.requests.opendap.dart import DartRequest
-from ndbc_api.api.requests.opendap.mmcbcur import MmcbcurRequest
+from ndbc_api.api.requests.opendap.mmbcur import mmbcurRequest
 from ndbc_api.api.requests.opendap.ocean import OceanRequest
 from ndbc_api.api.requests.opendap.pwind import PwindRequest
 from ndbc_api.api.requests.opendap.stdmet import StdmetRequest

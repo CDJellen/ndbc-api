@@ -42,7 +42,7 @@ class BaseRequest(CoreRequest):
     ) -> List[str]:
 
         def req_hist_helper_year(req_year: int) -> str:
-            return f'{cls.BASE_URL}{cls.URL_PREFIX}{cls.FORMAT}/{station_id}/{station_id}{cls.HISTORICAL_IDENTIFIER}{req_year}.{cls.FILE_FORMAT}'
+            return f'{cls.BASE_URL}{cls.URL_PREFIX}{cls.FORMAT}/{station_id.lower()}/{station_id.lower()}{cls.HISTORICAL_IDENTIFIER}{req_year}.{cls.FILE_FORMAT}'
 
         if not cls.FORMAT:  # pragma: no cover
             raise ValueError(
@@ -77,5 +77,5 @@ class BaseRequest(CoreRequest):
         station_id = station_id.upper()
         # realtime data uses 9999 as the year part
         return [
-            f'{cls.BASE_URL}{cls.URL_PREFIX}{cls.FORMAT}/{station_id}/{station_id}{cls.HISTORICAL_IDENTIFIER}9999.{cls.FILE_FORMAT}'
+            f'{cls.BASE_URL}{cls.URL_PREFIX}{cls.FORMAT}/{station_id.lower()}/{station_id.lower()}{cls.HISTORICAL_IDENTIFIER}9999.{cls.FILE_FORMAT}'
         ]

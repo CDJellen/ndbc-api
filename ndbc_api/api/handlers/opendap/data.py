@@ -10,7 +10,7 @@ from ndbc_api.api.parsers.opendap.adcp import AdcpParser
 from ndbc_api.api.parsers.opendap.adcp2 import Adcp2Parser
 from ndbc_api.api.parsers.opendap.cwind import CwindParser
 from ndbc_api.api.parsers.opendap.dart import DartParser
-from ndbc_api.api.parsers.opendap.mmcbcur import MmcbcurParser
+from ndbc_api.api.parsers.opendap.mmbcur import mmbcurParser
 from ndbc_api.api.parsers.opendap.ocean import OceanParser
 from ndbc_api.api.parsers.opendap.pwind import PwindParser
 from ndbc_api.api.parsers.opendap.stdmet import StdmetParser
@@ -20,7 +20,7 @@ from ndbc_api.api.requests.opendap.adcp import AdcpRequest
 from ndbc_api.api.requests.opendap.adcp2 import Adcp2Request
 from ndbc_api.api.requests.opendap.cwind import CwindRequest
 from ndbc_api.api.requests.opendap.dart import DartRequest
-from ndbc_api.api.requests.opendap.mmcbcur import MmcbcurRequest
+from ndbc_api.api.requests.opendap.mmbcur import mmbcurRequest
 from ndbc_api.api.requests.opendap.ocean import OceanRequest
 from ndbc_api.api.requests.opendap.pwind import PwindRequest
 from ndbc_api.api.requests.opendap.stdmet import StdmetRequest
@@ -124,7 +124,7 @@ class OpenDapDataHandler(BaseHandler):
                                              use_timestamp=use_timestamp)
 
     @classmethod
-    def mmcbcur(
+    def mmbcur(
         cls,
         handler: Any,
         station_id: str,
@@ -132,9 +132,9 @@ class OpenDapDataHandler(BaseHandler):
         end_time: datetime = datetime.now(),
         use_timestamp: bool = True,
     ) -> 'nc.Dataset':
-        """mmcbcur"""
+        """mmbcur"""
         try:
-            reqs = MmcbcurRequest.build_request(station_id=station_id,
+            reqs = mmbcurRequest.build_request(station_id=station_id,
                                               start_time=start_time,
                                               end_time=end_time)
         except Exception as e:
@@ -143,7 +143,7 @@ class OpenDapDataHandler(BaseHandler):
             resps = handler.handle_requests(station_id=station_id, reqs=reqs)
         except Exception as e:
             raise ResponseException('Failed to execute requests.') from e
-        return MmcbcurParser.nc_from_responses(responses=resps,
+        return mmbcurParser.nc_from_responses(responses=resps,
                                              use_timestamp=use_timestamp)
 
     @classmethod

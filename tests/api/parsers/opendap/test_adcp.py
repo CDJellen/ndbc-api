@@ -19,8 +19,8 @@ def adcp_response():
 
 @pytest.fixture
 def parsed_adcp():
-    df = pd.read_parquet(PARSED_FP)
-    yield df
+    ds = nc.Dataset(PARSED_FP, 'r')
+    yield ds
 
 
 @pytest.fixture

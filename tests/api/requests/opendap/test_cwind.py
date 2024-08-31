@@ -7,7 +7,7 @@ from tests.api.requests.opendap._base import (HISTORICAL_END, HISTORICAL_START,
                                       REQUESTS_TESTS_DIR)
 
 TEST_FP = REQUESTS_TESTS_DIR.joinpath('cwind.yml')
-TEST_STN = 'tplm2'
+TEST_STN = '41001'
 
 
 @pytest.fixture

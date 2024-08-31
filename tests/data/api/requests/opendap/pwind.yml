@@ -1,5 +1,5 @@
 historical:
-- https://www.ndbc.noaa.gov/view_text_file.php?filename=41001h2020.txt.gz&dir=data/historical/spec/
-- https://www.ndbc.noaa.gov/view_text_file.php?filename=41001h2021.txt.gz&dir=data/historical/spec/
+- 'https://dods.ndbc.noaa.gov/thredds/fileServer/data/pwind/41001/41001p2020.nc'
+- 'https://dods.ndbc.noaa.gov/thredds/fileServer/data/pwind/41001/41001p2021.nc'
 realtime:
-- https://www.ndbc.noaa.gov/data/realtime2/41001.spec
+- https://dods.ndbc.noaa.gov/thredds/fileServer/data/pwind/41001/41001p9999.nc

@@ -7,7 +7,7 @@ from ndbc_api.api.requests.opendap._base import BaseRequest
 class SwdenRequest(BaseRequest):
 
     FORMAT = 'swden'
-    HISTORICAL_IDENTIFIER = 's'
+    HISTORICAL_IDENTIFIER = 'w'
 
     @classmethod
     def build_request(cls, station_id: str, start_time: datetime,
