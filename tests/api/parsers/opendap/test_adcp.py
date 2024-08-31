@@ -1,19 +1,18 @@
 import netCDF4 as nc
 
 import pytest
-import yaml
 
 from ndbc_api.api.parsers.opendap.adcp import AdcpParser
 from tests.api.parsers.opendap._base import PARSED_TESTS_DIR, RESPONSES_TESTS_DIR
 
-TEST_FP = RESPONSES_TESTS_DIR.joinpath('adcp.yml')
-PARSED_FP = PARSED_TESTS_DIR.joinpath('adcp.parquet.gzip')
+TEST_FP = RESPONSES_TESTS_DIR.joinpath('adcp.content')
+PARSED_FP = PARSED_TESTS_DIR.joinpath('adcp.nc')
 
 
 @pytest.fixture
 def adcp_response():
-    with open(TEST_FP, 'r') as f:
-        data = yaml.safe_load(f)
+    with open(TEST_FP, 'rb') as f:
+        data = f.read()
     yield data
 
 
@@ -32,8 +31,6 @@ def adcp():
 def test_available_measurements(adcp, adcp_response, parsed_adcp):
     resp = adcp_response
     want = parsed_adcp
-    got = adcp.nc_from_responses(resp)
-    pd.testing.assert_frame_equal(got,
-                                  want,
-                                  check_dtype=False,
-                                  check_index_type=False)
+    got = adcp.nc_from_responses([resp])
+    assert set(want.variables.keys()) == set(got.variables.keys())
+

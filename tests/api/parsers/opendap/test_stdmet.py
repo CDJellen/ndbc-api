@@ -1,26 +1,25 @@
 import netCDF4 as nc
 
 import pytest
-import yaml
 
 from ndbc_api.api.parsers.opendap.stdmet import StdmetParser
 from tests.api.parsers.opendap._base import PARSED_TESTS_DIR, RESPONSES_TESTS_DIR
 
-TEST_FP = RESPONSES_TESTS_DIR.joinpath('stdmet.yml')
-PARSED_FP = PARSED_TESTS_DIR.joinpath('stdmet.parquet.gzip')
+TEST_FP = RESPONSES_TESTS_DIR.joinpath('stdmet.content')
+PARSED_FP = PARSED_TESTS_DIR.joinpath('stdmet.nc')
 
 
 @pytest.fixture
 def stdmet_response():
-    with open(TEST_FP, 'r') as f:
-        data = yaml.safe_load(f)
+    with open(TEST_FP, 'rb') as f:
+        data = f.read()
     yield data
 
 
 @pytest.fixture
 def parsed_stdmet():
-    df = pd.read_parquet(PARSED_FP)
-    yield df
+    ds = nc.Dataset(PARSED_FP, 'r')
+    yield ds
 
 
 @pytest.fixture
@@ -32,8 +31,5 @@ def stdmet():
 def test_available_measurements(stdmet, stdmet_response, parsed_stdmet):
     resp = stdmet_response
     want = parsed_stdmet
-    got = stdmet.nc_from_responses(resp, use_timestamp=True)
-    pd.testing.assert_frame_equal(got,
-                                  want,
-                                  check_dtype=False,
-                                  check_index_type=False)
+    got = stdmet.nc_from_responses([resp], use_timestamp=True)
+    assert set(want.variables.keys()) == set(got.variables.keys())

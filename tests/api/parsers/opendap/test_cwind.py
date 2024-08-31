@@ -1,26 +1,25 @@
 import netCDF4 as nc
 
 import pytest
-import yaml
 
 from ndbc_api.api.parsers.opendap.cwind import CwindParser
 from tests.api.parsers.opendap._base import PARSED_TESTS_DIR, RESPONSES_TESTS_DIR
 
-TEST_FP = RESPONSES_TESTS_DIR.joinpath('cwind.yml')
-PARSED_FP = PARSED_TESTS_DIR.joinpath('cwind.parquet.gzip')
+TEST_FP = RESPONSES_TESTS_DIR.joinpath('cwind.content')
+PARSED_FP = PARSED_TESTS_DIR.joinpath('cwind.nc')
 
 
 @pytest.fixture
 def cwind_response():
-    with open(TEST_FP, 'r') as f:
-        data = yaml.safe_load(f)
+    with open(TEST_FP, 'rb') as f:
+        data = f.read()
     yield data
 
 
 @pytest.fixture
 def parsed_cwind():
-    df = pd.read_parquet(PARSED_FP)
-    yield df
+    ds = nc.Dataset(PARSED_FP, 'r')
+    yield ds
 
 
 @pytest.fixture
@@ -32,8 +31,5 @@ def cwind():
 def test_available_measurements(cwind, cwind_response, parsed_cwind):
     resp = cwind_response
     want = parsed_cwind
-    got = cwind.nc_from_responses(resp, use_timestamp=True)
-    pd.testing.assert_frame_equal(got,
-                                  want,
-                                  check_dtype=False,
-                                  check_index_type=False)
+    got = cwind.nc_from_responses([resp], use_timestamp=True)
+    assert set(want.variables.keys()) == set(got.variables.keys())

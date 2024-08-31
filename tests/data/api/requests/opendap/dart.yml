@@ -1,5 +1,0 @@
-historical:
-- 'https://dods.ndbc.noaa.gov/thredds/fileServer/data/dart/41420/41420t2020.nc'
-- 'https://dods.ndbc.noaa.gov/thredds/fileServer/data/dart/41420/41420t2021.nc'
-realtime:
-- https://dods.ndbc.noaa.gov/thredds/fileServer/data/dart/41420/41420T9999.nc

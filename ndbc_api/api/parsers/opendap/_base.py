@@ -29,11 +29,15 @@ class BaseParser:
         """
         datasets = []
         for r in responses:
-            if r.get("status") != 200:
-                continue
+            if isinstance(r, dict):
+                if 'status' in r and r.get("status") != 200:
+                    continue
+                content = r['body']
+            else:
+                content = r
             try:
                 with tempfile.NamedTemporaryFile(delete=False, suffix='.nc', dir=os.getcwd()) as temp_file:
-                    temp_file.write(r["body"])
+                    temp_file.write(content)
                     temp_file.flush()
                     temp_file.close()
 
