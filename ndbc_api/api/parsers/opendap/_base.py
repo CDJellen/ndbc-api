@@ -108,7 +108,9 @@ class BaseParser:
                 continue
 
             var1 = datasets_with_var[0].variables[var_name]
-            fill_value = getattr(var1, '_FillValue', np.nan) 
+            fill_value = getattr(var1, '_FillValue', None)
+            if not fill_value:
+                continue
 
             out_var = output_ds.createVariable(var_name, var1.datatype, var1.dimensions, fill_value=fill_value)
             out_var.setncatts(var1.__dict__)

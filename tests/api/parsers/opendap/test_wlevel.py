@@ -17,7 +17,6 @@ def wlevel_response():
     yield data
 
 
-
 @pytest.fixture
 def parsed_wlevel():
     ds = nc.Dataset(PARSED_FP, 'r')

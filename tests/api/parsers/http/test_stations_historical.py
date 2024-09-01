@@ -5,7 +5,7 @@ import yaml
 from ndbc_api.api.parsers.http.historical_stations import HistoricalStationsParser
 from tests.api.parsers.http._base import PARSED_TESTS_DIR, RESPONSES_TESTS_DIR
 
-TEST_FP = RESPONSES_TESTS_DIR.joinpath('stations_historical.yml')
+TEST_FP = RESPONSES_TESTS_DIR.joinpath('stationshistorical.yml')
 PARSED_FP = PARSED_TESTS_DIR.joinpath('stations_historical.parquet.gzip')
 
 

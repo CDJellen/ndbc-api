@@ -32,7 +32,7 @@ class StationsHandler(BaseHandler):
         """Get all active stations from NDBC."""
         req = ActiveStationsRequest.build_request()
         try:
-            resp = handler.handle_request('stn', req)
+            resp = handler.handle_request('stn_active', req)
         except (AttributeError, ValueError, TypeError) as e:
             raise ResponseException(
                 'Failed to execute `station` request.') from e
@@ -43,7 +43,7 @@ class StationsHandler(BaseHandler):
         """Get historical stations from NDBC."""
         req = HistoricalStationsRequest.build_request()
         try:
-            resp = handler.handle_request('stn', req)
+            resp = handler.handle_request('stn_historical', req)
         except (AttributeError, ValueError, TypeError) as e:
             raise ResponseException(
                 'Failed to execute `station` request.') from e
