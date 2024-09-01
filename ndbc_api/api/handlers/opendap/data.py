@@ -1,9 +1,7 @@
-import tempfile
 from datetime import datetime, timedelta
-from typing import List, Any
+from typing import Any
 
 import netCDF4 as nc
-import numpy as np
 
 from ndbc_api.api.handlers._base import BaseHandler
 from ndbc_api.api.parsers.opendap.adcp import AdcpParser
