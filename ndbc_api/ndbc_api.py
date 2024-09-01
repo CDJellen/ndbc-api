@@ -29,13 +29,16 @@ import logging
 import itertools
 import pickle
 import warnings
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta
 from typing import Any, List, Tuple, Union
 
 import pandas as pd
+import netCDF4 as nc
 
-from .api.handlers.data import DataHandler
-from .api.handlers.stations import StationsHandler
+from .api.handlers.http.data import DataHandler
+from .api.handlers.http.stations import StationsHandler
+from .api.handlers.opendap.data import OpenDapDataHandler
 from .config import (DEFAULT_CACHE_LIMIT, HTTP_BACKOFF_FACTOR, HTTP_DEBUG,
                      HTTP_DELAY, HTTP_RETRY, LOGGER_NAME, VERIFY_HTTPS)
 from .exceptions import (HandlerException, ParserException, RequestException,
@@ -43,7 +46,7 @@ from .exceptions import (HandlerException, ParserException, RequestException,
 from .utilities.req_handler import RequestHandler
 from .utilities.singleton import Singleton
 from .utilities.log_formatter import LogFormatter
-from concurrent.futures import ThreadPoolExecutor
+from .utilities.opendap.dataset import join_netcdf4, filter_netcdf4_by_variable, filter_netcdf4_by_time_range
 
 
 class NdbcApi(metaclass=Singleton):
@@ -102,6 +105,7 @@ class NdbcApi(metaclass=Singleton):
         )
         self._stations_api = StationsHandler
         self._data_api = DataHandler
+        self._opendap_data_api = OpenDapDataHandler
         self.configure_logging(level=logging_level, filename=filename)
 
     def dump_cache(self, dest_fp: Union[str, None] = None) -> Union[dict, None]:
@@ -453,7 +457,8 @@ class NdbcApi(metaclass=Singleton):
         cols: List[str] = None,
         station_ids: Union[List[Union[int, str]], None] = None,
         modes: Union[List[str], None] = None,
-    ) -> Union[pd.DataFrame, dict]:
+        use_opendap: bool = False
+    ) -> Union[pd.DataFrame, 'nc.Dataset', dict]:
         """Execute data query against the specified NDBC station(s).
 
         Query the NDBC data service for station-level measurements, using the
@@ -548,7 +553,9 @@ class NdbcApi(metaclass=Singleton):
                                 end_time=end_time,
                                 use_timestamp=use_timestamp,
                                 as_df=as_df,
-                                cols=cols) for station_id, mode in data_requests
+                                cols=cols,
+                                use_opendap=use_opendap,
+                                ) for station_id, mode in data_requests
             ]
             for i, future in enumerate(futures):
                 try:
@@ -601,11 +608,47 @@ class NdbcApi(metaclass=Singleton):
                           f"{handle_station_ids} and modes "
                           f"{handle_modes}"))
         return self._handle_accumulate_data(accumulated_data,
-                                            station_id_as_column)
+                                            station_id_as_column,
+                                            use_opendap=use_opendap)
 
-    def get_modes(self):
-        """Get the list of supported modes for `get_data(...)`."""
+    def get_modes(self, use_opendap: bool = False) -> List[str]:
+        """Get the list of supported modes for `get_data(...)`.
+        
+        Args:
+            use_opendap (bool): Whether to return the available
+                modes for opendap (NetCDF) data.
+        
+        Returns:
+            (List[str]) the available modalities.
+        """
+        if use_opendap:
+            return [v for v in vars(self._opendap_data_api) if not v.startswith('_')]
         return [v for v in vars(self._data_api) if not v.startswith('_')]
+
+    @staticmethod
+    def save_netcdf_dataset(temp_dataset: nc.Dataset, output_filepath: str):
+        """
+        Saves a netCDF4 dataset from a temporary file to a user-specified file path.
+
+        Args:
+            temp_dataset: The netCDF4.Dataset object opened from the temporary file.
+            output_filepath: The desired file path to save the dataset.
+        
+        Returns:
+            None: The dataset is saved to the specified location.
+        """
+        new_dataset = nc.Dataset(output_filepath, 'w', format='NETCDF4', diskless=True, persist=True)
+        
+        for dim_name, dim in temp_dataset.dimensions.items():
+            new_dataset.createDimension(dim_name, len(dim) if not dim.isunlimited() else None)
+        
+        for var_name, var in temp_dataset.variables.items():
+            new_var = new_dataset.createVariable(var_name, var.datatype, var.dimensions)
+            new_var.setncatts(var.__dict__)
+            new_var[:] = var[:]
+        
+        new_dataset.close()
+        temp_dataset.close()
 
     """ PRIVATE """
 
@@ -685,17 +728,23 @@ class NdbcApi(metaclass=Singleton):
         else:
             return data
 
-    @staticmethod
     def _handle_accumulate_data(
+            self,
             accumulated_data: List[Tuple[Union[pd.DataFrame, dict], str]],
-            station_id_as_column: bool = False) -> Union[pd.DataFrame, dict]:
+            station_id_as_column: bool = False,
+            use_opendap: bool = False,
+        ) -> Union[pd.DataFrame, dict]:
+        """Accumulate the data from multiple stations and modes."""
         return_as_df = isinstance(accumulated_data[0][0], pd.DataFrame)
-        data: Union[List[pd.DataFrame], dict] = [] if return_as_df else {}
+
+        data: Union[List[pd.DataFrame], List['nc.Dataset'], dict] = [] if return_as_df or use_opendap else {}
 
         for d in accumulated_data:
             if return_as_df:
                 if station_id_as_column:
                     d[0].insert(0, 'station_id', d[1])
+                data.append(d[0])
+            elif use_opendap:
                 data.append(d[0])
             else:
                 d_data, d_station_id = d[0], d[1]
@@ -711,6 +760,8 @@ class NdbcApi(metaclass=Singleton):
 
         if return_as_df:
             return pd.concat(data)
+        elif use_opendap:
+            return join_netcdf4(data)
         return data
 
     def _handle_get_data(
@@ -721,11 +772,16 @@ class NdbcApi(metaclass=Singleton):
             end_time: datetime,
             use_timestamp: bool,
             as_df: bool = True,
-            cols: List[str] = None) -> Tuple[Union[pd.DataFrame, dict], str]:
+            cols: List[str] = None,
+            use_opendap: bool = False,
+            ) -> Tuple[Union[pd.DataFrame, 'nc.Dataset', dict], str]:
         start_time = self._handle_timestamp(start_time)
         end_time = self._handle_timestamp(end_time)
         station_id = self._parse_station_id(station_id)
-        data_api_call = getattr(self._data_api, mode, None)
+        if use_opendap:
+            data_api_call = getattr(self._opendap_data_api, mode, None)
+        else:
+            data_api_call = getattr(self._data_api, mode, None)
         if not data_api_call:
             raise RequestException(
                 'Please supply a supported mode from `get_modes()`.')
@@ -741,11 +797,20 @@ class NdbcApi(metaclass=Singleton):
             raise ResponseException(
                 f'Failed to handle API call.\nRaised from {e}') from e
         if use_timestamp:
-            data = self._enforce_timerange(df=data,
-                                           start_time=start_time,
-                                           end_time=end_time)
+            if use_opendap:
+                data = filter_netcdf4_by_time_range(data, start_time, end_time)
+            else:
+                data = self._enforce_timerange(df=data,
+                                            start_time=start_time,
+                                            end_time=end_time)
         try:
-            handled_data = self._handle_data(data, as_df, cols)
+            if use_opendap:
+                if cols:
+                    handled_data = filter_netcdf4_by_variable(data, cols)
+                else:
+                    handled_data = data
+            else:
+                handled_data = self._handle_data(data, as_df, cols)
         except (ValueError, KeyError, AttributeError) as e:
             raise ParserException(
                 f'Failed to handle returned data.\nRaised from {e}') from e

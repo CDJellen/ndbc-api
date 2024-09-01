@@ -205,6 +205,8 @@ class RequestHandler(metaclass=Singleton):
                  message=f'Response status: {response.status_code}')
         if response.status_code != 200:  # web request did not succeed
             return dict(status=response.status_code, body='')
+        elif any(['netcdf' in response.headers.get('Content-Type').lower(), 'octet' in response.headers.get('Content-Type').lower()]):
+            return dict(status=response.status_code, body=response.content)
         return dict(status=response.status_code, body=response.text)
 
     """ PRIVATE """

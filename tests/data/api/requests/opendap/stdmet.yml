@@ -1,0 +1,5 @@
+historical:
+- 'https://dods.ndbc.noaa.gov/thredds/fileServer/data/stdmet/tplm2/tplm2h2020.nc'
+- 'https://dods.ndbc.noaa.gov/thredds/fileServer/data/stdmet/tplm2/tplm2h2021.nc'
+realtime:
+- https://dods.ndbc.noaa.gov/thredds/fileServer/data/stdmet/tplm2/tplm2h9999.nc

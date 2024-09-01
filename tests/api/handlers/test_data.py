@@ -4,18 +4,18 @@ from functools import partial
 import pandas as pd
 import pytest
 
-from ndbc_api.api.handlers.data import DataHandler
-from ndbc_api.api.requests.adcp import AdcpRequest
-from ndbc_api.api.requests.cwind import CwindRequest
-from ndbc_api.api.requests.ocean import OceanRequest
-from ndbc_api.api.requests.spec import SpecRequest
-from ndbc_api.api.requests.stdmet import StdmetRequest
-from ndbc_api.api.requests.supl import SuplRequest
-from ndbc_api.api.requests.swden import SwdenRequest
-from ndbc_api.api.requests.swdir import SwdirRequest
-from ndbc_api.api.requests.swdir2 import Swdir2Request
-from ndbc_api.api.requests.swr1 import Swr1Request
-from ndbc_api.api.requests.swr2 import Swr2Request
+from ndbc_api.api.handlers.http.data import DataHandler
+from ndbc_api.api.requests.http.adcp import AdcpRequest
+from ndbc_api.api.requests.http.cwind import CwindRequest
+from ndbc_api.api.requests.http.ocean import OceanRequest
+from ndbc_api.api.requests.http.spec import SpecRequest
+from ndbc_api.api.requests.http.stdmet import StdmetRequest
+from ndbc_api.api.requests.http.supl import SuplRequest
+from ndbc_api.api.requests.http.swden import SwdenRequest
+from ndbc_api.api.requests.http.swdir import SwdirRequest
+from ndbc_api.api.requests.http.swdir2 import Swdir2Request
+from ndbc_api.api.requests.http.swr1 import Swr1Request
+from ndbc_api.api.requests.http.swr2 import Swr2Request
 from ndbc_api.exceptions import RequestException, ResponseException
 from ndbc_api.utilities.req_handler import RequestHandler
 from tests.api.handlers._base import TEST_END, TEST_START, mock_register_uri

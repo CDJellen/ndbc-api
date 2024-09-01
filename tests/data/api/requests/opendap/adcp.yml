@@ -1,0 +1,5 @@
+historical:
+- 'https://dods.ndbc.noaa.gov/thredds/fileServer/data/adcp/41001/41001a2020.nc'
+- 'https://dods.ndbc.noaa.gov/thredds/fileServer/data/adcp/41001/41001a2021.nc'
+realtime:
+- https://dods.ndbc.noaa.gov/thredds/fileServer/data/adcp/41001/41001a9999.nc

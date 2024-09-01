@@ -5,21 +5,21 @@ from os import path
 import pandas as pd
 import pytest
 
-from ndbc_api.api.requests.adcp import AdcpRequest
-from ndbc_api.api.requests.cwind import CwindRequest
-from ndbc_api.api.requests.ocean import OceanRequest
-from ndbc_api.api.requests.spec import SpecRequest
-from ndbc_api.api.requests.station_historical import HistoricalRequest
-from ndbc_api.api.requests.station_metadata import MetadataRequest
-from ndbc_api.api.requests.station_realtime import RealtimeRequest
-from ndbc_api.api.requests.active_stations import ActiveStationsRequest
-from ndbc_api.api.requests.stdmet import StdmetRequest
-from ndbc_api.api.requests.supl import SuplRequest
-from ndbc_api.api.requests.swden import SwdenRequest
-from ndbc_api.api.requests.swdir import SwdirRequest
-from ndbc_api.api.requests.swdir2 import Swdir2Request
-from ndbc_api.api.requests.swr1 import Swr1Request
-from ndbc_api.api.requests.swr2 import Swr2Request
+from ndbc_api.api.requests.http.adcp import AdcpRequest
+from ndbc_api.api.requests.http.cwind import CwindRequest
+from ndbc_api.api.requests.http.ocean import OceanRequest
+from ndbc_api.api.requests.http.spec import SpecRequest
+from ndbc_api.api.requests.http.station_historical import HistoricalRequest
+from ndbc_api.api.requests.http.station_metadata import MetadataRequest
+from ndbc_api.api.requests.http.station_realtime import RealtimeRequest
+from ndbc_api.api.requests.http.active_stations import ActiveStationsRequest
+from ndbc_api.api.requests.http.stdmet import StdmetRequest
+from ndbc_api.api.requests.http.supl import SuplRequest
+from ndbc_api.api.requests.http.swden import SwdenRequest
+from ndbc_api.api.requests.http.swdir import SwdirRequest
+from ndbc_api.api.requests.http.swdir2 import Swdir2Request
+from ndbc_api.api.requests.http.swr1 import Swr1Request
+from ndbc_api.api.requests.http.swr2 import Swr2Request
 from ndbc_api.exceptions import (HandlerException, ParserException,
                                  RequestException, ResponseException,
                                  TimestampException)

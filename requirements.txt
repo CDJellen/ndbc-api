@@ -2,3 +2,4 @@ requests>=2.10.0
 pandas
 beautifulsoup4
 html5lib>=1.1
+netcdf4==1.7.1.post2
