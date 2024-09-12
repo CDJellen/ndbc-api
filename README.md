@@ -6,10 +6,10 @@
 [![Coverage Status](https://coveralls.io/repos/github/CDJellen/ndbc-api/badge.svg?branch=main)](https://coveralls.io/github/CDJellen/ndbc-api?branch=main)
 [![PyPI](https://img.shields.io/pypi/v/ndbc-api)](https://pypi.org/project/ndbc-api/#history)
 [![PyPI - Status](https://img.shields.io/pypi/status/ndbc-api)](https://pypi.org/project/ndbc-api/)
-[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/ndbc-api)](https://pypi.org/project/ndbc-api/)
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white&style=flat-square)](https://www.linkedin.com/in/cdjellen/)
 [![GitHub](https://img.shields.io/github/license/cdjellen/ndbc-api)](https://github.com/cdjellen/ndbc-api/blob/main/LICENSE)
 [![PyPI - Downloads](https://img.shields.io/pypi/dm/ndbc-api)](https://pypi.org/project/ndbc-api/)
+[![Downloads](https://static.pepy.tech/badge/ndbc-api)](https://pepy.tech/project/ndbc-api)
 
 
 <div align="center">
