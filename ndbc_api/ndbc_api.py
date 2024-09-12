@@ -31,7 +31,7 @@ import pickle
 import warnings
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta
-from typing import Any, List, Tuple, Union
+from typing import Any, List, Sequence, Tuple, Union
 
 import pandas as pd
 import netCDF4 as nc
@@ -455,7 +455,7 @@ class NdbcApi(metaclass=Singleton):
         use_timestamp: bool = True,
         as_df: bool = True,
         cols: List[str] = None,
-        station_ids: Union[List[Union[int, str]], None] = None,
+        station_ids: Union[Sequence[Union[int, str]], None] = None,
         modes: Union[List[str], None] = None,
         use_opendap: bool = False
     ) -> Union[pd.DataFrame, 'nc.Dataset', dict]:
