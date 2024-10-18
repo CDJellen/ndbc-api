@@ -81,7 +81,7 @@ The `api` supports a range of public methods for accessing data from the above c
 The `api` has five key public methods for accessing NDBC metadata.
 
 1. The `stations` method, which returns all NDBC stations.
-2. The `nearest_staion` method, which returns the station ID of the nearest station.
+2. The `nearest_station` method, which returns the station ID of the nearest station.
 3. The `station` method, which returns station metadata from a given station ID.
 4. The `available_realtime` method, which returns hyperlinks and measurement names for realtime measurements captured by a given station.
 5. The `available_historical` method, which returns hyperlinks and measurement names for historical measurements captured by a given station.
