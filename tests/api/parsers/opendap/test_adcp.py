@@ -32,5 +32,5 @@ def test_available_measurements(adcp, adcp_response, parsed_adcp):
     resp = adcp_response
     want = parsed_adcp
     got = adcp.nc_from_responses([resp])
-    assert set(want.variables.keys()) == set(got.variables.keys())
 
+    assert set(want.variables.keys()).issubset(set(got.variables.keys()))

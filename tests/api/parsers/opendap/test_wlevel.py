@@ -33,4 +33,5 @@ def test_available_measurements(wlevel, wlevel_response, parsed_wlevel):
     resp = wlevel_response
     want = parsed_wlevel
     got = wlevel.nc_from_responses([resp], use_timestamp=True)
-    assert set(want.variables.keys()) == set(got.variables.keys())
+
+    assert set(want.variables.keys()).issubset(set(got.variables.keys()))

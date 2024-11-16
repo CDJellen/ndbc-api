@@ -3,8 +3,8 @@ import yaml
 
 from ndbc_api.api.requests.opendap.pwind import PwindRequest
 from tests.api.requests.opendap._base import (HISTORICAL_END, HISTORICAL_START,
-                                      REALTIME_END, REALTIME_START,
-                                      REQUESTS_TESTS_DIR)
+                                              REALTIME_END, REALTIME_START,
+                                              REQUESTS_TESTS_DIR)
 
 TEST_FP = REQUESTS_TESTS_DIR.joinpath('pwind.yml')
 TEST_STN = '41001'

@@ -11,7 +11,9 @@ class ActiveStationsParser(XMLParser):
     """
 
     @classmethod
-    def df_from_response(cls, response: dict, use_timestamp: bool = False) -> pd.DataFrame:
+    def df_from_response(cls,
+                         response: dict,
+                         use_timestamp: bool = False) -> pd.DataFrame:
         """
         Reads the response body and parses it into a DataFrame.
 
@@ -27,22 +29,36 @@ class ActiveStationsParser(XMLParser):
             station_data = []
             for station in root.findall('station'):
                 station_info = {
-                    'Station': station.get('id'),
-                    'Lat': float(station.get('lat')),
-                    'Lon': float(station.get('lon')),
-                    'Elevation': float(station.get('elev')) if station.get('elev') else pd.NA,
-                    'Name': station.get('name'),
-                    'Owner': station.get('owner'),
-                    'Program': station.get('pgm'),
-                    'Type': station.get('type'),
-                    'Includes Meteorology': station.get('met') == 'y',
-                    'Includes Currents': station.get('currents') == 'y',
-                    'Includes Water Quality': station.get('waterquality') == 'y',
-                    'DART Program': station.get('dart') == 'y'
+                    'Station':
+                        station.get('id'),
+                    'Lat':
+                        float(station.get('lat')),
+                    'Lon':
+                        float(station.get('lon')),
+                    'Elevation':
+                        float(station.get('elev'))
+                        if station.get('elev') else pd.NA,
+                    'Name':
+                        station.get('name'),
+                    'Owner':
+                        station.get('owner'),
+                    'Program':
+                        station.get('pgm'),
+                    'Type':
+                        station.get('type'),
+                    'Includes Meteorology':
+                        station.get('met') == 'y',
+                    'Includes Currents':
+                        station.get('currents') == 'y',
+                    'Includes Water Quality':
+                        station.get('waterquality') == 'y',
+                    'DART Program':
+                        station.get('dart') == 'y'
                 }
                 station_data.append(station_info)
 
-            df = pd.DataFrame(station_data)  # Create DataFrame from the extracted data
+            df = pd.DataFrame(
+                station_data)  # Create DataFrame from the extracted data
 
         except ET.ParseError as e:
             raise ParserException(f"Error parsing XML data: {e}") from e

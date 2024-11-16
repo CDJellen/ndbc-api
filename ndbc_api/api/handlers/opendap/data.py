@@ -104,8 +104,8 @@ class OpenDapDataHandler(BaseHandler):
         """pwind"""
         try:
             reqs = PwindRequest.build_request(station_id=station_id,
-                                             start_time=start_time,
-                                             end_time=end_time)
+                                              start_time=start_time,
+                                              end_time=end_time)
         except Exception as e:
             raise RequestException('Failed to build request.') from e
         try:
@@ -113,7 +113,7 @@ class OpenDapDataHandler(BaseHandler):
         except Exception as e:
             raise ResponseException('Failed to execute requests.') from e
         return PwindParser.nc_from_responses(responses=resps,
-                                            use_timestamp=use_timestamp)
+                                             use_timestamp=use_timestamp)
 
     @classmethod
     def stdmet(
@@ -150,8 +150,8 @@ class OpenDapDataHandler(BaseHandler):
         """swden"""
         try:
             reqs = SwdenRequest.build_request(station_id=station_id,
-                                             start_time=start_time,
-                                             end_time=end_time)
+                                              start_time=start_time,
+                                              end_time=end_time)
         except Exception as e:
             raise RequestException('Failed to build request.') from e
         try:
@@ -159,7 +159,7 @@ class OpenDapDataHandler(BaseHandler):
         except Exception as e:
             raise ResponseException('Failed to execute requests.') from e
         return SwdenParser.nc_from_responses(responses=resps,
-                                            use_timestamp=use_timestamp)
+                                             use_timestamp=use_timestamp)
 
     @classmethod
     def wlevel(
@@ -173,8 +173,8 @@ class OpenDapDataHandler(BaseHandler):
         """wlevel"""
         try:
             reqs = WlevelRequest.build_request(station_id=station_id,
-                                              start_time=start_time,
-                                              end_time=end_time)
+                                               start_time=start_time,
+                                               end_time=end_time)
         except Exception as e:
             raise RequestException('Failed to build request.') from e
         try:
@@ -182,4 +182,4 @@ class OpenDapDataHandler(BaseHandler):
         except Exception as e:
             raise ResponseException('Failed to execute requests.') from e
         return WlevelParser.nc_from_responses(responses=resps,
-                                             use_timestamp=use_timestamp)
+                                              use_timestamp=use_timestamp)

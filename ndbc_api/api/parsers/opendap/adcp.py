@@ -11,5 +11,7 @@ class AdcpParser(BaseParser):
     SPATIAL_DIMS = ['latitude', 'longitude', 'depth']
 
     @classmethod
-    def nc_from_responses(cls, responses: List[dict], use_timestamp: bool = False) -> pd.DataFrame:
+    def nc_from_responses(cls,
+                          responses: List[dict],
+                          use_timestamp: bool = False) -> pd.DataFrame:
         return super(AdcpParser, cls).nc_from_responses(responses)

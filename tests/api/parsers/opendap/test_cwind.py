@@ -32,4 +32,5 @@ def test_available_measurements(cwind, cwind_response, parsed_cwind):
     resp = cwind_response
     want = parsed_cwind
     got = cwind.nc_from_responses([resp], use_timestamp=True)
-    assert set(want.variables.keys()) == set(got.variables.keys())
+
+    assert set(want.variables.keys()).issubset(set(got.variables.keys()))

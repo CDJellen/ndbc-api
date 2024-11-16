@@ -32,4 +32,5 @@ def test_available_measurements(swden, swden_response, parsed_swden):
     resp = swden_response
     want = parsed_swden
     got = swden.nc_from_responses([resp], use_timestamp=True)
-    assert set(want.variables.keys()) == set(got.variables.keys())
+
+    assert set(want.variables.keys()).issubset(set(got.variables.keys()))

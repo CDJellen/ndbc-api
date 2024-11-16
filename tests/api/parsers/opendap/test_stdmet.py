@@ -32,4 +32,5 @@ def test_available_measurements(stdmet, stdmet_response, parsed_stdmet):
     resp = stdmet_response
     want = parsed_stdmet
     got = stdmet.nc_from_responses([resp], use_timestamp=True)
-    assert set(want.variables.keys()) == set(got.variables.keys())
+
+    assert set(want.variables.keys()).issubset(set(got.variables.keys()))

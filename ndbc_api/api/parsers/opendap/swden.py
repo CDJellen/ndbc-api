@@ -11,6 +11,7 @@ class SwdenParser(BaseParser):
     SPATIAL_DIMS = ['latitude', 'longitude', 'frequency']
 
     @classmethod
-    def nc_from_responses(cls, responses: List[dict], use_timestamp: bool = False) -> pd.DataFrame:
-        return super(SwdenParser,
-                     cls).nc_from_responses(responses)
+    def nc_from_responses(cls,
+                          responses: List[dict],
+                          use_timestamp: bool = False) -> pd.DataFrame:
+        return super(SwdenParser, cls).nc_from_responses(responses)

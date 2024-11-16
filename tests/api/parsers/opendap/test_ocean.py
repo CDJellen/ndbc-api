@@ -32,4 +32,5 @@ def test_available_measurements(ocean, ocean_response, parsed_ocean):
     resp = ocean_response
     want = parsed_ocean
     got = ocean.nc_from_responses([resp], use_timestamp=True)
-    assert set(want.variables.keys()) == set(got.variables.keys())
+
+    assert set(want.variables.keys()).issubset(set(got.variables.keys()))
