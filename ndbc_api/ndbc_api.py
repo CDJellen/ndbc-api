@@ -26,19 +26,17 @@ Attributes:
         handler.
 """
 import logging
-import itertools
 import pickle
 import warnings
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta
-from typing import Any, List, Sequence, Tuple, Union
+from typing import Any, List, Sequence, Tuple, Union, Dict
 
+import xarray
 import pandas as pd
-import netCDF4 as nc
 
 from .api.handlers.http.data import DataHandler
 from .api.handlers.http.stations import StationsHandler
-from .api.handlers.opendap.data import OpenDapDataHandler
 from .config import (DEFAULT_CACHE_LIMIT, HTTP_BACKOFF_FACTOR, HTTP_DEBUG,
                      HTTP_DELAY, HTTP_RETRY, LOGGER_NAME, VERIFY_HTTPS)
 from .exceptions import (HandlerException, ParserException, RequestException,
@@ -46,7 +44,8 @@ from .exceptions import (HandlerException, ParserException, RequestException,
 from .utilities.req_handler import RequestHandler
 from .utilities.singleton import Singleton
 from .utilities.log_formatter import LogFormatter
-from .utilities.opendap.dataset import join_netcdf4, filter_netcdf4_by_variable, filter_netcdf4_by_time_range
+from .api.handlers.opendap.data import OpenDapDataHandler
+from .utilities.opendap.dataset import concat_datasets, merge_datasets, filter_dataset_by_variable, filter_dataset_by_time_range
 
 
 class NdbcApi(metaclass=Singleton):
@@ -253,7 +252,8 @@ class NdbcApi(metaclass=Singleton):
         except (ResponseException, ValueError, KeyError) as e:
             raise ResponseException('Failed to handle returned data.') from e
 
-    def historical_stations(self, as_df: bool = True) -> Union[pd.DataFrame, dict]:
+    def historical_stations(self,
+                            as_df: bool = True) -> Union[pd.DataFrame, dict]:
         """Get historical stations and station metadata from the NDBC.
 
         Query the NDBC data service for the historical data buoys
@@ -279,7 +279,6 @@ class NdbcApi(metaclass=Singleton):
             return self._handle_data(data, as_df, cols=None)
         except (ResponseException, ValueError, KeyError) as e:
             raise ResponseException('Failed to handle returned data.') from e
-
 
     def nearest_station(
         self,
@@ -457,8 +456,8 @@ class NdbcApi(metaclass=Singleton):
         cols: List[str] = None,
         station_ids: Union[Sequence[Union[int, str]], None] = None,
         modes: Union[List[str], None] = None,
-        use_opendap: bool = False
-    ) -> Union[pd.DataFrame, 'nc.Dataset', dict]:
+        use_opendap: bool = False,
+    ) -> Union[pd.DataFrame, xarray.Dataset, dict]:
         """Execute data query against the specified NDBC station(s).
 
         Query the NDBC data service for station-level measurements, using the
@@ -522,7 +521,6 @@ class NdbcApi(metaclass=Singleton):
 
         handle_station_ids: List[Union[int, str]] = []
         handle_modes: List[str] = []
-        station_id_as_column: bool = True if station_id is None else False
 
         if station_id is not None:
             handle_station_ids.append(station_id)
@@ -533,6 +531,10 @@ class NdbcApi(metaclass=Singleton):
         if modes is not None:
             handle_modes.extend(modes)
 
+        for mode in handle_modes:
+            if mode not in self.get_modes(use_opendap):
+                raise RequestException(f"Mode {mode} is not available.")
+
         self.log(logging.INFO,
                  message=(f"Processing request for station_ids "
                           f"{handle_station_ids} and modes "
@@ -540,77 +542,49 @@ class NdbcApi(metaclass=Singleton):
 
         # accumulated_data records the handled response and parsed station_id
         # as a tuple, with the data as the first value and the id as the second.
-        accumulated_data: List[Tuple[Union[pd.DataFrame, dict], str]] = []
-        with ThreadPoolExecutor(max_workers=len(handle_station_ids) *
-                                len(handle_modes)) as executor:
-            data_requests = list(
-                itertools.product(handle_station_ids, handle_modes))
-            futures = [
-                executor.submit(self._handle_get_data,
-                                station_id=station_id,
-                                mode=mode,
-                                start_time=start_time,
-                                end_time=end_time,
-                                use_timestamp=use_timestamp,
-                                as_df=as_df,
-                                cols=cols,
-                                use_opendap=use_opendap,
-                                ) for station_id, mode in data_requests
-            ]
-            for i, future in enumerate(futures):
-                try:
-                    data = future.result()
-                    self.log(
-                        level=logging.DEBUG,
-                        station_id=data_requests[i][0],
-                        mode=data_requests[i][1],
-                        message=(
-                            f"Successfully processed request for station_id "
-                            f"{data_requests[i][0]} and mode "
-                            f"{data_requests[i][1]}"))
-                    accumulated_data.append(data)
-                except (RequestException, ResponseException,
-                        HandlerException) as e:
-                    self.log(
-                        level=logging.WARN,
-                        station_id=data_requests[i][0],
-                        mode=data_requests[i][1],
-                        message=(f"Failed to process request for station_id "
-                                 f"{data_requests[i][0]} and mode "
-                                 f"{data_requests[i][1]} with error: {e}"))
-                    continue
+        accumulated_data: Dict[str, Dict[str, Union[pd.DataFrame, dict]]] = {}
+        for mode in handle_modes:
+            accumulated_data[mode] = []
 
-        self.log(logging.INFO,
-                 message=(f"Finished processing request for "
-                          f"station_ids {handle_station_ids} and "
-                          f"modes {handle_modes} with "
-                          f"{len(accumulated_data)} results"))
+            with ThreadPoolExecutor(
+                    max_workers=len(handle_station_ids)) as station_executor:
+                station_futures = {}
+                for station_id in handle_station_ids:
+                    station_futures[station_id] = station_executor.submit(
+                        self._handle_get_data,
+                        mode=mode,
+                        station_id=station_id,
+                        start_time=start_time,
+                        end_time=end_time,
+                        use_timestamp=use_timestamp,
+                        as_df=as_df,
+                        cols=cols,
+                        use_opendap=use_opendap,
+                    )
 
-        # check that we have some response
-        if len(accumulated_data) == 0:
-            self.log(logging.WARN,
-                     message=(f"No data was returned for station_ids "
-                              f"{handle_station_ids} and modes "
-                              f"{handle_modes}"))
-            raise ResponseException(
-                f'No data was returned for station_ids {handle_station_ids} '
-                f'and modes {handle_modes}')
-        # handle the default case where a single station_id and mode are specified
-        if len(accumulated_data) == 1:
-            self.log(logging.DEBUG,
-                     message=(f"Returning data for single station_id "
-                              f"{handle_station_ids[0]} and mode "
-                              f"{handle_modes[0]}"))
-            return accumulated_data[0][0]
-        # handle the case where multiple station_ids and modes are specified
-        self.log(logging.DEBUG,
-                 message=(f"Returning data for multiple station_ids "
-                          f"{handle_station_ids} and modes "
-                          f"{handle_modes}"))
-        return self._handle_accumulate_data(accumulated_data,
-                                            station_id_as_column,
-                                            use_opendap=use_opendap)
+                for future in as_completed(station_futures.values()):
+                    try:
+                        station_data, station_id = future.result()
+                        self.log(
+                            level=logging.DEBUG,
+                            station_id=station_id,
+                            message=
+                            f"Successfully processed request for station_id {station_id}"
+                        )
+                        if as_df:
+                            station_data['station_id'] = station_id
+                        accumulated_data[mode].append(station_data)
+                    except (RequestException, ResponseException,
+                            HandlerException) as e:
+                        self.log(
+                            level=logging.WARN,
+                            station_id=station_id,
+                            message=(f"Failed to process request for station_id "
+                                    f"{station_id} with error: {e}"))
+        self.log(logging.INFO, message="Finished processing request.")
+        return self._handle_accumulate_data(accumulated_data)
 
+            
     def get_modes(self, use_opendap: bool = False) -> List[str]:
         """Get the list of supported modes for `get_data(...)`.
         
@@ -622,34 +596,22 @@ class NdbcApi(metaclass=Singleton):
             (List[str]) the available modalities.
         """
         if use_opendap:
-            return [v for v in vars(self._opendap_data_api) if not v.startswith('_')]
+            return [
+                v for v in vars(self._opendap_data_api) if not v.startswith('_')
+            ]
         return [v for v in vars(self._data_api) if not v.startswith('_')]
 
     @staticmethod
-    def save_netcdf_dataset(temp_dataset: nc.Dataset, output_filepath: str):
+    def save_netcdf_dataset(dataset: xarray.Dataset, output_filepath: str):
         """
         Saves a netCDF4 dataset from a temporary file to a user-specified file path.
 
         Args:
-            temp_dataset: The netCDF4.Dataset object opened from the temporary file.
-            output_filepath: The desired file path to save the dataset.
-        
-        Returns:
-            None: The dataset is saved to the specified location.
+            dataset: The xarray dataset to save.
+            output_filepath: The path to save the dataset to.
         """
-        new_dataset = nc.Dataset(output_filepath, 'w', format='NETCDF4', diskless=True, persist=True)
+        dataset.to_netcdf(output_filepath)
         
-        for dim_name, dim in temp_dataset.dimensions.items():
-            new_dataset.createDimension(dim_name, len(dim) if not dim.isunlimited() else None)
-        
-        for var_name, var in temp_dataset.variables.items():
-            new_var = new_dataset.createVariable(var_name, var.datatype, var.dimensions)
-            new_var.setncatts(var.__dict__)
-            new_var[:] = var[:]
-        
-        new_dataset.close()
-        temp_dataset.close()
-
     """ PRIVATE """
 
     def _get_request_handler(
@@ -729,52 +691,51 @@ class NdbcApi(metaclass=Singleton):
             return data
 
     def _handle_accumulate_data(
-            self,
-            accumulated_data: List[Tuple[Union[pd.DataFrame, dict], str]],
-            station_id_as_column: bool = False,
-            use_opendap: bool = False,
-        ) -> Union[pd.DataFrame, dict]:
+        self,
+        accumulated_data: Dict[str, List[Union[pd.DataFrame, dict, xarray.Dataset]]],
+    ) -> Union[pd.DataFrame, dict]:
         """Accumulate the data from multiple stations and modes."""
-        return_as_df = isinstance(accumulated_data[0][0], pd.DataFrame)
+        for k in list(accumulated_data.keys()):
+            if not accumulated_data[k]:
+                del accumulated_data[k]
+        
+        if not accumulated_data:
+            return {}
+        
+        return_as_df = isinstance(accumulated_data[list(accumulated_data.keys())[-1]][0], pd.DataFrame)
+        use_opendap = isinstance(accumulated_data[list(accumulated_data.keys())[-1]][0], xarray.Dataset)
 
-        data: Union[List[pd.DataFrame], List['nc.Dataset'], dict] = [] if return_as_df or use_opendap else {}
+        data: Union[List[pd.DataFrame], List[xarray.Dataset],
+                    dict] = [] if return_as_df or use_opendap else {}
 
-        for d in accumulated_data:
+        for mode, station_data in accumulated_data.items():
             if return_as_df:
-                if station_id_as_column:
-                    d[0].insert(0, 'station_id', d[1])
-                data.append(d[0])
+                data.extend(station_data)
             elif use_opendap:
-                data.append(d[0])
+                data.extend(station_data)
             else:
-                d_data, d_station_id = d[0], d[1]
-                if station_id_as_column:
-                    # the keys need to be updated to include the station_id
-                    # as a prefix before we update the `data` dict.
-                    d_data = {
-                        f'{d_station_id}_{k}': v for k, v in d_data.items()
-                    }
-                # the keys across modes should be unique so a simple update
-                # is sufficient.
-                data.update(d_data)
+                data[mode] = station_data
 
         if return_as_df:
-            return pd.concat(data)
+            df = pd.concat(data, axis=0)
+            df.reset_index(inplace=True, drop=False)
+            df.set_index(['timestamp', 'station_id'], inplace=True)
+            return df
         elif use_opendap:
-            return join_netcdf4(data)
+            return merge_datasets(data)
         return data
 
     def _handle_get_data(
-            self,
-            mode: str,
-            station_id: str,
-            start_time: datetime,
-            end_time: datetime,
-            use_timestamp: bool,
-            as_df: bool = True,
-            cols: List[str] = None,
-            use_opendap: bool = False,
-            ) -> Tuple[Union[pd.DataFrame, 'nc.Dataset', dict], str]:
+        self,
+        mode: str,
+        station_id: str,
+        start_time: datetime,
+        end_time: datetime,
+        use_timestamp: bool,
+        as_df: bool = True,
+        cols: List[str] = None,
+        use_opendap: bool = False,
+    ) -> Tuple[Union[pd.DataFrame, xarray.Dataset, dict], str]:
         start_time = self._handle_timestamp(start_time)
         end_time = self._handle_timestamp(end_time)
         station_id = self._parse_station_id(station_id)
@@ -798,15 +759,15 @@ class NdbcApi(metaclass=Singleton):
                 f'Failed to handle API call.\nRaised from {e}') from e
         if use_timestamp:
             if use_opendap:
-                data = filter_netcdf4_by_time_range(data, start_time, end_time)
+                data = filter_dataset_by_time_range(data, start_time, end_time)
             else:
                 data = self._enforce_timerange(df=data,
-                                            start_time=start_time,
-                                            end_time=end_time)
+                                               start_time=start_time,
+                                               end_time=end_time)
         try:
             if use_opendap:
                 if cols:
-                    handled_data = filter_netcdf4_by_variable(data, cols)
+                    handled_data = filter_dataset_by_variable(data, cols)
                 else:
                     handled_data = data
             else:

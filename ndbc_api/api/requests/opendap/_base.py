@@ -22,7 +22,8 @@ class BaseRequest(CoreRequest):
             now = datetime.strptime(os.getenv('MOCKDATE'), '%Y-%m-%d')
         else:
             now = datetime.now()
-        is_historical = (now - start_time) >= timedelta(days=45)  # we use 45 rather than 44 for opendap data
+        is_historical = (now - start_time) >= timedelta(
+            days=45)  # we use 45 rather than 44 for opendap data
         if is_historical:
             return cls._build_request_historical(
                 station_id=station_id,

@@ -9,9 +9,11 @@ class HistoricalStationsParser(XMLParser):
     """
     Parser for active station information from XML data.
     """
-    
+
     @classmethod
-    def df_from_response(cls, response: dict, use_timestamp: bool = False) -> pd.DataFrame:
+    def df_from_response(cls,
+                         response: dict,
+                         use_timestamp: bool = False) -> pd.DataFrame:
         """
         Reads the response body and parses it into a DataFrame.
 
@@ -31,22 +33,37 @@ class HistoricalStationsParser(XMLParser):
                 station_owner = station.get('owner')
                 station_program = station.get('pgm')
                 station_type = station.get('type')
-                
+
                 for history in station.findall('history'):
                     station_info = {
-                        'Station': station_id,
-                        'Lat': float(history.get('lat')),
-                        'Lon': float(history.get('lng')),
-                        'Elevation': float(history.get('elev')) if history.get('elev') else pd.NA,
-                        'Name': station_name,
-                        'Owner': station_owner,
-                        'Program': station_program,
-                        'Type': station_type,
-                        'Includes Meteorology': history.get('met') == 'y',
-                        'Hull Type': history.get('hull'),
-                        'Anemometer Height': float(history.get('anemom_height')) if history.get('anemom_height') else pd.NA,
-                        'Start Date': history.get('start'),
-                        'End Date': history.get('stop'),
+                        'Station':
+                            station_id,
+                        'Lat':
+                            float(history.get('lat')),
+                        'Lon':
+                            float(history.get('lng')),
+                        'Elevation':
+                            float(history.get('elev'))
+                            if history.get('elev') else pd.NA,
+                        'Name':
+                            station_name,
+                        'Owner':
+                            station_owner,
+                        'Program':
+                            station_program,
+                        'Type':
+                            station_type,
+                        'Includes Meteorology':
+                            history.get('met') == 'y',
+                        'Hull Type':
+                            history.get('hull'),
+                        'Anemometer Height':
+                            float(history.get('anemom_height'))
+                            if history.get('anemom_height') else pd.NA,
+                        'Start Date':
+                            history.get('start'),
+                        'End Date':
+                            history.get('stop'),
                     }
                     station_data.append(station_info)
 

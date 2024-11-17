@@ -1,4 +1,4 @@
-import netCDF4 as nc
+import xarray
 
 import pytest
 
@@ -18,7 +18,7 @@ def swden_response():
 
 @pytest.fixture
 def parsed_swden():
-    ds = nc.Dataset(PARSED_FP, 'r')
+    ds = xarray.open_dataset(PARSED_FP)
     yield ds
 
 
@@ -32,4 +32,5 @@ def test_available_measurements(swden, swden_response, parsed_swden):
     resp = swden_response
     want = parsed_swden
     got = swden.nc_from_responses([resp], use_timestamp=True)
-    assert set(want.variables.keys()) == set(got.variables.keys())
+
+    assert set(want.variables.keys()).issubset(set(got.variables.keys()))

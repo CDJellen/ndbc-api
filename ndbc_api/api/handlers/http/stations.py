@@ -47,7 +47,8 @@ class StationsHandler(BaseHandler):
         except (AttributeError, ValueError, TypeError) as e:
             raise ResponseException(
                 'Failed to execute `station` request.') from e
-        return HistoricalStationsParser.df_from_response(resp, use_timestamp=False)
+        return HistoricalStationsParser.df_from_response(resp,
+                                                         use_timestamp=False)
 
     @classmethod
     def nearest_station(
@@ -154,9 +155,9 @@ class StationsHandler(BaseHandler):
 
         # Calculate distances using Haversine formula
         df_filtered['distance'] = df_filtered.apply(
-            lambda row: StationsHandler._distance(lat_a, lon_a, row['Lat'], row['Lon']),
-            axis=1
-        )
+            lambda row: StationsHandler._distance(lat_a, lon_a, row['Lat'], row[
+                'Lon']),
+            axis=1)
 
         # Find the index of the closest row
         smallest_distance = df_filtered['distance'].min()
@@ -173,9 +174,9 @@ class StationsHandler(BaseHandler):
 
         # Calculate distances using Haversine formula
         df_filtered['distance'] = df_filtered.apply(
-            lambda row: StationsHandler._distance(lat_a, lon_a, row['Lat'], row['Lon']),
-            axis=1
-        )
+            lambda row: StationsHandler._distance(lat_a, lon_a, row['Lat'], row[
+                'Lon']),
+            axis=1)
 
         df_filtered.sort_values(by='distance', inplace=True)
 
