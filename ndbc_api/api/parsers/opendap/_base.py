@@ -3,7 +3,7 @@ import tempfile
 from typing import List, Optional
 
 import xarray
-import netCDF4 as nc
+import xarray
 
 from ndbc_api.exceptions import ParserException
 from ndbc_api.utilities.opendap.dataset import concat_datasets
@@ -19,7 +19,7 @@ class BaseParser:
         cls,
         responses: List[dict],
         use_timestamp: bool = False,
-    ) -> 'nc.Dataset':
+    ) -> xarray.Dataset:
         """Build the netCDF dataset from the responses.
         
         Args: 
@@ -38,16 +38,7 @@ class BaseParser:
             else:
                 content = r
             try:
-                with tempfile.NamedTemporaryFile(delete=False,
-                                                 suffix='.nc',
-                                                 dir=os.getcwd()) as temp_file:
-                    temp_file.write(content)
-                    temp_file.flush()
-                    temp_file.close()
-
-                    ds = nc.Dataset(temp_file.name, 'r', format='NETCDF4')
-                    os.remove(temp_file.name)
-                xrds = xarray.open_dataset(xarray.backends.NetCDF4DataStore(ds))
+                xrds = xarray.open_dataset(content)
                 datasets.append(xrds)
             except Exception as e:
                 raise ParserException from e
@@ -59,7 +50,7 @@ class BaseParser:
         cls,
         datasets: List[xarray.Dataset],
         temporal_dim_name: Optional[str] = None,
-    ) -> 'nc.Dataset':
+    ) -> xarray.Dataset:
         """Joins multiple xarray datasets using their shared dimensions.
 
         Handles cases where datasets might not have the same variables, 

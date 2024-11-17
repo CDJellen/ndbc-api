@@ -1,4 +1,4 @@
-import netCDF4 as nc
+import xarray
 
 import pytest
 import yaml

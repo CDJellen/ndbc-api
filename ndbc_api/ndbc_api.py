@@ -37,7 +37,6 @@ import pandas as pd
 
 from .api.handlers.http.data import DataHandler
 from .api.handlers.http.stations import StationsHandler
-from .api.handlers.opendap.data import OpenDapDataHandler
 from .config import (DEFAULT_CACHE_LIMIT, HTTP_BACKOFF_FACTOR, HTTP_DEBUG,
                      HTTP_DELAY, HTTP_RETRY, LOGGER_NAME, VERIFY_HTTPS)
 from .exceptions import (HandlerException, ParserException, RequestException,
@@ -45,6 +44,7 @@ from .exceptions import (HandlerException, ParserException, RequestException,
 from .utilities.req_handler import RequestHandler
 from .utilities.singleton import Singleton
 from .utilities.log_formatter import LogFormatter
+from .api.handlers.opendap.data import OpenDapDataHandler
 from .utilities.opendap.dataset import concat_datasets, merge_datasets, filter_dataset_by_variable, filter_dataset_by_time_range
 
 
