@@ -18,7 +18,7 @@ def adcp_response():
 
 @pytest.fixture
 def parsed_adcp():
-    ds = xarray.open_dataset(PARSED_FP, 'r')
+    ds = xarray.open_dataset(PARSED_FP)
     yield ds
 
 

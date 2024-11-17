@@ -18,7 +18,7 @@ def ocean_response():
 
 @pytest.fixture
 def parsed_ocean():
-    ds = xarray.open_dataset(PARSED_FP, 'r')
+    ds = xarray.open_dataset(PARSED_FP)
     yield ds
 
 

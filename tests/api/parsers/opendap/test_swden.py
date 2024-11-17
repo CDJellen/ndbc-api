@@ -18,7 +18,7 @@ def swden_response():
 
 @pytest.fixture
 def parsed_swden():
-    ds = xarray.open_dataset(PARSED_FP, 'r')
+    ds = xarray.open_dataset(PARSED_FP)
     yield ds
 
 
