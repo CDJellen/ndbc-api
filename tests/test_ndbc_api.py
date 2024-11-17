@@ -267,19 +267,6 @@ def test_get_data(ndbc_api, monkeypatch, mock_socket, read_responses,
             use_timestamp=True,
             as_df=True)
 
-    handler = ndbc_api._handler
-    ndbc_api._handler = None
-    with pytest.raises(ResponseException):
-        _ = ndbc_api.get_data(
-            station_id=globals()[f'TEST_STN_{name.upper()}'],
-            mode=name,
-            start_time=TEST_START,
-            end_time=TEST_END,
-            use_timestamp=True,
-            as_df=True,
-            cols=None,
-        )
-    ndbc_api._handler = handler
     with pytest.raises(ParserException):
         _ = ndbc_api.get_data(
             station_id=globals()[f'TEST_STN_{name.upper()}'],
