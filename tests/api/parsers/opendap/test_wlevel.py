@@ -19,7 +19,7 @@ def wlevel_response():
 
 @pytest.fixture
 def parsed_wlevel():
-    ds = nc.Dataset(PARSED_FP, 'r')
+    ds = xarray.open_dataset(PARSED_FP, 'r')
     yield ds
 
 

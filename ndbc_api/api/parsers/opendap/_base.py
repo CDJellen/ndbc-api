@@ -27,7 +27,7 @@ class BaseParser:
                 server regardless of content or HTTP code.
         
         Returns:
-            nc.Dataset: The netCDF dataset.
+            xarray.open_dataset: The netCDF dataset.
         """
         datasets = []
         for r in responses:
