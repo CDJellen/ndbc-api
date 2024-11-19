@@ -37,6 +37,18 @@ The `ndbc-api` can be installed via PIP:
 pip install ndbc-api
 ```
 
+Conda users can install the `ndbc-api` via the `conda-forge` channel:
+
+```sh
+conda install -c conda-forge ndbc-api
+```
+
+Finally, to install the `ndbc-api` from source, clone the repository and run the following command:
+
+```sh
+python setup.py install
+```
+
 #### Requirements
 The `ndbc-api` has been tested on Python 3.6, 3.7, 3.8, 3.9, and 3.10. Python 2 support is not currently planned, but could be implemented based on the needs of the atmospheric research community.
 

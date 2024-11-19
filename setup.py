@@ -6,7 +6,7 @@ with open('README.md', 'r', encoding='utf-8') as f:
 setuptools.setup(
     name='ndbc-api',
     packages=setuptools.find_packages(exclude=['*tests*']),
-    version='0.24.06.12.1',
+    version='0.24.11.19.1',
     license='MIT',
     description='A Python API for the National Data Buoy Center.',
     author='Chris Jellen',
@@ -16,15 +16,16 @@ setuptools.setup(
     long_description_content_type='text/markdown',
     download_url='https://github.com/cdjellen/ndbc-api/tarball/main',
     keywords=['ndbc', 'python3', 'api', 'oceanography', 'buoy', 'atmospheric'],
-    install_requires=['requests', 'pandas', 'bs4', 'html5lib'],
+    install_requires=['requests', 'pandas', 'bs4', 'html5lib', 'scipy', 'xarray'],
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
         'Topic :: Software Development :: Build Tools',
         'License :: OSI Approved :: MIT License',
-        'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10',
         'Programming Language :: Python :: 3.11',
+        'Programming Language :: Python :: 3.12',
+        'Programming Language :: Python :: 3.13',
     ],
 )
