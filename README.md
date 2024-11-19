@@ -30,11 +30,24 @@ Please see [the included example notebook](/notebooks/overview.ipynb) for a more
 [^3]: https://www.ndbc.noaa.gov/docs/ndbc_web_data_guide.pdf
 
 
+
 #### Installation
 The `ndbc-api` can be installed via PIP:
 
 ```sh
 pip install ndbc-api
+```
+
+Conda users can install the `ndbc-api` via the `conda-forge` channel:
+
+```sh
+conda install -c conda-forge ndbc-api
+```
+
+Finally, to install the `ndbc-api` from source, clone the repository and run the following command:
+
+```sh
+python setup.py install
 ```
 
 #### Requirements
