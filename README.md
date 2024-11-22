@@ -258,6 +258,13 @@ the [GitHub discussion forum](https://github.com/cdjellen/ndbc-api/discussions).
 #### Contributing
 The `ndbc-api` is actively maintained, please feel free to open a pull request if you have any suggested improvements, test coverage is strongly preferred.
 
+To run tests, first install the ndbc-api general usage and dev requirments in your environment:
+
+1. `pip install -r requirements.txt`
+2. `pip install -r requirements_dev.txt`
+
+Run the tests from the root directory using `pytest .`. To run all tests use `pytest . --run-slow --run-private`.
+
 As a reminder, breaking changes will be considered, especially in the current `alpha` state of the package on `PyPi`.  As the API further matures, breaking changes will only be considered with new major versions (e.g. `N.0.0`).
 
 Alternatively, if you have an idea for a new capability or improvement, feel free to open a feature request issue outlining your suggestion and the ways in which it will empower the atmospheric research community.
