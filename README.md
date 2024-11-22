@@ -170,7 +170,7 @@ tplm2_historical_df = api.available_historical(station_id='tplm2', as_df=True)
 
 ##### Station measurements
 
-The `api` has two public method which support accessing supported NDBC station measurements.
+The `api` has two public methods which support accessing supported NDBC station measurements.
 
 1. The `get_modes` method, which returns a list of supported `mode`s, coresponding to the data formats provided by the NDBC data service. 
 
