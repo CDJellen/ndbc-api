@@ -58,6 +58,8 @@ The API uses synchronous HTTP requests to compile data matching the user-supplie
 * pandas
 * bs4
 * html5lib>=1.1
+* xarray
+* scipy
 
 ##### Development
 If you would like to contribute to the growth and maintenance of the `ndbc-api`, please feel free to open a PR with tests covering your changes. The tests leverage `pytest` and depend on the above requirements, as well as:
@@ -82,12 +84,12 @@ api = NdbcApi()
 
 The `api` is a singleton, such that the underlying `RequestHandler` and NDBC station-level `RequestCache`s are shared between instances. Both the singleton metaclass and `RequestHandler` are implemented to reduce the likelihood of repeat requests to the NDBC's data service, and to converse NDBC resources. This is balanced by a station-level `cache_limit`, implemented as an LRU cache, which seeks to respect user resources.
 
-Data made available by the NDBC falls into two broad catagories.
+Data made available by the NDBC falls into two broad categories.
 
 1. Station metadata
 2. Station measurements
 
-The `api` supports a range of public methods for accessing data from the above catagories.
+The `api` supports a range of public methods for accessing data from the above categories.
 
 ##### Station metadata
 
@@ -144,7 +146,7 @@ nearby_stations_df = api.radial_search(lat=lat, lon=lon, radius=radius, units=un
 ###### `station`
 
 ```python3
-# get staion metadata
+# get station metadata
 tplm2_meta = api.station(station_id='tplm2')
 # parse the response as a Pandas DataFrame
 tplm2_df = api.station(station_id='tplm2', as_df=True)
@@ -172,7 +174,7 @@ tplm2_historical_df = api.available_historical(station_id='tplm2', as_df=True)
 
 The `api` has two public methods which support accessing supported NDBC station measurements.
 
-1. The `get_modes` method, which returns a list of supported `mode`s, coresponding to the data formats provided by the NDBC data service. 
+1. The `get_modes` method, which returns a list of supported `mode`s, corresponding to the data formats provided by the NDBC data service. 
 
 Note that not all stations provide the same set of measurements. The `available_realtime` and `available_historical` methods can be called on a station-by station basis to ensure a station has the desired data available, before building and executing requests with `get_data`. 
 
@@ -249,22 +251,6 @@ stdmet_df = api.get_data(
 #### More Information
 Please see [the included example notebook](/notebooks/overview.ipynb) for a more detailed walkthrough of the API's capabilities.
 
-
 #### Questions
 If you have questions regarding the library please post them into
 the [GitHub discussion forum](https://github.com/cdjellen/ndbc-api/discussions).
-
-
-#### Contributing
-The `ndbc-api` is actively maintained, please feel free to open a pull request if you have any suggested improvements, test coverage is strongly preferred.
-
-To run tests, first install the ndbc-api general usage and dev requirments in your environment:
-
-1. `pip install -r requirements.txt`
-2. `pip install -r requirements_dev.txt`
-
-Run the tests from the root directory using `pytest .`. To run all tests use `pytest . --run-slow --run-private`.
-
-As a reminder, breaking changes will be considered, especially in the current `alpha` state of the package on `PyPi`.  As the API further matures, breaking changes will only be considered with new major versions (e.g. `N.0.0`).
-
-Alternatively, if you have an idea for a new capability or improvement, feel free to open a feature request issue outlining your suggestion and the ways in which it will empower the atmospheric research community.
