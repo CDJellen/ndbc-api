@@ -82,7 +82,7 @@ from ndbc_api import NdbcApi
 api = NdbcApi()
 ```
 
-The `api` is a singleton, such that the underlying `RequestHandler` and NDBC station-level `RequestCache`s are shared between instances. Both the singleton metaclass and `RequestHandler` are implemented to reduce the likelihood of repeat requests to the NDBC's data service, and to converse NDBC resources. This is balanced by a station-level `cache_limit`, implemented as an LRU cache, which seeks to respect user resources.
+The `NdbcApi` provides a unified access point for NDBC data. All methods for obtaining data, metadata, and locating stations are available using the `api` object. The `get_data` method is the primary method for accessing NDBC data, and is used to retrieve measurements from a given station over a specified time range. This method can request data from the NDBC HTTP Data Service or the THREDDS data service, and return the data as a `pandas.DataFrame`, `xarray.Dataset` or python `dict` object.
 
 Data made available by the NDBC falls into two broad categories.
 
