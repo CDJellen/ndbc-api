@@ -174,7 +174,7 @@ tplm2_historical_df = api.available_historical(station_id='tplm2', as_df=True)
 
 The `api` has two public methods which support accessing supported NDBC station measurements.
 
-1. The `get_modes` method, which returns a list of supported `mode`s, corresponding to the data formats provided by the NDBC data service. 
+1. The `get_modes` method, which returns a list of supported `mode`s, corresponding to the data formats provided by the NDBC data service. For example, the `adcp` mode represents "Acoustic Doppler Current Profiler" measurements, providing information about ocean currents at different depths, while `cwind` represents "Continuous winds" data, offering high-frequency wind speed and direction measurements.
 
 Note that not all stations provide the same set of measurements. The `available_realtime` and `available_historical` methods can be called on a station-by station basis to ensure a station has the desired data available, before building and executing requests with `get_data`. 
 
@@ -207,7 +207,7 @@ print(modes)
 ###### `get_data`
 
 ```python3
-# get all continuous wind measurements for station tplm2
+# get all continuous wind (`cwind`) measurements for station tplm2
 cwind_df = api.get_data(
     station_id='tplm2',
     mode='cwind',
@@ -231,7 +231,7 @@ wspd_df = api.get_data(
     as_df=True,
     cols=['WSPD']
 )
-# get all standard meterological measurements for stations tplm2 and apam2
+# get all standard meterological (`stdmet`) measurements for stations tplm2 and apam2
 stdmet_df = api.get_data(
     station_ids=['tplm2', 'apam2'],
     mode='stdmet',
