@@ -204,6 +204,19 @@ print(modes)
 ]
 ```
 
+The mode values above map directly to the identifiers used buy the NDBC. Desriptions for each mode are presented below:
+* `adcp`: Acoustic Doppler Current Profiler measurements, providing information about ocean currents at different depths.
+* `cwind`: Continuous winds data, offering high-frequency wind speed and direction measurements.
+* `ocean`: Oceanographic data, including water temperature, salinity, and wave measurements.
+* `spec`: Spectral wave data, providing detailed information about wave energy and direction.
+* `stdmet`: Standard meteorological data, including air temperature, pressure, wind speed, and visibility.
+* `supl`: Supplemental measurements, which can vary depending on the specific buoy and its sensors.
+* `swden`: Spectral wave density data, providing information about the distribution of wave energy across different frequencies.
+* `swdir`: Spectral wave direction data, indicating the primary direction of wave energy.
+* `swdir2`: Secondary spectral wave direction data, capturing additional wave direction information.
+* `swr1`: First-order spectral wave data, providing basic wave height and period information.
+* `swr2`: Second-order spectral wave data, offering more detailed wave measurements.
+
 ###### `get_data`
 
 ```python3
