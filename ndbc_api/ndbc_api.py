@@ -325,13 +325,13 @@ class NdbcApi(metaclass=Singleton):
         (passed either as `float` or as DD.dd[E/W] strings).
 
         Args:
-            lat: The latitude of interest, used to determine the maintained
+            lat (float): The latitude of interest, used to determine the maintained
                 stations within radius units of the given position.
-            lon: The longitude of interest, used to determine the maintained
+            lon (float): The longitude of interest, used to determine the maintained
                 stations within radius units of the given position.
-            radius: The radius in the specified units to search for stations
+            radius (float): The radius in the specified units to search for stations
                 within.
-            units: The units of the radius, either 'nm', 'km', or 'mi'.
+            units (str: 'nm', 'km', or 'mi'): The units of the radius, either 'nm', 'km', or 'mi'.
 
         Returns:
             A `pandas.DataFrame` of the stations within the specified radius of
