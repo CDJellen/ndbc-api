@@ -6,7 +6,7 @@ with open('README.md', 'r', encoding='utf-8') as f:
 setuptools.setup(
     name='ndbc-api',
     packages=setuptools.find_packages(exclude=['*tests*']),
-    version='0.24.06.12.1',
+    version='0.24.12.02.1',
     license='MIT',
     description='A Python API for the National Data Buoy Center.',
     author='Chris Jellen',
@@ -26,5 +26,6 @@ setuptools.setup(
         'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10',
         'Programming Language :: Python :: 3.11',
+        'Programming Language :: Python :: 3.12',
     ],
 )

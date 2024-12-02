@@ -11,7 +11,7 @@ class BaseParser:
     HEADER_PREFIX = '#'
     NAN_VALUES = ['MM']
     DATE_PARSER = '%Y %m %d %H %M'
-    PARSE_DATES = ['YY', 'MM', 'DD', 'hh', 'mm']
+    PARSE_DATES = [0, 1, 2, 3, 4]
     INDEX_COL = False
     REVERT_COL_NAMES = []
 
@@ -28,7 +28,7 @@ class BaseParser:
         if use_timestamp:
             try:
                 df = df.reset_index().drop_duplicates(subset='timestamp',
-                                                    keep='first')
+                                                      keep='first')
                 df = df.set_index('timestamp').sort_index()
             except KeyError as e:
                 raise ParserException from e
@@ -43,7 +43,8 @@ class BaseParser:
         if not data:
             return pd.DataFrame()
         # check that parsed names match parsed values or revert
-        if len([v.strip() for v in data[0].split(' ') if v]) != len(names):
+        if len([v.strip() for v in data[0].strip('\n').split(' ') if v
+               ]) != len(names):
             names = cls.REVERT_COL_NAMES
         if '(' in data[0]:
             data = cls._clean_data(data)
@@ -67,6 +68,7 @@ class BaseParser:
                 df.index.name = 'timestamp'
 
         except (NotImplementedError, TypeError, ValueError) as e:
+            print(e)
             return pd.DataFrame()
 
         # check whether to parse dates

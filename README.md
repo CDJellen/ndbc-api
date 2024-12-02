@@ -30,11 +30,24 @@ Please see [the included example notebook](/notebooks/overview.ipynb) for a more
 [^3]: https://www.ndbc.noaa.gov/docs/ndbc_web_data_guide.pdf
 
 
+
 #### Installation
 The `ndbc-api` can be installed via PIP:
 
 ```sh
 pip install ndbc-api
+```
+
+Conda users can install the `ndbc-api` via the `conda-forge` channel:
+
+```sh
+conda install -c conda-forge ndbc-api
+```
+
+Finally, to install the `ndbc-api` from source, clone the repository and run the following command:
+
+```sh
+python setup.py install
 ```
 
 #### Requirements
@@ -45,6 +58,8 @@ The API uses synchronous HTTP requests to compile data matching the user-supplie
 * pandas
 * bs4
 * html5lib>=1.1
+* xarray
+* scipy
 
 ##### Development
 If you would like to contribute to the growth and maintenance of the `ndbc-api`, please feel free to open a PR with tests covering your changes. The tests leverage `pytest` and depend on the above requirements, as well as:
@@ -67,21 +82,21 @@ from ndbc_api import NdbcApi
 api = NdbcApi()
 ```
 
-The `api` is a singleton, such that the underlying `RequestHandler` and NDBC station-level `RequestCache`s are shared between instances. Both the singleton metaclass and `RequestHandler` are implemented to reduce the likelihood of repeat requests to the NDBC's data service, and to converse NDBC resources. This is balanced by a station-level `cache_limit`, implemented as an LRU cache, which seeks to respect user resources.
+The `NdbcApi` provides a unified access point for NDBC data. All methods for obtaining data, metadata, and locating stations are available using the `api` object. The `get_data` method is the primary method for accessing NDBC data, and is used to retrieve measurements from a given station over a specified time range. This method can request data from the NDBC HTTP Data Service or the THREDDS data service, and return the data as a `pandas.DataFrame`, `xarray.Dataset` or python `dict` object.
 
-Data made available by the NDBC falls into two broad catagories.
+Data made available by the NDBC falls into two broad categories.
 
 1. Station metadata
 2. Station measurements
 
-The `api` supports a range of public methods for accessing data from the above catagories.
+The `api` supports a range of public methods for accessing data from the above categories.
 
 ##### Station metadata
 
 The `api` has five key public methods for accessing NDBC metadata.
 
 1. The `stations` method, which returns all NDBC stations.
-2. The `nearest_staion` method, which returns the station ID of the nearest station.
+2. The `nearest_station` method, which returns the station ID of the nearest station.
 3. The `station` method, which returns station metadata from a given station ID.
 4. The `available_realtime` method, which returns hyperlinks and measurement names for realtime measurements captured by a given station.
 5. The `available_historical` method, which returns hyperlinks and measurement names for historical measurements captured by a given station.
@@ -131,7 +146,7 @@ nearby_stations_df = api.radial_search(lat=lat, lon=lon, radius=radius, units=un
 ###### `station`
 
 ```python3
-# get staion metadata
+# get station metadata
 tplm2_meta = api.station(station_id='tplm2')
 # parse the response as a Pandas DataFrame
 tplm2_df = api.station(station_id='tplm2', as_df=True)
@@ -157,9 +172,9 @@ tplm2_historical_df = api.available_historical(station_id='tplm2', as_df=True)
 
 ##### Station measurements
 
-The `api` has two public method which support accessing supported NDBC station measurements.
+The `api` has two public methods which support accessing supported NDBC station measurements.
 
-1. The `get_modes` method, which returns a list of supported `mode`s, coresponding to the data formats provided by the NDBC data service. 
+1. The `get_modes` method, which returns a list of supported `mode`s, corresponding to the data formats provided by the NDBC data service. For example, the `adcp` mode represents "Acoustic Doppler Current Profiler" measurements, providing information about ocean currents at different depths, while `cwind` represents "Continuous winds" data, offering high-frequency wind speed and direction measurements.
 
 Note that not all stations provide the same set of measurements. The `available_realtime` and `available_historical` methods can be called on a station-by station basis to ensure a station has the desired data available, before building and executing requests with `get_data`. 
 
@@ -189,10 +204,23 @@ print(modes)
 ]
 ```
 
+The mode values above map directly to the identifiers used buy the NDBC. Desriptions for each mode are presented below:
+* `adcp`: Acoustic Doppler Current Profiler measurements, providing information about ocean currents at different depths.
+* `cwind`: Continuous winds data, offering high-frequency wind speed and direction measurements.
+* `ocean`: Oceanographic data, including water temperature, salinity, and wave measurements.
+* `spec`: Spectral wave data, providing detailed information about wave energy and direction.
+* `stdmet`: Standard meteorological data, including air temperature, pressure, wind speed, and visibility.
+* `supl`: Supplemental measurements, which can vary depending on the specific buoy and its sensors.
+* `swden`: Spectral wave density data, providing information about the distribution of wave energy across different frequencies.
+* `swdir`: Spectral wave direction data, indicating the primary direction of wave energy.
+* `swdir2`: Secondary spectral wave direction data, capturing additional wave direction information.
+* `swr1`: First-order spectral wave data, providing basic wave height and period information.
+* `swr2`: Second-order spectral wave data, offering more detailed wave measurements.
+
 ###### `get_data`
 
 ```python3
-# get all continuous wind measurements for station tplm2
+# get all continuous wind (`cwind`) measurements for station tplm2
 cwind_df = api.get_data(
     station_id='tplm2',
     mode='cwind',
@@ -216,7 +244,7 @@ wspd_df = api.get_data(
     as_df=True,
     cols=['WSPD']
 )
-# get all standard meterological measurements for stations tplm2 and apam2
+# get all standard meterological (`stdmet`) measurements for stations tplm2 and apam2
 stdmet_df = api.get_data(
     station_ids=['tplm2', 'apam2'],
     mode='stdmet',
@@ -236,15 +264,6 @@ stdmet_df = api.get_data(
 #### More Information
 Please see [the included example notebook](/notebooks/overview.ipynb) for a more detailed walkthrough of the API's capabilities.
 
-
 #### Questions
 If you have questions regarding the library please post them into
 the [GitHub discussion forum](https://github.com/cdjellen/ndbc-api/discussions).
-
-
-#### Contributing
-The `ndbc-api` is actively maintained, please feel free to open a pull request if you have any suggested improvements, test coverage is strongly preferred.
-
-As a reminder, breaking changes will be considered, especially in the current `alpha` state of the package on `PyPi`.  As the API further matures, breaking changes will only be considered with new major versions (e.g. `N.0.0`).
-
-Alternatively, if you have an idea for a new capability or improvement, feel free to open a feature request issue outlining your suggestion and the ways in which it will empower the atmospheric research community.

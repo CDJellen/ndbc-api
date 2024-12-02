@@ -1,11 +1,12 @@
 import os
 import tempfile
-from typing import List
+from typing import List, Optional
 
-import netCDF4 as nc
+import xarray
+import xarray
 
 from ndbc_api.exceptions import ParserException
-from ndbc_api.utilities.opendap.dataset import join_netcdf4
+from ndbc_api.utilities.opendap.dataset import concat_datasets
 
 
 class BaseParser:
@@ -14,10 +15,11 @@ class BaseParser:
     SPATIAL_DIMS = ['latitude', 'longitude']
 
     @classmethod
-    def nc_from_responses(cls,
-                          responses: List[dict],
-                          use_timestamp: bool = False,
-                          ) -> 'nc.Dataset':
+    def nc_from_responses(
+        cls,
+        responses: List[dict],
+        use_timestamp: bool = False,
+    ) -> xarray.Dataset:
         """Build the netCDF dataset from the responses.
         
         Args: 
@@ -25,7 +27,7 @@ class BaseParser:
                 server regardless of content or HTTP code.
         
         Returns:
-            nc.Dataset: The netCDF dataset.
+            xarray.open_dataset: The netCDF dataset.
         """
         datasets = []
         for r in responses:
@@ -36,27 +38,20 @@ class BaseParser:
             else:
                 content = r
             try:
-                with tempfile.NamedTemporaryFile(delete=False, suffix='.nc', dir=os.getcwd()) as temp_file:
-                    temp_file.write(content)
-                    temp_file.flush()
-                    temp_file.close()
-
-                    ds = nc.Dataset(temp_file.name, 'r', format='NETCDF4')
-                    datasets.append(ds)
-
-                    os.remove(temp_file.name)
-                datasets.append(ds)
+                xrds = xarray.open_dataset(content)
+                datasets.append(xrds)
             except Exception as e:
                 raise ParserException from e
 
-        return cls._join_netcdf4(datasets)
+        return cls._merge_datasets(datasets)
 
     @classmethod
-    def _join_netcdf4(
-            cls,
-            datasets: List['nc.Dataset'],
-        ) -> 'nc.Dataset':
-        """Joins multiple netCDF4 datasets using their shared dimensions.
+    def _merge_datasets(
+        cls,
+        datasets: List[xarray.Dataset],
+        temporal_dim_name: Optional[str] = None,
+    ) -> xarray.Dataset:
+        """Joins multiple xarray datasets using their shared dimensions.
 
         Handles cases where datasets might not have the same variables, 
         but requires that all datasets share the same dimensions. For
@@ -64,7 +59,7 @@ class BaseParser:
         have `time`, `latitude`, and `longitude` dimensions.
 
         Args:
-            datasets (List[netCDF4.Dataset]): A list of netCDF4 datasets
+            temporal_dim_name (List[xarray.Dataset]): A list of netCDF4 datasets
                 to join.
             dimension_names (List[str]): A list of dimension names to join
                 the datasets on. Defaults to `['time', 'latitude', 'longitude']`.
@@ -72,7 +67,7 @@ class BaseParser:
         Returns:
             A netCDF4.Dataset object containing the joined data.
         """
-        return join_netcdf4(
+        return concat_datasets(
             datasets,
-            cls.TEMPORAL_DIM,
+            temporal_dim_name if temporal_dim_name else cls.TEMPORAL_DIM,
         )

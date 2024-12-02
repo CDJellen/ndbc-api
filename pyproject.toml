@@ -1,19 +1,20 @@
 [tool.poetry]
 name = "ndbc-api"
-version = "0.24.08.31.1"
+version = "0.24.12.02.1"
 description = "A Python API for the National Data Buoy Center."
 authors = ["cdjellen <cdjellen@gmail.com>"]
 license = "MIT"
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = ">=3.8,<3.13"
+python = ">=3.9,<3.13"
 requests = ">=2.10.0"
-pandas = ">=1.5.3"
-numpy  = "^1.24.3"
+pandas = ">=2.0.0"
+numpy  = ">=1.26.3"
+scipy = ">=1.7.3"
 beautifulsoup4 = "~4"
 html5lib = "^1.1"
-netcdf4 = "^1.7.1.post2"
+xarray = ">=2022.6.0"
 
 [tool.poetry.group.dev.dependencies]
 coveralls = ">=4.0.1"

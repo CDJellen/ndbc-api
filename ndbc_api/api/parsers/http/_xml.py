@@ -22,6 +22,7 @@ class XMLParser(BaseParser):
 
         try:
             root = ET.fromstring(body)
-            return ET.ElementTree(root) 
+            return ET.ElementTree(root)
         except Exception as e:
-            raise ParserException("failed to obtain XML root from response body") from e
+            raise ParserException(
+                "failed to obtain XML root from response body") from e

@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from typing import Any
 
-import netCDF4 as nc
+import xarray
 
 from ndbc_api.api.handlers._base import BaseHandler
 from ndbc_api.api.parsers.opendap.adcp import AdcpParser
@@ -31,7 +31,7 @@ class OpenDapDataHandler(BaseHandler):
         start_time: datetime = datetime.now() - timedelta(days=30),
         end_time: datetime = datetime.now(),
         use_timestamp: bool = True,
-    ) -> 'nc.Dataset':
+    ) -> xarray.Dataset:
         """adcp"""
         try:
             reqs = AdcpRequest.build_request(station_id=station_id,
@@ -54,7 +54,7 @@ class OpenDapDataHandler(BaseHandler):
         start_time: datetime = datetime.now() - timedelta(days=30),
         end_time: datetime = datetime.now(),
         use_timestamp: bool = True,
-    ) -> 'nc.Dataset':
+    ) -> xarray.Dataset:
         """cwind"""
         try:
             reqs = CwindRequest.build_request(station_id=station_id,
@@ -77,7 +77,7 @@ class OpenDapDataHandler(BaseHandler):
         start_time: datetime = datetime.now() - timedelta(days=30),
         end_time: datetime = datetime.now(),
         use_timestamp: bool = True,
-    ) -> 'nc.Dataset':
+    ) -> xarray.Dataset:
         """ocean"""
         try:
             reqs = OceanRequest.build_request(station_id=station_id,
@@ -100,12 +100,12 @@ class OpenDapDataHandler(BaseHandler):
         start_time: datetime = datetime.now() - timedelta(days=30),
         end_time: datetime = datetime.now(),
         use_timestamp: bool = True,
-    ) -> 'nc.Dataset':
+    ) -> xarray.Dataset:
         """pwind"""
         try:
             reqs = PwindRequest.build_request(station_id=station_id,
-                                             start_time=start_time,
-                                             end_time=end_time)
+                                              start_time=start_time,
+                                              end_time=end_time)
         except Exception as e:
             raise RequestException('Failed to build request.') from e
         try:
@@ -113,7 +113,7 @@ class OpenDapDataHandler(BaseHandler):
         except Exception as e:
             raise ResponseException('Failed to execute requests.') from e
         return PwindParser.nc_from_responses(responses=resps,
-                                            use_timestamp=use_timestamp)
+                                             use_timestamp=use_timestamp)
 
     @classmethod
     def stdmet(
@@ -123,7 +123,7 @@ class OpenDapDataHandler(BaseHandler):
         start_time: datetime = datetime.now() - timedelta(days=30),
         end_time: datetime = datetime.now(),
         use_timestamp: bool = True,
-    ) -> 'nc.Dataset':
+    ) -> xarray.Dataset:
         """stdmet"""
         try:
             reqs = StdmetRequest.build_request(station_id=station_id,
@@ -146,12 +146,12 @@ class OpenDapDataHandler(BaseHandler):
         start_time: datetime = datetime.now() - timedelta(days=30),
         end_time: datetime = datetime.now(),
         use_timestamp: bool = True,
-    ) -> 'nc.Dataset':
+    ) -> xarray.Dataset:
         """swden"""
         try:
             reqs = SwdenRequest.build_request(station_id=station_id,
-                                             start_time=start_time,
-                                             end_time=end_time)
+                                              start_time=start_time,
+                                              end_time=end_time)
         except Exception as e:
             raise RequestException('Failed to build request.') from e
         try:
@@ -159,7 +159,7 @@ class OpenDapDataHandler(BaseHandler):
         except Exception as e:
             raise ResponseException('Failed to execute requests.') from e
         return SwdenParser.nc_from_responses(responses=resps,
-                                            use_timestamp=use_timestamp)
+                                             use_timestamp=use_timestamp)
 
     @classmethod
     def wlevel(
@@ -169,12 +169,12 @@ class OpenDapDataHandler(BaseHandler):
         start_time: datetime = datetime.now() - timedelta(days=30),
         end_time: datetime = datetime.now(),
         use_timestamp: bool = True,
-    ) -> 'nc.Dataset':
+    ) -> xarray.Dataset:
         """wlevel"""
         try:
             reqs = WlevelRequest.build_request(station_id=station_id,
-                                              start_time=start_time,
-                                              end_time=end_time)
+                                               start_time=start_time,
+                                               end_time=end_time)
         except Exception as e:
             raise RequestException('Failed to build request.') from e
         try:
@@ -182,4 +182,4 @@ class OpenDapDataHandler(BaseHandler):
         except Exception as e:
             raise ResponseException('Failed to execute requests.') from e
         return WlevelParser.nc_from_responses(responses=resps,
-                                             use_timestamp=use_timestamp)
+                                              use_timestamp=use_timestamp)
