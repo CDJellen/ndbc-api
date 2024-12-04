@@ -1,5 +1,5 @@
 ---
-title: '<code>ndbc-api</code>: Accelerating oceanography and climate science research with Python'
+title: 'ndbc-api: Accelerating oceanography and climate science research with Python'
 tags:
   - Python
   - oceanography
