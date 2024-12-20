@@ -382,8 +382,8 @@ class NdbcApi(metaclass=Singleton):
 
     def available_realtime(self,
                            station_id: Union[str, int],
-                           as_df: bool = False,
                            full_response: bool = False,
+                           as_df: Optional[bool] = None,
                            ) -> Union[List[str], pd.DataFrame, dict]:
         """Get the available realtime modalities for a station.
 
@@ -414,14 +414,16 @@ class NdbcApi(metaclass=Singleton):
         """
         station_id = self._parse_station_id(station_id)
         try:
-            full_response = self._stations_api.realtime(handler=self._handler,
+            station_realtime = self._stations_api.realtime(handler=self._handler,
                                                station_id=station_id)
             full_data = {}
             if full_response:
-                full_data = self._handle_data(full_response, as_df, cols=None)
+                if as_df is None:
+                    as_df = False
+                full_data = self._handle_data(station_realtime, as_df, cols=None)
                 return full_data
             else:
-                full_data = self._handle_data(full_response, as_df=False, cols=None)
+                full_data = self._handle_data(station_realtime, as_df=False, cols=None)
 
             # Parse the modes from the full response
             _modes = self.get_modes()
@@ -477,7 +479,7 @@ class NdbcApi(metaclass=Singleton):
         station_ids: Union[Sequence[Union[int, str]], None] = None,
         modes: Union[List[str], None] = None,
         as_xarray_dataset: bool = False,
-        use_opendap: Optional[bool] = False,
+        use_opendap: Optional[bool] = None,
     ) -> Union[pd.DataFrame, xarray.Dataset, dict]:
         """Execute data query against the specified NDBC station(s).
 
@@ -534,6 +536,8 @@ class NdbcApi(metaclass=Singleton):
         """
         if use_opendap is not None:
             as_xarray_dataset = use_opendap
+
+        as_df = as_df and not as_xarray_dataset
 
         self.log(logging.DEBUG,
                  message=f"`get_data` called with arguments: {locals()}")
