@@ -380,11 +380,12 @@ class NdbcApi(metaclass=Singleton):
         except (ResponseException, ValueError, KeyError) as e:
             raise ResponseException('Failed to handle returned data.') from e
 
-    def available_realtime(self,
-                           station_id: Union[str, int],
-                           full_response: bool = False,
-                           as_df: Optional[bool] = None,
-                           ) -> Union[List[str], pd.DataFrame, dict]:
+    def available_realtime(
+        self,
+        station_id: Union[str, int],
+        full_response: bool = False,
+        as_df: Optional[bool] = None,
+    ) -> Union[List[str], pd.DataFrame, dict]:
         """Get the available realtime modalities for a station.
 
         While most data buoy (station) measurements are available over
@@ -414,16 +415,20 @@ class NdbcApi(metaclass=Singleton):
         """
         station_id = self._parse_station_id(station_id)
         try:
-            station_realtime = self._stations_api.realtime(handler=self._handler,
-                                               station_id=station_id)
+            station_realtime = self._stations_api.realtime(
+                handler=self._handler, station_id=station_id)
             full_data = {}
             if full_response:
                 if as_df is None:
                     as_df = False
-                full_data = self._handle_data(station_realtime, as_df, cols=None)
+                full_data = self._handle_data(station_realtime,
+                                              as_df,
+                                              cols=None)
                 return full_data
             else:
-                full_data = self._handle_data(station_realtime, as_df=False, cols=None)
+                full_data = self._handle_data(station_realtime,
+                                              as_df=False,
+                                              cols=None)
 
             # Parse the modes from the full response
             _modes = self.get_modes()
@@ -611,13 +616,15 @@ class NdbcApi(metaclass=Singleton):
                         self.log(
                             level=logging.WARN,
                             station_id=station_id,
-                            message=(f"Failed to process request for station_id "
-                                    f"{station_id} with error: {e}"))
+                            message=(
+                                f"Failed to process request for station_id "
+                                f"{station_id} with error: {e}"))
         self.log(logging.INFO, message="Finished processing request.")
         return self._handle_accumulate_data(accumulated_data)
 
-            
-    def get_modes(self, use_opendap: bool = False, as_xarray_dataset: Optional[bool] = None) -> List[str]:
+    def get_modes(self,
+                  use_opendap: bool = False,
+                  as_xarray_dataset: Optional[bool] = None) -> List[str]:
         """Get the list of supported modes for `get_data(...)`.
         
         Args:
@@ -638,7 +645,8 @@ class NdbcApi(metaclass=Singleton):
         return [v for v in vars(self._data_api) if not v.startswith('_')]
 
     @staticmethod
-    def save_xarray_dataset(dataset: xarray.Dataset, output_filepath: str, **kwargs) -> None:
+    def save_xarray_dataset(dataset: xarray.Dataset, output_filepath: str,
+                            **kwargs) -> None:
         """
         Saves an `xarray.Dataset` to netCDF a user-specified file path.
 
@@ -732,18 +740,23 @@ class NdbcApi(metaclass=Singleton):
 
     def _handle_accumulate_data(
         self,
-        accumulated_data: Dict[str, List[Union[pd.DataFrame, dict, xarray.Dataset]]],
+        accumulated_data: Dict[str, List[Union[pd.DataFrame, dict,
+                                               xarray.Dataset]]],
     ) -> Union[pd.DataFrame, dict]:
         """Accumulate the data from multiple stations and modes."""
         for k in list(accumulated_data.keys()):
             if not accumulated_data[k]:
                 del accumulated_data[k]
-        
+
         if not accumulated_data:
             return {}
-        
-        return_as_df = isinstance(accumulated_data[list(accumulated_data.keys())[-1]][0], pd.DataFrame)
-        use_opendap = isinstance(accumulated_data[list(accumulated_data.keys())[-1]][0], xarray.Dataset)
+
+        return_as_df = isinstance(
+            accumulated_data[list(accumulated_data.keys())[-1]][0],
+            pd.DataFrame)
+        use_opendap = isinstance(
+            accumulated_data[list(accumulated_data.keys())[-1]][0],
+            xarray.Dataset)
 
         data: Union[List[pd.DataFrame], List[xarray.Dataset],
                     dict] = [] if return_as_df or use_opendap else {}
