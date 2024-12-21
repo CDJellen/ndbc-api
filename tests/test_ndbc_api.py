@@ -307,6 +307,7 @@ def test_station_realtime(ndbc_api, monkeypatch, mock_socket, read_responses,
     want = read_parsed_yml['realtime']
     got = ndbc_api.available_realtime(
         station_id=TEST_STN_REALTIME,
+        full_response=True,
         as_df=False,
     )
     assert want == got
@@ -315,6 +316,7 @@ def test_station_realtime(ndbc_api, monkeypatch, mock_socket, read_responses,
     with pytest.raises(Exception):
         _ = ndbc_api.available_realtime(
             station_id=TEST_STN_REALTIME,
+            full_response=False,
             as_df=False,
         )
     ndbc_api._handler = handler
