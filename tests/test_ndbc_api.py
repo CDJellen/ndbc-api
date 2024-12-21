@@ -333,7 +333,6 @@ def test_station_historical(ndbc_api, monkeypatch, mock_socket, read_responses,
     want = read_parsed_yml['historical']
     got = ndbc_api.available_historical(
         station_id=TEST_STN_STDMET,
-        full_response=True,
         as_df=False,
     )
     assert want == got
