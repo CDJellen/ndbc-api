@@ -36,7 +36,7 @@ def hfradar_historical_requests(hfradar_requests):
 @pytest.mark.private
 def test_hfradar_realtime(hfradar, hfradar_realtime_requests):
     want = hfradar_realtime_requests
-    got = hfradar.build_request(TEST_STN, REALTIME_START, REALTIME_START + timedelta(hours=1))
+    got = hfradar.build_request(TEST_STN, HISTORICAL_START, HISTORICAL_START + timedelta(hours=1))  # we use historical start for testing
     assert want == got
 
 
