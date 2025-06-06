@@ -23,6 +23,7 @@ TEST_STN_PWIND = '41001'
 TEST_STN_STDMET = 'TPLM2'
 TEST_STN_SWDEN = '41001'
 TEST_STN_WLEVEL = '41001'
+TEST_STN_HFRADAR = "uswc_1km"
 TEST_LOG = partial(logging.getLogger('OpenDapDataHandler').log, msg="")
 
 
