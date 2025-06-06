@@ -47,7 +47,7 @@ class BaseParser:
                     xrds = xarray.open_dataset(tmp_file_path, engine='h5netcdf')
                     os.remove(tmp_file_path)
                 else:
-                    xrds = xarray.open_dataset(content, engine='h5netcdf')
+                    xrds = xarray.open_dataset(content)
                 datasets.append(xrds)
             except Exception as e:
                 raise ParserException from e
