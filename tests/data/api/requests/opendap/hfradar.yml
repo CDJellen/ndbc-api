@@ -1,0 +1,6 @@
+historical:
+- 'https://dods.ndbc.noaa.gov/thredds/fileServer/hfradar/202001010000_hfr_uswc_1km_rtv_uwls_NDBC.nc'
+- 'https://dods.ndbc.noaa.gov/thredds/fileServer/hfradar/202001010100_hfr_uswc_1km_rtv_uwls_NDBC.nc'
+realtime:
+- 'https://dods.ndbc.noaa.gov/thredds/fileServer/hfradar/202505062100_hfr_uswc_1km_rtv_uwls_NDBC.nc'
+- 'https://dods.ndbc.noaa.gov/thredds/fileServer/hfradar/202505062200_hfr_uswc_1km_rtv_uwls_NDBC.nc'

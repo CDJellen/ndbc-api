@@ -14,4 +14,4 @@ class AdcpParser(BaseParser):
     def nc_from_responses(cls,
                           responses: List[dict],
                           use_timestamp: bool = False) -> pd.DataFrame:
-        return super(AdcpParser, cls).nc_from_responses(responses)
+        return super(AdcpParser, cls).nc_from_responses(responses, use_timestamp=use_timestamp)
