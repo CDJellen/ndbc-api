@@ -499,14 +499,16 @@ class NdbcApi(metaclass=Singleton):
 
         Args:
             station_id: The NDBC station ID (e.g. `'tplm2'` or `41001`) for the
-                station of interest.
+                station of interest. For HF radar data, this should be an
+                identifier such as `'uswc_6km'` for the US West Coast at 6 km
+                resolution.
             station_ids: A list of NDBC station IDs (e.g. `['tplm2', '41001']`)
-                for the stations of interest.
+                for the stations of interest. Not supported for HF radar.
             mode: The data measurement type to query for the station (e.g.
                 `'stdmet'` for standard meterological data or `'cwind'` for
-                continuous winds data).
+                continuous winds data, or `'hfradar'` for HF radar data).
             modes: A list of data measurement types to query for the stations
-                (e.g. `['stdmet', 'cwind']`).
+                (e.g. `['stdmet', 'cwind']`, `'hfradar'` is not supported).
             start_time: The first timestamp of interest  (in UTC) for the data
                 query, defaulting to 30 days before the current system time.
             end_time: The last timestamp of interest (in UTC) for the data
@@ -546,11 +548,21 @@ class NdbcApi(metaclass=Singleton):
 
         self.log(logging.DEBUG,
                  message=f"`get_data` called with arguments: {locals()}")
+
         if station_id is None and station_ids is None:
             raise ValueError('Both `station_id` and `station_ids` are `None`.')
         if station_id is not None and station_ids is not None:
             raise ValueError('`station_id` and `station_ids` cannot both be '
-                             'specified.')
+                            'specified.')
+        if modes is not None:
+            if not isinstance(modes, list):
+                raise ValueError('`modes` must be a list of strings.')
+            if any(not isinstance(m, str) for m in modes):
+                raise ValueError('All elements in `modes` must be strings.')
+            if any(m == 'hfradar' for m in modes):
+                raise ValueError(
+                    'HF radar data cannot be requested with `modes`. '
+                    'Please use `mode` to specify a single `hfradar` mode.')
         if mode is None and modes is None:
             raise ValueError('Both `mode` and `modes` are `None`.')
         if mode is not None and modes is not None:

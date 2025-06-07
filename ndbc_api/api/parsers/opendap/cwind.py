@@ -14,4 +14,4 @@ class CwindParser(BaseParser):
     def nc_from_responses(cls,
                           responses: List[dict],
                           use_timestamp: bool = False) -> pd.DataFrame:
-        return super(CwindParser, cls).nc_from_responses(responses)
+        return super(CwindParser, cls).nc_from_responses(responses, use_timestamp=use_timestamp)

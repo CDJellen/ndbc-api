@@ -15,6 +15,7 @@ scipy = ">=1.7.3"
 beautifulsoup4 = "~4"
 html5lib = "^1.1"
 xarray = ">=2022.6.0"
+h5netcdf = "^1.6.1"
 
 [tool.poetry.group.dev.dependencies]
 coveralls = ">=4.0.1"

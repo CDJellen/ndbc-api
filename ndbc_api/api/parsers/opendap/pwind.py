@@ -14,4 +14,4 @@ class PwindParser(BaseParser):
     def nc_from_responses(cls,
                           responses: List[dict],
                           use_timestamp: bool = False) -> xarray.Dataset:
-        return super(PwindParser, cls).nc_from_responses(responses)
+        return super(PwindParser, cls).nc_from_responses(responses, use_timestamp=use_timestamp)

@@ -38,7 +38,16 @@ class BaseParser:
             else:
                 content = r
             try:
-                xrds = xarray.open_dataset(content)
+                # if the content bytes begin with b'\x1f\x8b\x08' we need to write to a temporary file
+                if content.startswith(b'\x89HDF\r'):
+                    # This is a gzip-compressed HDF5 file, we need to write it to a temporary file
+                    with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
+                        tmp_file.write(content)
+                        tmp_file_path = tmp_file.name
+                    xrds = xarray.open_dataset(tmp_file_path, engine='h5netcdf')
+                    os.remove(tmp_file_path)
+                else:
+                    xrds = xarray.open_dataset(content)
                 datasets.append(xrds)
             except Exception as e:
                 raise ParserException from e
