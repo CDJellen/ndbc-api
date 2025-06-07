@@ -12,6 +12,7 @@ from ndbc_api.api.requests.opendap.stdmet import StdmetRequest
 from ndbc_api.api.requests.opendap.swden import SwdenRequest
 from ndbc_api.api.requests.opendap.pwind import PwindRequest
 from ndbc_api.api.requests.opendap.wlevel import WlevelRequest
+from ndbc_api.api.requests.opendap.hfradar import HfradarRequest
 from ndbc_api.exceptions import RequestException, ResponseException
 from ndbc_api.utilities.req_handler import RequestHandler
 from tests.api.handlers._base import TEST_END, TEST_START

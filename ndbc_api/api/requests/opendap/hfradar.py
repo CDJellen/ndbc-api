@@ -17,11 +17,14 @@ class HfradarRequest(BaseRequest):
     def build_request(cls, station_id: str, start_time: datetime,
                       end_time: datetime) -> List[str]:
         """Builds the request for HFRadar data."""
+
+        if not isinstance(start_time, datetime) or not isinstance(end_time, datetime):
+            raise ValueError('start_time and end_time must be datetime objects.')
+
         if 'MOCKDATE' in os.environ:
             start_time = datetime.strptime(os.getenv('MOCKDATE'), '%Y-%m-%d')
             end_time = start_time + timedelta(days=1)
-        if not isinstance(start_time, datetime) or not isinstance(end_time, datetime):
-            raise TypeError('start_time and end_time must be datetime objects')
+
         # Each file is stored at a 1 hour interval, so we need to round the start and end time
         start_time = start_time.replace(minute=0, second=0, microsecond=0)
         end_time = end_time.replace(minute=0, second=0, microsecond=0)
