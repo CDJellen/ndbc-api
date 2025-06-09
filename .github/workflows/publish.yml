@@ -34,7 +34,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: pypi
-      url: https://pypi.org/p/aq-utilities
+      url: https://pypi.org/p/ndbc-api
     permissions:
       id-token: write
     steps:
