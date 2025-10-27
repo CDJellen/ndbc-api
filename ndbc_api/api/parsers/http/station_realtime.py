@@ -7,11 +7,21 @@ class RealtimeParser(StationParser):
 
     @classmethod
     def available_measurements(cls, response: dict) -> dict:
-        if response.get('status') == 200:
-            soup = bs4.BeautifulSoup(response.get('body'), 'html.parser')
-            items = soup.find('section', {"class": "data"})
-            line_items = items.find_all('li')
-            return cls._build_available_measurements(line_items=line_items)
+        if response.get('status') != 200:
+            return dict()
+        
+        soup = bs4.BeautifulSoup(response.get('body'), 'html.parser')
+        items = soup.find('section', {"class": "data"})
+        
+        if items:
+            # Find all <a> tags whose href attribute starts with "/data/realtime2/"
+            links = items.select('a[href^="/data/realtime2/"]')
+            # Get the parent <li> tag for each link
+            line_items = [link.find_parent('li') for link in links if link.find_parent('li')]
+            # Remove duplicates while preserving order
+            unique_line_items = list(dict.fromkeys(line_items))
+            
+            return cls._build_available_measurements(line_items=unique_line_items)
         else:
             return dict()
 

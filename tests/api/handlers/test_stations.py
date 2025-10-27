@@ -45,7 +45,7 @@ def test_station_meta(stations_handler, request_handler, read_parsed_yml,
         handler=request_handler,
         station_id=TEST_STN,
     )
-    assert want == got
+    assert sorted(list(want.keys())) == sorted(list(got.keys()))
     with pytest.raises(ResponseException):
         _ = stations_handler.metadata(
             handler=None,

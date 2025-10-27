@@ -1,244 +1,344 @@
 https://www.ndbc.noaa.gov/station_realtime.php?station=41013:
-  body: "\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<title>NDBC - Station 41013\
-    \ Real Time Data</title>\n<meta name=\"viewport\" content=\"width=device-width,\
-    \ initial-scale=1.0\">\n<meta http-equiv=\"content-type\" content=\"text/html;\
-    \ charset=iso-8859-1\">\n<meta name=\"DC.title\" content=\"NDBC Station Realtime\
-    \ Data Page\">\n<meta name=\"DC.description\" content=\"National Data Buoy Center\
-    \ - Most recent 45-day observations from buoy 41013 (33.441N 77.764W) - Frying\
-    \ Pan Shoals, NC.\">\n<meta name=\"description\" content=\"National Data Buoy\
-    \ Center - Most recent 45-day observations from buoy 41013 (33.441N 77.764W) -\
-    \ Frying Pan Shoals, NC.\">\n<meta name=\"DC.subject\" content=\"weather, buoy,\
-    \ weather buoy, marine, forecast, hurricane, wind, wave, offshore, surfing  temperature,\
-    \ meteorology, climate, ocean\">\n<meta name=\"DC.creator\" content=\"US Department\
-    \ of Commerce, National Oceanic and Atmospheric Administration, National We ther\
-    \ Service, National Data Buoy Center\">\n<meta name=\"DC.language\" scheme=\"\
-    DCTERMS.RFC1766\" content=\"EN-US\">\n<meta name=\"DC.format\" content=\"text/html;charset=iso-8859-1\"\
-    >\n<meta name=\"DC.date.created\" scheme=\"ISO8601\" content=\"1996-11-08\">\n\
-    <meta name=\"DC.robot\" content=\"index,follow\">\n<link rel=\"canonical\" href=\"\
-    https://www.ndbc.noaa.gov/station_realtime.php?station=41013\">\n<link rel=\"\
-    stylesheet\" href=\"/style/ndbc2022a.css\" type=\"text/css\">\n<link rel=\"icon\"\
-    \ href=\"/favicon.ico\">\n<script defer src=\"/js/ndbc_utils.js\"></script>\n\
-    <script async type=\"text/javascript\" id=\"_fed_an_ua_tag\" src=\"https://dap.digitalgov.gov/Universal-Federated-Analytics-Min.js?agency=DOC&subagency=NOAA\"\
-    ></script>\n\n</head>\n<body>\n  <a href=\"#contents\" class=\"skip-nav-link\"\
-    >Skip Navigation</a>\n\n    <div class=\"web-page\">\n    <!-- Header Section\
-    \ -->\n    <header class=\"header\">\n      <div class=\"banner\">\n        <a\
-    \ href=\"https://www.noaa.gov/\" class=\"header-noaa-link\"><img src=\"/images/noaalogo001.png\"\
-    \ width=\"53\" height=\"59\" alt=\"NOAA Logo\" class=\"header-noaa-icon responsive\"\
-    ></a>\n        <a href=\"https://www.weather.gov/\" class=\"header-nws-link\"\
-    ><img src=\"/images/nwslogo000.png\" width=\"53\" height=\"59\" alt=\"NWS Logo\"\
-    \ class=\"header-nws-icon responsive\"></a>\n\t<a href=\"/\" class=\"header-ndbc-link\"\
-    ><img src=\"/images/ndbcheader.png\" width=\"554\" height=\"60\" alt=\"National\
-    \ Data Buoy Center\" class=\"header-ndbc-icon responsive\"></a>\n        <a href=\"\
-    https://www.commerce.gov/\" class=\"header-doc-link\"><img src=\"/images/header_doc.png\"\
-    \ width=\"135\" height=\"60\" alt=\"United States Department of Commerce\" class=\"\
-    header-doc responsive\"></a>\n      </div>\n<!-- Top Menu Content -->\n\t<div\
-    \ class=\"nav-container\">\n          <button class=\"mobile-nav-toggle\" arial-controls=\"\
-    topnavbar\" aria-expanded=\"false\"><span class=\"visually-hidden\">Menui</span><div\
-    \ class=\"bar1\"></div><div class=\"bar2\"></div><div class=\"bar3\"></div></button>\n\
-    \        <nav class=\"topnav\" id=\"topnavbar\">\n          <ul id=\"topnav\"\
-    >\n  \n    <!-- Home Link -->\n            <li>\n              <div class=\"section-link\"\
-    >\n                <a href=\"/\">Home</a>\n              </div>\n            </li>\n\
-    \ \n    <!-- Observations Menu -->\n            <li>\n              <div class=\"\
-    section-link has-dropdown\">\n                <a href=\"/observations.shtml\"\
-    >Observations</a>\n              </div>\n              <div class=\"drop drop-left\"\
-    >\n                <ul>\n                  <li><a href=\"/obs.shtml\">All Stations\
-    \ (Map)</a></li>\n                  <li><a href=\"/os.shtml\">Observation Search</a></li>\n\
-    \                  <li><a href=\"/histsearch.php\">Historical Observation Search</a></li>\n\
-    \                  <li><a href=\"/ship_obs.php\">Ship Obs Report</a></li>\n  \
-    \                <li><a href=\"/buoycams.shtml\">BuoyCAMs</a></li>\n         \
-    \         <li><a href=\"/faq/rss_access.shtml\">RSS Feeds <img src=\"/images/feed-icon-14x14.png\"\
-    \ alt=\"Image indicating link to RSS feed access page\" width=\"14\" height=\"\
-    14\"></a></li>\n                  <li><a href=\"/widgets/\">Web Widget</a></li>\n\
-    \                </ul>\n              </div>\n            </li>\n\n    <!-- Information\
-    \ Menu -->\n            <li>\n              <div class=\"section-link has-dropdown\"\
-    >\n                <a href=\"/information.shtml\">Information</a>\n          \
-    \    </div>\n              <div class=\"drop drop-left\">\n                <ul>\n\
-    \                  <li><a href=\"https://tao.ndbc.noaa.gov/proj_overview/proj_overview_ndbc.shtml\"\
-    >TAO Program Info</a></li>\n                  <li><a href=\"/dart/dart.shtml\"\
-    >DART&reg; Program Info</a></li>\n                  <li><a href=\"https://ioos.noaa.gov/\"\
-    >IOOS&reg; Program Info</a></li>\n                  <li><a href=\"https://vos.noaa.gov/\"\
-    >Voluntary Observing Ship</a></li>\n                  <li><a href=\"/faq/dial.shtml\"\
-    >Dial-A-Buoy</a></li>\n                  <li><a href=\"/docs/ndbc_web_data_guide.pdf\"\
-    >Web Data Guide</a></li>\n                  <li><a href=\"/ops.shtml\">Maintenance\
-    \ Schedule</a></li>\n                  <li><a href=\"/wstat.shtml\">Station Status</a></li>\n\
-    \                  <li><a href=\"/publications/\">Publications</a></li>\n    \
-    \            </ul>\n              </div>\n            </li>\n\n    <!-- Education\
-    \ Menu -->\n            <li>\n              <div class=\"section-link has-dropdown\"\
-    >\n                <a href=\"/education.shtml\">Education</a>\n              </div>\n\
-    \              <div class=\"drop drop-left\">\n                <ul>\n        \
-    \          <li><a href=\"/education/\">Education</a></li>\n                  <li><a\
-    \ href=\"/faq/\">Frequently Asked Questions</a></li>\n                </ul>\n\
-    \              </div>\n            </li>\n\n    <!-- News Menu -->\n         \
-    \   <li>\n              <div class=\"section-link has-dropdown\">\n          \
-    \      <a href=\"/news.shtml\">News</a>\n              </div>\n              <div\
-    \ class=\"drop drop-left\">\n                <ul>\n                  <li><a href=\"\
-    /news\">News @ NDBC</a></li>\n                  <li><a href=\"/ndbcexit.php?url=https://www.facebook.com/NWSNDBC&blurb=NDBC%20on%20Facebook\"\
-    ><img src=\"/images/f_logo.png\" alt=\"Follow the National Data Buoy Center on\
-    \ Facebook\" width=\"16\" height=\"16\"> &nbsp; NDBC on Facebook</a></li>\n  \
-    \                <li><a href=\"/ndbcexit.php?url=https://www.twitter.com/databuoycenter&blurb=NDBC%20on%20Twitter\"\
-    ><img src=\"/images/twitter.png\" alt=\"Follow the National Data Buoy Center on\
-    \ Twitter\" width=\"16\" height=\"16\"> &nbsp; NDBC on Twitter</a></li>\n    \
-    \              <li><a href=\"/ndbcexit.php?url=https://www.linkedin.com/company/noaa&amp;blurb=NOAA%20on%20LinkedIn\"\
-    ><img src=\"/images/linkedin_logo.png\" alt=\"Follow the National Data Buoy Center\
-    \ on LinkedIn\" width=\"19\" height=\"16\"> &nbsp; NOAA on LinkedIn</a></li>\n\
-    \                </ul>\n              </div>\n            </li>\n\n    <!-- Search\
-    \ Menu -->\n            <li>\n              <div class=\"section-link has-dropdown\"\
-    >\n                <a href=\"search.shtml\">Search</a>\n              </div>\n\
-    \              <div class=\"dropsearch drop-right\">\n                <div class=\"\
-    site-search\">\n\t\t  <p><b>Site Search</b></p>\n                  <form method=\"\
-    get\" action=\"https://search.usa.gov/search\">\n                    <input type=\"\
-    hidden\" name=\"v:project\" value=\"firstgov\">\n                    <label for=\"\
-    query\">Search For</label>\n                    <input type=\"search\" name=\"\
-    query\" id=\"query\" size=\"12\" autocomplete=\"off\" enterkeyhint=\"search\"\
-    >\n                    <input type=\"submit\" value=\"Go\">\n                \
-    \    <p>\n                      <input type=\"radio\" name=\"affiliate\" checked=\"\
-    checked\" value=\"ndbc.noaa.gov\" id=\"ndbc\">\n                      <label for=\"\
-    ndbc\" class=\"search-scope\">NDBC</label>\n                      <input type=\"\
-    radio\" name=\"affiliate\" value=\"noaa.gov\" id=\"noaa\">\n                 \
-    \     <label for=\"noaa\" class=\"search-scope\">All NOAA</label>\n          \
-    \          </p>\n                  </form>\n                </div>\n         \
-    \     </div>\n            </li>\n\n    <!-- About Menu -->\n            <li>\n\
-    \              <div class=\"section-link has-dropdown\">\n                <a href=\"\
-    about.shtml\">About</a>\n              </div>\n              <div class=\"drop\
-    \ drop-right\">\n                <ul>\n                  <li><a href=\"/faq/ndbc.shtml\"\
-    >About Us</a></li>\n                  <li><a href=\"/visitorinfo.shtml\">Visitor\
-    \ Information</a></li>\n                  <li><a href=\"/contact_us.shtml\">Contact\
-    \ Us</a></li>\n                </ul>\n              </div>\n            </li>\n\
-    \n          </ul><!-- End of top nav ul -->\n        </nav><!-- End of topnav\
-    \ content div -->\n\t</div>\n    </header>\n\n        <!-- START OF CONTENT -->\n\
-    \t\t<main class=\"main-content\" id=\"contents\">\n\t\t\t<div class=\"station-search\"\
-    ><form id=\"station_form\" method=\"get\" action=\"/station_page.php\">\n\t\t\t\
-    <label for=\"station\">Station ID Search</label>\n\t\t\t<span class=\"searchinput\"\
-    ><input name=\"station\" id=\"station\" class=\"station-input\" type=\"search\"\
-    \ required pattern=\"[0-9a-zA-z]{4,7}\" title=\"4 to 7 letters or digits\" value=\"\
-    \" size=\"8\" maxlength=\"7\">\n\t\t\t<input type=\"submit\" value=\"Go\"></span></form>\n\
-    \t\t\t<a href=\"/to_station.shtml\" title=\"View a list of available stations\
-    \ ordered by owner\" class=\"nav\">Station List</a>\n\t\t\t</div>\n\t\t\t<div\
-    \ class=\"notices\">\n\t\t\t<p class=\"notice\"><img src=\"/images/hurrsmall.jpg\"\
-    \ alt=\"Hurricane Symbol\" height=\"22\" width=\"11\"> View the latest observations\
-    \ near <a href=\"/radial_search.php?storm=ep5\">East Pacific Tropical Depression\
-    \ Five-E</a>.</p>\n\n\t\t\t<p class=\"notice\">On or about August 15, 2023, the\
-    \ NDBC will modify data file formats and data file names to accommodate seven-character\
-    \ station IDs.  <a href=\"/fileformatchanges.shtml\">Formats of the latest observation\
-    \ file and hourly files will change</a>.</p>\n\n\t\t\t</div>\n\t\t\t<h1>Station\
-    \ 41013 <a href='http://www.navcen.uscg.gov/?pageName=lightLists' target='_blank'\
-    \ rel='noopener'>(LLNR 815)</a> - Frying Pan Shoals, NC</h1>\n\t\t\t\n\n\n<section\
-    \ class=\"metadata\">\n<p><b>Owned and maintained by National Data Buoy Center</b><br>\n\
-    <b>33.441 N 77.764 W (33&#176;26'28\" N 77&#176;45'50\" W)</b></p>\n</section>\n\
-    <section class=\"data\">\n<p>Links for real time data for station 41013 are listed\
-    \ below:\n<br>(Times are in GMT, Wind Speed is in m/s, and Wave Height is in meters)</p>\n\
-    <ul>\n\t<li><p>Data for last 24 hours:<b>These real time data have undergone gross\
-    \ error checking only. Please use with discretion.</b></p>\n\t\t<ul>\n\t\t\t<li>Real\
-    \ time hourly standard meteorological\n\t\t\tand hourly continuous winds <a href=\"\
-    /data/hourly2/\">data directory</a><br>\n\t\t\twith standard meteorological <a\
-    \ href=\"/faq/measdes.shtml#stdmet\"> description</a>\n\t\t\tand continuous winds\
-    \ <a href=\"/faq/measdes.shtml#cwind\"> description</a>.</li>\n\t\t</ul>\n\t\t\
-    <br>\n\t</li>\n\t<li><p>Data for last 5 days:<b>These real time data have undergone\
-    \ gross error checking only. Please use with discretion.</b></p>\n\t\t<ul>\n\t\
-    \t\t<li><a href=\"/data/5day2/41013_5day.txt\">Real time standard meteorological\
-    \ data</a>\n\t\t\tand their <a href=\"/faq/measdes.shtml#stdmet\"> description</a>.</li>\n\
-    \t\t\t<li><a href=\"/data/5day2/41013_5day.spectral\">Real time spectral wave\
-    \ data</a>\n\t\t\tand their <a href=\"/faq/measdes.shtml#swden\"> description</a>.</li>\n\
-    \t\t</ul>\n\t\t<br>\n\t</li>\n\t<li><p>Data for last 45 days:<b>These real time\
-    \ data have undergone gross error checking only. Please use with discretion.</b></p>\n\
-    \t\t<ul>\n\t\t\t<li><a href=\"/data/realtime2/41013.txt\">Real time standard meteorological\
-    \ data</a>\n\t\t\tand their <a href=\"/faq/measdes.shtml#stdmet\"> description</a>.</li>\n\
-    \t\t\t<li><a href=\"/data/realtime2/41013.spec\">Real time spectral wave data</a>\n\
-    \t\t\tand their <a href=\"/waveobs.shtml\"> description</a>.</li>\n\t\t\t<li><a\
-    \ href=\"/data/realtime2/41013.data_spec\">Real time raw spectral wave data</a>\n\
-    \t\t\tand their <a href=\"/data_spec.shtml\"> description</a>.</li>\n\t\t\t<li><a\
-    \ href=\"/data/realtime2/41013.swdir\">Real time raw spectral wave (alpha1) data</a>\n\
-    \t\t\tand their <a href=\"/data_spec.shtml\"> description</a>.</li>\n\t\t\t<li><a\
-    \ href=\"/data/realtime2/41013.swdir2\">Real time raw spectral wave (alpha2) data</a>\n\
-    \t\t\tand their <a href=\"/data_spec.shtml\"> description</a>.</li>\n\t\t\t<li><a\
-    \ href=\"/data/realtime2/41013.swr1\">Real time raw spectral wave (r1) data</a>\n\
-    \t\t\tand their <a href=\"/data_spec.shtml\"> description</a>.</li>\n\t\t\t<li><a\
-    \ href=\"/data/realtime2/41013.swr2\">Real time raw spectral wave (r2) data</a>\n\
-    \t\t\tand their <a href=\"/data_spec.shtml\"> description</a>.</li>\n\t\t\t<li><a\
-    \ href=\"/data/realtime2/41013.supl\">Real time supplemental measurements data</a>\n\
-    \t\t\tand their <a href=\"/faq/measdes.shtml#supl\"> description</a>.</li>\n\t\
-    \t\t<li><a href=\"/data/derived2/41013.dmv\">Real time derived measurements data</a>\n\
-    \t\t\tand their <a href=\"/faq/measdes.shtml#deriv\"> description</a>.</li>\n\t\
-    \t</ul>\n\t\t<br>\n\t</li>\n</ul>\n</section>\n<p><a href=\"/station_page.php?station=41013\"\
-    >View Station Page</a><br>\n<a href=\"/station_history.php?station=41013\">View\
-    \ Historical Data</a></p>\n\t\t\t<hr><div class=\"socialMediaContainer\">\n\t\t\
-    \t\t<a class=\"socialMediaLink\" href=\"/ndbcexit.php?url=https://www.facebook.com/NWSNDBC&amp;blurb=NDBC%20on%20Facebook\"\
-    ><img src=\"/images/facebook_logo.png\" class=\"socialMediaLogo\" height=\"21\"\
-    \ width=\"21\" alt=\"Facebook Logo\" title=\"NDBC on Facebook\">&nbsp;NDBC on\
-    \ Facebook</a>\n\t\t\t\t<a class=\"socialMediaLink\" href=\"/ndbcexit.php?url=https://www.linkedin.com/company/noaa&amp;blurb=NOAA%20on%20LinkedIn\"\
-    ><img src=\"/images/linkedin_logo.png\" class=\"socialMediaLogo\" height=\"21\"\
-    \ width=\"25\" alt=\"LinkedIn Logo\" title=\"NDBC on LinkedIn\">&nbsp;NOAA on\
-    \ LinkedIn</a>\n\t\t\t\t<a class=\"socialMediaLink\" href=\"/ndbcexit.php?url=https://www.twitter.com/databuoycenter&amp;blurb=NDBC%20on%20Twitter\"\
-    ><img src=\"/images/twitter.png\" class=\"socialMediaLogo\" height=\"21\" width=\"\
-    21\" alt=\"Twitter Logo\" title=\"NDBC on Twitter\">&nbsp;NDBC on Twitter</a>\n\
-    \t\t\t</div>\n\n\t\t</main>\n\n        <!-- END OF CONTENT -->\n        <footer\
-    \ class=\"footer\">\n          <div class=\"footer-content\">\n\n            <div\
-    \ class=\"footer-column\">\n              <a class=\"footer-column-head\">Observations</a><br>\n\
-    \              <a href=\"/obs.shtml\">All Stations (Map)</a><br>\n           \
-    \   <a href=\"/os.shtml\">Observation Search</a><br>\n              <a href=\"\
-    /histsearch.php\">Historical Observation Search</a><br>\n              <a href=\"\
-    /ship_obs.php\">Ship Obs Report</a><br>\n              <a href=\"/buoycams.shtml\"\
-    >BuoyCAMs</a><br>\n              <a href=\"/faq/rss_access.shtml\">RSS Feeds <img\
-    \ src=\"/images/feed-icon-14x14.png\" alt=\"Image indicating link to RSS feed\
-    \ access page\" width=\"14\" height=\"14\"></a><br>\n              <a href=\"\
-    /widgets/\">Web Widget</a><br>\n            </div>\n\n            <div class=\"\
-    footer-column\">\n              <a class=\"footer-column-head\">Information</a><br>\n\
-    \              <a href=\"https://tao.ndbc.noaa.gov/proj_overview/proj_overview_ndbc.shtml\"\
-    >TAO Program Info</a><br>\n              <a href=\"/dart/dart.shtml\">DART&reg;\
-    \ Program Info</a><br>\n              <a href=\"https://ioos.noaa.gov/\">IOOS&reg;\
-    \ Program Info</a><br>\n              <a href=\"https://vos.noaa.gov/\">Voluntary\
-    \ Observing Ship</a><br>\n              <a href=\"/faq/dial.shtml\">Dial-A-Buoy</a><br>\n\
-    \              <a href=\"/docs/ndbc_web_data_guide.pdf\">Web Data Guide</a><br>\n\
-    \              <a href=\"/ops.shtml\">Station Maintenance Schedule</a><br>\n \
-    \             <a href=\"/wstat.shtml\">Station Status</a><br>\n              <a\
-    \ href=\"/publications/\">Publications</a>\n            </div>\n\n           \
-    \ <div>\n            <div class=\"footer-column\">\n              <a class=\"\
-    footer-column-head\">Education</a><br>\n              <a href=\"/education\">Education</a><br>\n\
-    \            </div>\n\n            <div class=\"footer-column\">\n           \
-    \   <a class=\"footer-column-head\">News</a><br>\n              <a href=\"/news\"\
-    >News @ NDBC</a><br>\n              <a href=\"/ndbcexit.php?url=https://www.facebook.com/NWSNDBC&blurb=NDBC%20on%20Facebook\"\
-    ><img src=\"/images/f_logo.png\" alt=\"Follow the National Data Buoy Center on\
-    \ Facebook\" width=\"16\" height=\"16\"> &nbsp; NDBC on Facebook</a><br>\n   \
-    \           <a href=\"/ndbcexit.php?url=https://www.twitter.com/databuoycenter&blurb=NDBC%20on%20Twitter\"\
-    ><img src=\"/images/twitter.png\" alt=\"Follow the National Data Buoy Center on\
-    \ Twitter\" width=\"16\" height=\"16\"> &nbsp; NDBC on Twitter</a><br>\n     \
-    \         <a href=\"/ndbcexit.php?url=https://www.linkedin.com/company/noaa&amp;blurb=NOAA%20on%20LinkedIn\"\
-    ><img src=\"/images/linkedin_logo.png\" alt=\"Follow the National Data Buoy Center\
-    \ on LinkedIn\" width=\"19\" height=\"16\"> &nbsp; NOAA on LinkedIn</a>\n    \
-    \        </div>\n            </div>\n\n            <div>\n            <div class=\"\
-    footer-column\">\n              <a class=\"footer-column-head\">Other NDBC Websites</a><br>\n\
-    \              <a href=\"/mobile/\">Low Bandwidth Website</a><br>\n          \
-    \    <a href=\"https://dods.ndbc.noaa.gov/\">NDBC Data via NetCDF (THREDDS)</a><br>\n\
-    \              <a href=\"https://hfradar.ndbc.noaa.gov/\">Surface Currents via\
-    \ High Frequency Radar</a><br>\n              <a href=\"https://dods.ndbc.noaa.gov/oceansites/\"\
-    >OceanSITES</a><br>\n              <a href=\"https://viz.pmel.noaa.gov/osmc/\"\
-    >OSMC</a><br>\n            </div>\n\n            <div class=\"footer-column\"\
-    >\n              <a class=\"footer-column-head\">About Us</a><br>\n          \
-    \    <a href=\"/faq/ndbc.shtml\">About Us</a><br>\n              <a href=\"/visitorinfo.shtml\"\
-    >Visitor Information</a><br>\n              <a href=\"/contact_us.shtml\">Contact\
-    \ Us</a>\n            </div>\n            </div>\n\n          </div>\n\n<!-- legal\
-    \ footer area -->\n          <div class=\"footer-legal-content\">\n          \
-    \  <div class=\"footer-legal-gov\">\n              <a href=\"https://www.usa.gov/\"\
-    ><img src=\"/images/usa_gov.png\" alt=\"usa.gov\" width=\"110\" height=\"30\"\
-    ></a>\n            </div> \n            <div class=\"footer-legal-column\">\n\
-    \              <p> \n                  <a href=\"https://www.commerce.gov/\">US\
-    \ Dept of Commerce</a><br>\n                  <a href=\"https://www.noaa.gov/\"\
-    >National Oceanic and Atmospheric Administration</a><br>\n                  <a\
-    \ href=\"https://www.weather.gov/\">National Weather Service</a><br>\n       \
-    \           National Data Buoy Center<br>\n                  Building 3205<br>\n\
-    \                  Stennis Space Center, MS, 39529<br>\n                  <a href=\"\
-    mailto:webmaster.ndbc@noaa.gov\">webmaster.ndbc@noaa.gov</a>\n              </p>\n\
-    \            </div>\n\n \t    <div class=\"footer-legal-column2\">\n         \
-    \   <p>\n              <a href=\"https://www.weather.gov/disclaimer\">Disclaimer</a><br>\n\
-    \              <a href=\"https://www.cio.noaa.gov/services_programs/info_quality.html\"\
-    >Information Quality</a><br>\n              <a href=\"https://www.weather.gov/help\"\
-    >Help</a><br>\n              <a href=\"https://www.weather.gov/glossary\">Glossary</a>\n\
-    \            </p>\n            </div>\n\n   \t    <div class=\"footer-legal-column3\"\
-    >\n            <p>\n              <a href=\"https://www.weather.gov/privacy\"\
-    >Privacy Policy</a><br>\n              <a href=\"https://www.noaa.gov/organization/information-technology/freedom-of-information-act\"\
-    >Freedom of Information Act (FOIA)</a><br>\n              <a href=\"https://www.weather.gov/about\"\
-    >About Us</a><br>\n              <a href=\"https://www.weather.gov/careers\">Career\
-    \ Opportunities</a>\n            </p>\n          </div>\n\t\n        </div><!--\
-    \ end of footer-legal-content div  -->\n\n    </footer><!-- End of center div\
-    \ -->\n</div> <!-- End of web page div -->\n\n</body>\n</html>\n"
+  body: |
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+    <title>NDBC - Station 41013 Real Time Data</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="schema.DC" href="http://purl.org/dc/elements/1.1/">
+    <meta http-equiv="content-type" content="text/html; charset=iso-8859-1">
+    <meta name="DC.title" content="NDBC Station Realtime Data Page">
+    <meta name="DC.description" content="National Data Buoy Center - Most recent 45-day observations from buoy 41013 (33.441N 77.764W) - Frying Pan Shoals, NC.">
+    <meta name="description" content="National Data Buoy Center - Most recent 45-day observations from buoy 41013 (33.441N 77.764W) - Frying Pan Shoals, NC.">
+    <meta name="DC.subject" content="weather, buoy, weather buoy, marine, forecast, hurricane, wind, wave, offshore, surfing  temperature, meteorology, climate, ocean">
+    <meta name="DC.creator" content="US Department of Commerce, National Oceanic and Atmospheric Administration, National We ther Service, National Data Buoy Center">
+    <meta name="DC.language" content="EN-US">
+    <meta name="DC.format" content="text/html;charset=iso-8859-1">
+    <meta name="DC.date.created" content="1996-11-08">
+    <link rel="canonical" href="https://www.ndbc.noaa.gov/station_realtime.php?station=41013">
+    <link rel="stylesheet" href="/style/ndbc2022a.css" type="text/css">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <script defer src="/js/ndbc_utils.js"></script>
+    <script async id="_fed_an_ua_tag" src="https://dap.digitalgov.gov/Universal-Federated-Analytics-Min.js?agency=DOC&subagency=NOAA"></script>
+    <script src="https://touchpoints.app.cloud.gov/touchpoints/b5347857.js" defer></script>
+    <script src="https://www.weather.gov/source/nws/govshutdown.js" defer></script>
+
+
+    </head>
+    <body>
+      <a href="#contents" class="skip-nav-link usa-skipnav">Skip Navigation</a>
+
+        <div class="web-page">
+        <!-- Header Section -->
+        <header class="header">
+          <div class="banner">
+            <a href="https://www.noaa.gov/" class="header-noaa-link"><img src="/images/noaalogo001.png" width="53" height="59" alt="NOAA Logo" class="header-noaa-icon responsive"></a>
+            <a href="https://www.weather.gov/" class="header-nws-link"><img src="/images/nwslogo000.png" width="53" height="59" alt="NWS Logo" class="header-nws-icon responsive"></a>
+      <a href="/" class="header-ndbc-link"><img src="/images/ndbcheader.png" width="554" height="60" alt="National Data Buoy Center" class="header-ndbc-icon responsive"></a>
+            <a href="https://www.commerce.gov/" class="header-doc-link"><img src="/images/header_doc.png" width="135" height="60" alt="United States Department of Commerce" class="header-doc responsive"></a>
+          </div>
+    <!-- Top Menu Content -->
+      <div class="nav-container">
+              <button class="mobile-nav-toggle" aria-controls="topnavbar" aria-expanded="false"><span class="visually-hidden">Menu</span><span class="bar1"></span><span class="bar2"></span><span class="bar3"></span></button>
+            <nav class="topnav" id="topnavbar">
+              <ul id="topnav">
+      
+        <!-- Home Link -->
+                <li>
+                  <div class="section-link">
+                    <a href="/">Home</a>
+                  </div>
+                </li>
+    
+        <!-- Observations Menu -->
+                <li>
+                  <div class="section-link has-dropdown">
+                    <a href="/observations.shtml">Observations</a>
+                  </div>
+                  <div class="drop drop-left">
+                    <ul>
+                      <li><a href="/obs.shtml">All Stations (Map)</a></li>
+                      <li><a href="/os.shtml">Observation Search</a></li>
+                      <li><a href="/histsearch.php">Historical Observation Search</a></li>
+                      <li><a href="/ship_obs.php">Ship Obs Report</a></li>
+                      <li><a href="/buoycams.shtml">BuoyCAMs</a></li>
+                      <li><a href="/faq/rss_access.shtml">RSS Feeds <img src="/images/feed-icon-14x14.png" alt="Image indicating link to RSS feed access page" width="14" height="14"></a></li>
+                      <li><a href="/widgets/">Web Widget</a></li>
+                    </ul>
+                  </div>
+                </li>
+
+        <!-- Information Menu -->
+                <li>
+                  <div class="section-link has-dropdown">
+                    <a href="/information.shtml">Information</a>
+                  </div>
+                  <div class="drop drop-left">
+                    <ul>
+                      <li><a href="https://tao.ndbc.noaa.gov/proj_overview/proj_overview_ndbc.shtml">TAO Program Info</a></li>
+                      <li><a href="/dart/dart.shtml">DART&reg; Program Info</a></li>
+                      <li><a href="https://ioos.noaa.gov/">IOOS&reg; Program Info</a></li>
+                      <li><a href="https://vos.noaa.gov/">Voluntary Observing Ship</a></li>
+                      <li><a href="/docs/ndbc_web_data_guide.pdf">Web Data Guide</a></li>
+                      <li><a href="/ops.shtml">Maintenance Schedule</a></li>
+                      <li><a href="/wstat.shtml">Station Status</a></li>
+                      <li><a href="/publications/">Publications</a></li>
+                    </ul>
+                  </div>
+                </li>
+
+        <!-- Education Menu -->
+                <li>
+                  <div class="section-link has-dropdown">
+                    <a href="/education.shtml">Education</a>
+                  </div>
+                  <div class="drop drop-left">
+                    <ul>
+                      <li><a href="/education/">Education</a></li>
+                      <li><a href="/faq/">Frequently Asked Questions</a></li>
+                    </ul>
+                  </div>
+                </li>
+
+        <!-- News Menu -->
+                <li>
+                  <div class="section-link has-dropdown">
+                    <a href="/news.shtml">News</a>
+                  </div>
+                  <div class="drop drop-left">
+                    <ul>
+                      <li><a href="/news/">News @ NDBC</a></li>
+                      <li><a href="/ndbcexit.php?url=https://www.facebook.com/NWSNDBC&blurb=NDBC%20on%20Facebook"><img src="/images/f_logo.png" alt="Follow the National Data Buoy Center on Facebook" width="16" height="16"> &nbsp; NDBC on Facebook</a></li>
+                      <li><a href="/ndbcexit.php?url=https://www.twitter.com/databuoycenter&blurb=NDBC%20on%20Twitter"><img src="/images/twitter.png" alt="Follow the National Data Buoy Center on Twitter" width="16" height="16"> &nbsp; NDBC on Twitter</a></li>
+                      <li><a href="/ndbcexit.php?url=https://www.linkedin.com/company/noaa&blurb=NOAA%20on%20LinkedIn"><img src="/images/linkedin_logo.png" alt="Follow the National Data Buoy Center on LinkedIn" width="19" height="16"> &nbsp; NOAA on LinkedIn</a></li>
+                    </ul>
+                  </div>
+                </li>
+
+        <!-- Search Menu -->
+                <li>
+                  <div class="section-link has-dropdown">
+                    <a href="/search.shtml">Search</a>
+                  </div>
+                  <div class="dropsearch drop-right">
+                    <div class="site-search">
+          <p><b>Site Search</b></p>
+                      <form method="get" action="https://search.usa.gov/search" role="search" aria-label="Sitewide">
+                        <input type="hidden" name="v:project" value="firstgov">
+                        <label for="query">Search For</label>
+                        <input type="search" name="query" id="query" size="12" autocomplete="off" enterkeyhint="search">
+                        <input type="submit" value="Go">
+                        <p>
+                          <input type="radio" name="affiliate" checked="checked" value="ndbc.noaa.gov" id="ndbc">
+                          <label for="ndbc" class="search-scope">NDBC</label>
+                          <input type="radio" name="affiliate" value="noaa.gov" id="noaa">
+                          <label for="noaa" class="search-scope">All NOAA</label>
+                        </p>
+                      </form>
+                    </div>
+                  </div>
+                </li>
+
+        <!-- About Menu -->
+                <li>
+                  <div class="section-link has-dropdown">
+                    <a href="/about.shtml">About</a>
+                  </div>
+                  <div class="drop drop-right">
+                    <ul>
+                      <li><a href="/faq/ndbc.shtml">About Us</a></li>
+                      <li><a href="/visitorinfo.shtml">Visitor Information</a></li>
+                      <li><a href="/contact_us.shtml">Contact Us</a></li>
+                    </ul>
+                  </div>
+                </li>
+
+              </ul><!-- End of top nav ul -->
+            </nav><!-- End of topnav content div -->
+      </div>
+        </header>
+
+            <!-- START OF CONTENT -->
+        <main class="main-content" id="contents">
+          <div class="station-search"><form id="station_form" method="get" action="/station_page.php" role="search" aria-label="Station ID">
+          <label for="station">Station ID Search</label>
+          <span class="searchinput"><input name="station" id="station" class="station-input" type="search" required pattern="[0-9a-zA-z]{4,7}" title="4 to 7 letters or digits" value="" size="8" maxlength="7">
+          <input type="submit" value="Go"></span></form>
+          <a href="/to_station.shtml" title="View a list of available stations ordered by owner" class="nav">Station List</a>
+          </div>
+          <div class="notices">
+          <p class="notice"><img src="/images/hurrsmall.jpg" alt="Hurricane Symbol" height="22" width="11"> View the latest observations near <a href="/radial_search.php?storm=at3">Atlantic Hurricane Melissa</a> and <a href="/radial_search.php?storm=ep3">East Pacific Tropical Storm Sonia</a>.</p>
+
+          
+          </div>
+          <h1>Station 41013 <a href='https://www.navcen.uscg.gov/?pageName=lightLists' target='_blank' rel='noopener'>(LLNR 815)</a> - Frying Pan Shoals, NC</h1>
+          
+
+
+    <section class="metadata">
+    <p><b>Owned and maintained by National Data Buoy Center</b><br>
+    <b>33.441 N 77.764 W (33&#176;26'28" N 77&#176;45'50" W)</b></p>
+    </section>
+    <section class="data">
+    <p>Links for real time data for station 41013 are listed below:
+    <br>(Times are in GMT, Wind Speed is in m/s, and Wave Height is in meters)</p>
+    <ul>
+      <li><p>Data for last 24 hours:<b>These real time data have undergone gross error checking only. Please use with discretion.</b></p>
+        <ul>
+          <li>Real time hourly standard meteorological
+          and hourly continuous winds <a href="/data/hourly2/">data directory</a><br>
+          with standard meteorological <a href="/faq/measdes.shtml#stdmet"> description</a>
+          and continuous winds <a href="/faq/measdes.shtml#cwind"> description</a>.</li>
+        </ul>
+        <br>
+      </li>
+      <li><p>Data for last 5 days:<b>These real time data have undergone gross error checking only. Please use with discretion.</b></p>
+        <ul>
+          <li><a href="/data/5day2/41013_5day.txt">Real time standard meteorological data</a>
+          and their <a href="/faq/measdes.shtml#stdmet"> description</a>.</li>
+          <li><a href="/data/5day2/41013_5day.spectral">Real time spectral wave data</a>
+          and their <a href="/faq/measdes.shtml#swden"> description</a>.</li>
+        </ul>
+        <br>
+      </li>
+      <li><p>Data for last 45 days:<b>These real time data have undergone gross error checking only. Please use with discretion.</b></p>
+        <ul>
+          <li><a href="/data/realtime2/41013.txt">Real time standard meteorological data</a>
+          and their <a href="/faq/measdes.shtml#stdmet"> description</a>.</li>
+          <li><a href="/data/realtime2/41013.spec">Real time spectral wave data</a>
+          and their <a href="/waveobs.shtml"> description</a>.</li>
+          <li><a href="/data/realtime2/41013.data_spec">Real time raw spectral wave data</a>
+          and their <a href="/data_spec.shtml"> description</a>.</li>
+          <li><a href="/data/realtime2/41013.swdir">Real time raw spectral wave (alpha1) data</a>
+          and their <a href="/data_spec.shtml"> description</a>.</li>
+          <li><a href="/data/realtime2/41013.swdir2">Real time raw spectral wave (alpha2) data</a>
+          and their <a href="/data_spec.shtml"> description</a>.</li>
+          <li><a href="/data/realtime2/41013.swr1">Real time raw spectral wave (r1) data</a>
+          and their <a href="/data_spec.shtml"> description</a>.</li>
+          <li><a href="/data/realtime2/41013.swr2">Real time raw spectral wave (r2) data</a>
+          and their <a href="/data_spec.shtml"> description</a>.</li>
+          <li><a href="/data/realtime2/41013.supl">Real time supplemental measurements data</a>
+          and their <a href="/faq/measdes.shtml#supl"> description</a>.</li>
+          <li><a href="/data/derived2/41013.dmv">Real time derived measurements data</a>
+          and their <a href="/faq/measdes.shtml#deriv"> description</a>.</li>
+        </ul>
+        <br>
+      </li>
+    </ul>
+    </section>
+    <p><a href="/station_page.php?station=41013">View Station Page</a><br>
+    <a href="/station_history.php?station=41013">View Historical Data</a></p>
+          <hr><div class="socialMediaContainer">
+            <a class="socialMediaLink" href="/ndbcexit.php?url=https://www.facebook.com/NWSNDBC&blurb=NDBC%20on%20Facebook"><img src="/images/facebook_logo.png" class="socialMediaLogo" height="21" width="21" alt="Facebook Logo" title="NDBC on Facebook">&nbsp;NDBC on Facebook</a>
+            <a class="socialMediaLink" href="/ndbcexit.php?url=https://www.linkedin.com/company/noaa&blurb=NOAA%20on%20LinkedIn"><img src="/images/linkedin_logo.png" class="socialMediaLogo" height="21" width="25" alt="LinkedIn Logo" title="NDBC on LinkedIn">&nbsp;NOAA on LinkedIn</a>
+            <a class="socialMediaLink" href="/ndbcexit.php?url=https://www.twitter.com/databuoycenter&blurb=NDBC%20on%20Twitter"><img src="/images/twitter.png" class="socialMediaLogo" height="21" width="21" alt="Twitter Logo" title="NDBC on Twitter">&nbsp;NDBC on Twitter</a>
+          </div>
+
+        </main>
+
+            <!-- END OF CONTENT -->
+            <footer class="footer">
+              <div class="footer-content">
+
+                <div class="footer-column">
+                  <a class="footer-column-head">Observations</a><br>
+                  <a href="/obs.shtml">All Stations (Map)</a><br>
+                  <a href="/os.shtml">Observation Search</a><br>
+                  <a href="/histsearch.php">Historical Observation Search</a><br>
+                  <a href="/ship_obs.php">Ship Obs Report</a><br>
+                  <a href="/buoycams.shtml">BuoyCAMs</a><br>
+                  <a href="/faq/rss_access.shtml">RSS Feeds <img src="/images/feed-icon-14x14.png" alt="Image indicating link to RSS feed access page" width="14" height="14"></a><br>
+                  <a href="/widgets/">Web Widget</a><br>
+                </div>
+
+                <div class="footer-column">
+                  <a class="footer-column-head">Information</a><br>
+                  <a href="https://tao.ndbc.noaa.gov/proj_overview/proj_overview_ndbc.shtml">TAO Program Info</a><br>
+                  <a href="/dart/dart.shtml">DART&reg; Program Info</a><br>
+                  <a href="https://ioos.noaa.gov/">IOOS&reg; Program Info</a><br>
+                  <a href="https://vos.noaa.gov/">Voluntary Observing Ship</a><br>
+                  <a href="/docs/ndbc_web_data_guide.pdf">Web Data Guide</a><br>
+                  <a href="/ops.shtml">Station Maintenance Schedule</a><br>
+                  <a href="/wstat.shtml">Station Status</a><br>
+                  <a href="/publications/">Publications</a>
+                </div>
+
+                <div>
+                <div class="footer-column">
+                  <a class="footer-column-head">Education</a><br>
+                  <a href="/education/">Education</a><br>
+                </div>
+
+                <div class="footer-column">
+                  <a class="footer-column-head">News</a><br>
+                  <a href="/news/">News @ NDBC</a><br>
+                  <a href="/ndbcexit.php?url=https://www.facebook.com/NWSNDBC&blurb=NDBC%20on%20Facebook"><img src="/images/f_logo.png" alt="Follow the National Data Buoy Center on Facebook" width="16" height="16"> &nbsp; NDBC on Facebook</a><br>
+                  <a href="/ndbcexit.php?url=https://www.twitter.com/databuoycenter&blurb=NDBC%20on%20Twitter"><img src="/images/twitter.png" alt="Follow the National Data Buoy Center on Twitter" width="16" height="16"> &nbsp; NDBC on Twitter</a><br>
+                  <a href="/ndbcexit.php?url=https://www.linkedin.com/company/noaa&blurb=NOAA%20on%20LinkedIn"><img src="/images/linkedin_logo.png" alt="Follow the National Data Buoy Center on LinkedIn" width="19" height="16"> &nbsp; NOAA on LinkedIn</a>
+                </div>
+                </div>
+
+                <div>
+                <div class="footer-column">
+                  <a class="footer-column-head">Other NDBC Websites</a><br>
+                  <a href="/mobile/">Low Bandwidth Website</a><br>
+                  <a href="https://dods.ndbc.noaa.gov/">NDBC Data via NetCDF (THREDDS)</a><br>
+                  <a href="https://hfradar.ndbc.noaa.gov/">Surface Currents via High Frequency Radar</a><br>
+                  <a href="https://dods.ndbc.noaa.gov/oceansites/">OceanSITES</a><br>
+                  <a href="https://viz.pmel.noaa.gov/osmc/">OSMC</a><br>
+                </div>
+
+                <div class="footer-column">
+                  <a class="footer-column-head">About Us</a><br>
+                  <a href="/faq/ndbc.shtml">About Us</a><br>
+                  <a href="/visitorinfo.shtml">Visitor Information</a><br>
+                  <a href="/contact_us.shtml">Contact Us</a>
+                </div>
+                </div>
+
+              </div>
+
+    <!-- legal footer area -->
+              <div class="footer-legal-content">
+                <div class="footer-legal-gov">
+                  <a href="https://www.usa.gov/"><img src="/images/usa_gov.png" alt="usa.gov" width="110" height="30"></a>
+                </div> 
+                <div class="footer-legal-column">
+                  <p> 
+                      <a href="https://www.commerce.gov/">US Dept of Commerce</a><br>
+                      <a href="https://www.noaa.gov/">National Oceanic and Atmospheric Administration</a><br>
+                      <a href="https://www.weather.gov/">National Weather Service</a><br>
+                      National Data Buoy Center<br>
+                      Building 3205<br>
+                      Stennis Space Center, MS, 39529<br>
+                      <a href="mailto:webmaster.ndbc@noaa.gov">webmaster.ndbc@noaa.gov</a>
+                  </p>
+                </div>
+
+          <div class="footer-legal-column2">
+                <p>
+                  <a href="https://www.weather.gov/disclaimer">Disclaimer</a><br>
+                  <a href="https://www.cio.noaa.gov/services_programs/info_quality.html">Information Quality</a><br>
+                  <a href="https://www.weather.gov/help">Help</a><br>
+                  <a href="https://www.weather.gov/glossary">Glossary</a>
+                </p>
+                </div>
+
+            <div class="footer-legal-column3">
+                <p>
+                  <a href="https://www.weather.gov/privacy">Privacy Policy</a><br>
+                  <a href="https://www.noaa.gov/information-technology/foia">Freedom of Information Act (FOIA)</a><br>
+                  <a href="https://www.weather.gov/about">About Us</a><br>
+                  <a href="https://www.weather.gov/careers">Career Opportunities</a>
+                </p>
+              </div>
+      
+            </div><!-- end of footer-legal-content div  -->
+
+        </footer><!-- End of center div -->
+    </div> <!-- End of web page div -->
+
+
+    </body>
+    </html>
   status: 200
