@@ -754,8 +754,12 @@ class NdbcApi(metaclass=Singleton):
         self,
         accumulated_data: Dict[str, List[Union[pd.DataFrame, dict,
                                                xarray.Dataset]]],
-    ) -> Union[pd.DataFrame, dict]:
-        """Accumulate the data from multiple stations and modes."""
+    ) -> Union[pd.DataFrame, dict, xarray.Dataset]:
+        """
+        Accumulate the data from multiple stations and modes, coalescing
+        overlapping data.
+        """
+        # Prune any modalities that returned no data
         for k in list(accumulated_data.keys()):
             if not accumulated_data[k]:
                 del accumulated_data[k]
@@ -763,32 +767,58 @@ class NdbcApi(metaclass=Singleton):
         if not accumulated_data:
             return {}
 
-        return_as_df = isinstance(
-            accumulated_data[list(accumulated_data.keys())[-1]][0],
-            pd.DataFrame)
-        use_opendap = isinstance(
-            accumulated_data[list(accumulated_data.keys())[-1]][0],
-            xarray.Dataset)
+        # Determine return type from the first available data item
+        first_key = list(accumulated_data.keys())[0]
+        first_item = accumulated_data[first_key][0]
 
-        data: Union[List[pd.DataFrame], List[xarray.Dataset],
-                    dict] = [] if return_as_df or use_opendap else {}
+        return_as_df = isinstance(first_item, pd.DataFrame)
+        use_opendap = isinstance(first_item, xarray.Dataset)
 
-        for mode, station_data in accumulated_data.items():
-            if return_as_df:
-                data.extend(station_data)
-            elif use_opendap:
-                data.extend(station_data)
-            else:
-                data[mode] = station_data
+        # Flatten all data into a single list if df or xarray
+        if return_as_df or use_opendap:
+            data_list = []
+            for mode, station_data in accumulated_data.items():
+                data_list.extend(station_data)
+            
+            if not data_list:
+                return pd.DataFrame() if return_as_df else xarray.Dataset()
+        
+        else:
+            # For dict response, return data grouped by modality.
+            # Coalescence does not apply to this structure.
+            return accumulated_data
 
         if return_as_df:
-            df = pd.concat(data, axis=0)
+            df = pd.concat(data_list, axis=0)
+            if df.empty:
+                return df
+            
             df.reset_index(inplace=True, drop=False)
-            df.set_index(['timestamp', 'station_id'], inplace=True)
+            
+            # Group by the intended index to merge rows for the same timestamp
+            index_cols = ['timestamp', 'station_id']
+            
+            present_index_cols = [col for col in index_cols if col in df.columns]
+            if not present_index_cols:
+                return df 
+
+            # Aggregate all other columns by taking the first non-null value
+            agg_cols = [col for col in df.columns if col not in present_index_cols]
+            
+            # Only aggregate if there are columns to aggregate
+            if agg_cols:
+                agg_funcs = {col: 'first' for col in agg_cols}
+                df = df.groupby(present_index_cols, as_index=False).agg(agg_funcs)
+            else:
+                df = df.drop_duplicates(subset=present_index_cols)
+
+            df.set_index(present_index_cols, inplace=True)
             return df
+
         elif use_opendap:
-            return merge_datasets(data)
-        return data
+            # xarray's merge function handles this type of coalescence.
+            return merge_datasets(data_list)
+        return {}
 
     def _handle_get_data(
         self,
