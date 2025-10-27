@@ -33,9 +33,6 @@ def test_available_measurements(stations_realtime, realtime_response,
     resp = realtime_response.get(list(realtime_response.keys())[0])
     want = parsed_stations_realtime
     got = stations_realtime.available_measurements(resp)
-    # Save got as a yaml to the file `/home/cjellen/projects/github/ndbc-api/tests/data/api/parsed/station_realtime2.yml`
-    with open('/home/cjellen/projects/github/ndbc-api/tests/data/api/parsed/station_realtime2.yml', 'w') as f:
-        yaml.safe_dump(got, f)
     assert sorted(list(want.keys())) == sorted(list(got.keys()))
     for k in want.keys():
         assert want[k] == got[k]
