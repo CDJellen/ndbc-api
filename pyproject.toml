@@ -1,13 +1,13 @@
 [tool.poetry]
 name = "ndbc-api"
-version = "0.25.10.26.1"
+version = "0.25.10.28.1"
 description = "A Python API for the National Data Buoy Center."
 authors = ["cdjellen <cdjellen@gmail.com>"]
 license = "MIT"
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = ">=3.9,<3.13"
+python = ">=3.9,<3.14"
 requests = ">=2.10.0"
 pandas = ">=2.0.0"
 numpy  = ">=1.26.3"
@@ -18,7 +18,7 @@ xarray = ">=2022.6.0"
 h5netcdf = "^1.6.1"
 
 [tool.poetry.group.dev.dependencies]
-coveralls = ">=4.0.1"
+coveralls = { version = ">=4.0.1", python = "<3.13" }
 httpretty = ">=0.9.1"
 pytest = ">=7.1.2"
 pytest-cov = ">=3.0.0"
