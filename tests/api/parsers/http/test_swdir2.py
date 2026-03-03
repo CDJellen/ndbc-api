@@ -18,7 +18,7 @@ def swdir2_response():
 
 @pytest.fixture
 def parsed_swdir2():
-    df = pd.read_parquet(PARSED_FP)
+    df = pd.read_parquet(PARSED_FP).where(lambda x: x.notna())
     yield df
 
 

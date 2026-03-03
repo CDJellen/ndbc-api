@@ -84,6 +84,9 @@ def read_parsed_df():
     for f in PARSED_DF_FP:
         name = path.basename(str(f)).split('.')[0].split('_')[-1]
         data = pd.read_parquet(f)
+        # Normalize null representation: parquet stores None for
+        # object-dtype NA, while read_csv produces np.nan.
+        data = data.where(data.notna())
         parsed[name] = data
 
     yield parsed

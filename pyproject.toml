@@ -1,31 +1,45 @@
 [tool.poetry]
 name = "ndbc-api"
-version = "0.25.10.28.1"
+version = "0.26.03.02.1"
 description = "A Python API for the National Data Buoy Center."
 authors = ["cdjellen <cdjellen@gmail.com>"]
 license = "MIT"
 readme = "README.md"
+homepage = "https://github.com/cdjellen/ndbc-api"
+repository = "https://github.com/cdjellen/ndbc-api"
+keywords = ["ndbc", "python3", "api", "oceanography", "buoy", "atmospheric"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Build Tools",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+]
+packages = [{include = "ndbc_api"}]
 
 [tool.poetry.dependencies]
-python = ">=3.9,<3.14"
+python = ">=3.9,<3.15"
 requests = ">=2.10.0"
-pandas = ">=2.0.0"
-numpy  = ">=1.26.3"
+pandas = ">=2.0.0,<3"
+numpy = ">=1.26.3,<3"
 scipy = ">=1.7.3"
-beautifulsoup4 = "~4"
-html5lib = "^1.1"
+beautifulsoup4 = ">=4.0.0,<5"
+html5lib = ">=1.1"
 xarray = ">=2022.6.0"
-h5netcdf = "^1.6.1"
+h5netcdf = ">=1.6.1"
 
 [tool.poetry.group.dev.dependencies]
-coveralls = { version = ">=4.0.1", python = "<3.13" }
+coveralls = {version = ">=4.0.1", python = "<3.13"}
 httpretty = ">=0.9.1"
 pytest = ">=7.1.2"
 pytest-cov = ">=3.0.0"
 pyyaml = ">=6.0"
-pyarrow = "~16"
+pyarrow = ">=16.0.0"
 yapf = ">=0.30"
-setuptools = ">=61.0"
 
 [build-system]
 requires = ["poetry-core"]

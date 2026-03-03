@@ -27,7 +27,7 @@ Attributes:
 """
 import logging
 import pickle
-import warnings
+
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta
 from typing import Any, List, Sequence, Tuple, Union, Dict, Optional
@@ -76,7 +76,6 @@ class NdbcApi(metaclass=Singleton):
     """
 
     logger = logging.getLogger(LOGGER_NAME)
-    warnings.simplefilter(action='ignore', category=FutureWarning)
 
     def __init__(
         self,
@@ -632,7 +631,10 @@ class NdbcApi(metaclass=Singleton):
                                 f"Failed to process request for station_id "
                                 f"{station_id} with error: {e}"))
         self.log(logging.INFO, message="Finished processing request.")
-        return self._handle_accumulate_data(accumulated_data)
+        return self._handle_accumulate_data(
+            accumulated_data,
+            as_xarray_dataset=as_xarray_dataset,
+        )
 
     def get_modes(self,
                   use_opendap: bool = False,
@@ -670,6 +672,12 @@ class NdbcApi(metaclass=Singleton):
         Returns:
             None: The dataset is written to disk
         """
+        if not isinstance(dataset, xarray.Dataset):
+            raise ValueError(
+                f'Expected an xarray.Dataset, got {type(dataset).__name__}. '
+                'This can happen when get_data() returns an empty result. '
+                'Check the logs for errors.'
+            )
         dataset.to_netcdf(output_filepath, **kwargs)
 
     """ PRIVATE """
@@ -754,6 +762,7 @@ class NdbcApi(metaclass=Singleton):
         self,
         accumulated_data: Dict[str, List[Union[pd.DataFrame, dict,
                                                xarray.Dataset]]],
+        as_xarray_dataset: bool = False,
     ) -> Union[pd.DataFrame, dict, xarray.Dataset]:
         """
         Accumulate the data from multiple stations and modes, coalescing
@@ -765,6 +774,8 @@ class NdbcApi(metaclass=Singleton):
                 del accumulated_data[k]
 
         if not accumulated_data:
+            if as_xarray_dataset:
+                return xarray.Dataset()
             return {}
 
         # Determine return type from the first available data item
@@ -813,11 +824,15 @@ class NdbcApi(metaclass=Singleton):
                 df = df.drop_duplicates(subset=present_index_cols)
 
             df.set_index(present_index_cols, inplace=True)
-            return df
+            # Normalize null representation: concat/groupby may
+            # introduce None for object-dtype columns.
+            return df.where(df.notna())
 
         elif use_opendap:
             # xarray's merge function handles this type of coalescence.
             return merge_datasets(data_list)
+        if as_xarray_dataset:
+            return xarray.Dataset()
         return {}
 
     def _handle_get_data(

@@ -1,7 +1,8 @@
 requests>=2.10.0
-pandas>2.0.0
-beautifulsoup4
+pandas>=2.0.0,<3
+numpy>=1.26.3,<3
+scipy>=1.7.3
+beautifulsoup4>=4.0.0,<5
 html5lib>=1.1
-xarray
-h5netcdf
-scipy
+xarray>=2022.6.0
+h5netcdf>=1.6.1

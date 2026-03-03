@@ -20,7 +20,7 @@ from ndbc_api.api.requests.opendap.stdmet import StdmetRequest
 from ndbc_api.api.requests.opendap.swden import SwdenRequest
 from ndbc_api.api.requests.opendap.wlevel import WlevelRequest
 from ndbc_api.api.requests.opendap.hfradar import HfradarRequest
-from ndbc_api.exceptions import RequestException, ResponseException
+from ndbc_api.exceptions import ParserException, RequestException, ResponseException
 
 
 class OpenDapDataHandler(BaseHandler):
@@ -45,8 +45,11 @@ class OpenDapDataHandler(BaseHandler):
             resps = handler.handle_requests(station_id=station_id, reqs=reqs)
         except Exception as e:
             raise ResponseException('Failed to execute requests.') from e
-        return AdcpParser.nc_from_responses(responses=resps,
-                                            use_timestamp=use_timestamp)
+        try:
+            return AdcpParser.nc_from_responses(responses=resps,
+                                                use_timestamp=use_timestamp)
+        except ParserException as e:
+            raise ResponseException('Failed to parse response.') from e
 
     @classmethod
     def cwind(
@@ -68,8 +71,11 @@ class OpenDapDataHandler(BaseHandler):
             resps = handler.handle_requests(station_id=station_id, reqs=reqs)
         except Exception as e:
             raise ResponseException('Failed to execute requests.') from e
-        return CwindParser.nc_from_responses(responses=resps,
-                                             use_timestamp=use_timestamp)
+        try:
+            return CwindParser.nc_from_responses(responses=resps,
+                                                 use_timestamp=use_timestamp)
+        except ParserException as e:
+            raise ResponseException('Failed to parse response.') from e
 
     @classmethod
     def ocean(
@@ -91,8 +97,11 @@ class OpenDapDataHandler(BaseHandler):
             resps = handler.handle_requests(station_id=station_id, reqs=reqs)
         except Exception as e:
             raise ResponseException('Failed to execute requests.') from e
-        return OceanParser.nc_from_responses(responses=resps,
-                                             use_timestamp=use_timestamp)
+        try:
+            return OceanParser.nc_from_responses(responses=resps,
+                                                 use_timestamp=use_timestamp)
+        except ParserException as e:
+            raise ResponseException('Failed to parse response.') from e
 
     @classmethod
     def pwind(
@@ -114,8 +123,11 @@ class OpenDapDataHandler(BaseHandler):
             resps = handler.handle_requests(station_id=station_id, reqs=reqs)
         except Exception as e:
             raise ResponseException('Failed to execute requests.') from e
-        return PwindParser.nc_from_responses(responses=resps,
-                                             use_timestamp=use_timestamp)
+        try:
+            return PwindParser.nc_from_responses(responses=resps,
+                                                 use_timestamp=use_timestamp)
+        except ParserException as e:
+            raise ResponseException('Failed to parse response.') from e
 
     @classmethod
     def stdmet(
@@ -137,8 +149,11 @@ class OpenDapDataHandler(BaseHandler):
             resps = handler.handle_requests(station_id=station_id, reqs=reqs)
         except Exception as e:
             raise ResponseException('Failed to execute requests.') from e
-        return StdmetParser.nc_from_responses(responses=resps,
-                                              use_timestamp=use_timestamp)
+        try:
+            return StdmetParser.nc_from_responses(responses=resps,
+                                                  use_timestamp=use_timestamp)
+        except ParserException as e:
+            raise ResponseException('Failed to parse response.') from e
 
     @classmethod
     def swden(
@@ -160,8 +175,11 @@ class OpenDapDataHandler(BaseHandler):
             resps = handler.handle_requests(station_id=station_id, reqs=reqs)
         except Exception as e:
             raise ResponseException('Failed to execute requests.') from e
-        return SwdenParser.nc_from_responses(responses=resps,
-                                             use_timestamp=use_timestamp)
+        try:
+            return SwdenParser.nc_from_responses(responses=resps,
+                                                 use_timestamp=use_timestamp)
+        except ParserException as e:
+            raise ResponseException('Failed to parse response.') from e
 
     @classmethod
     def wlevel(
@@ -183,8 +201,11 @@ class OpenDapDataHandler(BaseHandler):
             resps = handler.handle_requests(station_id=station_id, reqs=reqs)
         except Exception as e:
             raise ResponseException('Failed to execute requests.') from e
-        return WlevelParser.nc_from_responses(responses=resps,
-                                              use_timestamp=use_timestamp)
+        try:
+            return WlevelParser.nc_from_responses(responses=resps,
+                                                  use_timestamp=use_timestamp)
+        except ParserException as e:
+            raise ResponseException('Failed to parse response.') from e
 
     @classmethod
     def hfradar(
@@ -206,5 +227,8 @@ class OpenDapDataHandler(BaseHandler):
             resps = handler.handle_requests(station_id=station_id, reqs=reqs)
         except Exception as e:
             raise ResponseException('Failed to execute requests.') from e
-        return HfradarParser.nc_from_responses(responses=resps,
-                                                use_timestamp=use_timestamp)
+        try:
+            return HfradarParser.nc_from_responses(responses=resps,
+                                                    use_timestamp=use_timestamp)
+        except ParserException as e:
+            raise ResponseException('Failed to parse response.') from e

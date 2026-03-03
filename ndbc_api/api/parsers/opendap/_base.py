@@ -3,7 +3,6 @@ import tempfile
 from typing import List, Optional
 
 import xarray
-import xarray
 
 from ndbc_api.exceptions import ParserException
 from ndbc_api.utilities.opendap.dataset import concat_datasets

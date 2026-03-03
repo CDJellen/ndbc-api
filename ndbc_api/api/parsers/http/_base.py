@@ -32,7 +32,9 @@ class BaseParser:
                 df = df.set_index('timestamp').sort_index()
             except KeyError as e:
                 raise ParserException from e
-        return df
+        # Normalize null representation: concat may introduce
+        # None when aligning DataFrames with different columns.
+        return df.where(df.notna())
 
     @classmethod
     def _read_response(cls, response: dict,
@@ -50,29 +52,32 @@ class BaseParser:
             data = cls._clean_data(data)
 
         try:
-            parse_dates = False
-            date_format = None
-            if use_timestamp:
-                parse_dates = [cls.PARSE_DATES]
-                date_format = cls.DATE_PARSER
             df = pd.read_csv(
                 StringIO('\n'.join(data)),
                 names=names,
-                delim_whitespace=True,
+                sep=r'\s+',
                 na_values=cls.NAN_VALUES,
                 index_col=cls.INDEX_COL,
-                parse_dates=parse_dates,
-                date_format=date_format,
             )
             if use_timestamp:
-                df.index.name = 'timestamp'
+                # Reset index so date columns are accessible as
+                # regular columns (INDEX_COL=0 absorbs column 0).
+                df = df.reset_index()
+                date_col_names = [names[i] for i in cls.PARSE_DATES]
+                date_strings = (
+                    df[date_col_names].astype(str).agg(' '.join, axis=1))
+                df['timestamp'] = pd.to_datetime(
+                    date_strings, format=cls.DATE_PARSER)
+                df = df.drop(columns=date_col_names)
+                df = df.set_index('timestamp')
 
         except (NotImplementedError, TypeError, ValueError) as e:
             print(e)
             return pd.DataFrame()
 
-        # check whether to parse dates
-        return df
+        # Normalize null representation: read_csv may produce
+        # None for object-dtype columns; standardize to NaN.
+        return df.where(df.notna())
 
     @staticmethod
     def _parse_body(body: str) -> Tuple[List[str], List[str]]:
