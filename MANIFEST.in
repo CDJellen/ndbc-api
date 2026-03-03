@@ -1,6 +1,0 @@
-exclude conftest.py
-prune tests/
-setup.cfg
-setup.py
-ndbc_api\__init__.py
-ndbc_api\ndbc_api.py

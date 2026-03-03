@@ -14,7 +14,7 @@ class HistoricalParser(StationParser):
     def available_measurements(cls, response: dict) -> dict:
         if response.get('status') == 200:
             soup = bs4.BeautifulSoup(response.get('body'), 'html.parser')
-            p_tag = soup.find('p', text=cls.LIST_IDENTIFIER)
+            p_tag = soup.find('p', string=cls.LIST_IDENTIFIER)
             line_items = p_tag.find_next_siblings('ul')[0].find_all('li')
             return cls._build_available_measurements(line_items=line_items)
         else:

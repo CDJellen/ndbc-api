@@ -1,7 +1,7 @@
-coveralls
-httpretty
-pytest
-pytest-cov
-pyyaml
-pyarrow
-yapf
+coveralls>=4.0.1
+httpretty>=0.9.1
+pytest>=7.1.2
+pytest-cov>=3.0.0
+pyyaml>=6.0
+pyarrow>=16.0.0
+yapf>=0.30

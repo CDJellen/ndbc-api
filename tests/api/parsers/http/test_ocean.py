@@ -18,7 +18,7 @@ def ocean_response():
 
 @pytest.fixture
 def parsed_ocean():
-    df = pd.read_parquet(PARSED_FP)
+    df = pd.read_parquet(PARSED_FP).where(lambda x: x.notna())
     yield df
 
 

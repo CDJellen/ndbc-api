@@ -37,7 +37,7 @@ class ActiveStationsParser(XMLParser):
                         float(station.get('lon')),
                     'Elevation':
                         float(station.get('elev'))
-                        if station.get('elev') else pd.NA,
+                        if station.get('elev') else float('nan'),
                     'Name':
                         station.get('name'),
                     'Owner':

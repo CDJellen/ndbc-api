@@ -44,7 +44,7 @@ class HistoricalStationsParser(XMLParser):
                             float(history.get('lng')),
                         'Elevation':
                             float(history.get('elev'))
-                            if history.get('elev') else pd.NA,
+                            if history.get('elev') else float('nan'),
                         'Name':
                             station_name,
                         'Owner':
@@ -59,7 +59,7 @@ class HistoricalStationsParser(XMLParser):
                             history.get('hull'),
                         'Anemometer Height':
                             float(history.get('anemom_height'))
-                            if history.get('anemom_height') else pd.NA,
+                            if history.get('anemom_height') else float('nan'),
                         'Start Date':
                             history.get('start'),
                         'End Date':

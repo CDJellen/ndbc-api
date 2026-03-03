@@ -18,7 +18,7 @@ def swr1_response():
 
 @pytest.fixture
 def parsed_swr1():
-    df = pd.read_parquet(PARSED_FP)
+    df = pd.read_parquet(PARSED_FP).where(lambda x: x.notna())
     yield df
 
 

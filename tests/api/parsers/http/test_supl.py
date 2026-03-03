@@ -18,7 +18,7 @@ def supl_response():
 
 @pytest.fixture
 def parsed_supl():
-    df = pd.read_parquet(PARSED_FP)
+    df = pd.read_parquet(PARSED_FP).where(lambda x: x.notna())
     yield df
 
 
