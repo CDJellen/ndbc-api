@@ -1,13 +1,13 @@
 [tool.poetry]
 name = "ndbc-api"
-version = "0.26.03.02.1"
+version = "0.26.03.08.1"
 description = "A Python API for the National Data Buoy Center."
 authors = ["cdjellen <cdjellen@gmail.com>"]
 license = "MIT"
 readme = "README.md"
 homepage = "https://github.com/cdjellen/ndbc-api"
 repository = "https://github.com/cdjellen/ndbc-api"
-keywords = ["ndbc", "python3", "api", "oceanography", "buoy", "atmospheric"]
+keywords = ["ndbc", "python3", "api", "oceanography", "buoy", "atmospheric", "async", "aiohttp"]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
@@ -31,12 +31,18 @@ beautifulsoup4 = ">=4.0.0,<5"
 html5lib = ">=1.1"
 xarray = ">=2022.6.0"
 h5netcdf = ">=1.6.1"
+aiohttp = {version = ">=3.9.0", optional = true}
+
+[tool.poetry.extras]
+async = ["aiohttp"]
 
 [tool.poetry.group.dev.dependencies]
 coveralls = {version = ">=4.0.1", python = "<3.13"}
 httpretty = ">=0.9.1"
 pytest = ">=7.1.2"
 pytest-cov = ">=3.0.0"
+pytest-asyncio = ">=0.23.0,<1"
+aioresponses = ">=0.7.6"
 pyyaml = ">=6.0"
 pyarrow = ">=16.0.0"
 yapf = ">=0.30"
@@ -44,3 +50,14 @@ yapf = ">=0.30"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.coverage.run]
+source = ["ndbc_api"]
+omit = ["tests/*"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "if __name__",
+    "raise NotImplementedError",
+]

@@ -33,7 +33,32 @@ jobs:
           poetry install
       - name: Run tests
         run: |
-          poetry run python -m pytest
+          poetry run python -m pytest --ignore=tests/test_async_ndbc_api.py --ignore=tests/utilities/test_async_req_handler.py
+  Async-Tests:
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        python-version: ["3.9", "3.10", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - name: Install Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Setup dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install poetry
+          poetry config virtualenvs.create false
+          poetry install --extras async
+      - name: Run async tests
+        run: |
+          poetry run python -m pytest tests/test_async_ndbc_api.py tests/test_data_helpers.py tests/utilities/test_async_req_handler.py
   Coverage:
     timeout-minutes: 30
     runs-on: ubuntu-latest
@@ -55,7 +80,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install poetry
           poetry config virtualenvs.create false
-          poetry install
+          poetry install --extras async
       - name: Generate coverage report
         run: |
           poetry run coverage run --source ndbc_api -m pytest --run-slow --run-private tests/
