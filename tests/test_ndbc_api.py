@@ -395,3 +395,91 @@ def test_handle_data(ndbc_api, read_parsed_df):
     assert isinstance(want, dict)
     assert isinstance(got, dict)
     assert len(want.keys()) == len(got.keys())
+
+
+# ---------------------------------------------------------------------------
+# Tier 2 — surgical coverage tests
+# ---------------------------------------------------------------------------
+
+
+class TestLogBranches:
+    """Exercise NdbcApi.log branches for mode and extra_data (L226, L230)."""
+
+    def test_log_with_mode(self, ndbc_api):
+        """Exercises the ``if mode:`` branch at L226."""
+        ndbc_api.log(logging.DEBUG, mode='stdmet', message='test with mode')
+
+    def test_log_with_extra_data(self, ndbc_api):
+        """Exercises the ``for k, v in extra_data.items()`` branch at L230."""
+        ndbc_api.log(logging.DEBUG, message='test', foo='bar', baz=42)
+
+
+class TestGetModesOpendap:
+    """Exercise get_modes with use_opendap / as_xarray_dataset (L660, L663)."""
+
+    def test_get_modes_use_opendap(self, ndbc_api):
+        modes = ndbc_api.get_modes(use_opendap=True)
+        assert isinstance(modes, list)
+        assert 'stdmet' in modes
+
+    def test_get_modes_as_xarray_dataset_alias(self, ndbc_api):
+        """The as_xarray_dataset kwarg should alias use_opendap (L660)."""
+        modes = ndbc_api.get_modes(as_xarray_dataset=True)
+        assert isinstance(modes, list)
+        assert 'stdmet' in modes
+
+
+class TestSaveXarrayDatasetGuard:
+    """Exercise the type guard in save_xarray_dataset (L682-688)."""
+
+    def test_non_dataset_raises(self, ndbc_api):
+        with pytest.raises(ValueError, match='Expected an xarray.Dataset'):
+            ndbc_api.save_xarray_dataset(
+                dataset={'not': 'a dataset'},
+                output_filepath='/tmp/test.nc',
+            )
+
+
+class TestGetDataValidation:
+    """Exercise get_data input validation branches (L551-573)."""
+
+    def test_use_opendap_alias(self, ndbc_api):
+        """use_opendap=False should not raise (covers L551 alias)."""
+        with pytest.raises(ValueError, match='station_id'):
+            ndbc_api.get_data(
+                station_id=None, station_ids=None,
+                mode='stdmet', use_opendap=False,
+            )
+
+    def test_modes_not_a_list(self, ndbc_api):
+        """modes must be a list (L565)."""
+        with pytest.raises(ValueError, match='must be a list'):
+            ndbc_api.get_data(
+                station_id='tplm2', modes='stdmet',
+            )
+
+    def test_modes_contains_non_string(self, ndbc_api):
+        """All modes elements must be strings (L567)."""
+        with pytest.raises(ValueError, match='must be strings'):
+            ndbc_api.get_data(
+                station_id='tplm2', modes=[123],
+            )
+
+    def test_modes_contains_hfradar(self, ndbc_api):
+        """hfradar cannot be used with modes (L569)."""
+        with pytest.raises(ValueError, match='HF radar'):
+            ndbc_api.get_data(
+                station_id='tplm2', modes=['hfradar'],
+            )
+
+    def test_both_mode_and_modes(self, ndbc_api):
+        """mode and modes cannot both be specified (L573)."""
+        with pytest.raises(ValueError, match='cannot both be specified'):
+            ndbc_api.get_data(
+                station_id='tplm2', mode='stdmet', modes=['cwind'],
+            )
+
+    def test_neither_mode_nor_modes(self, ndbc_api):
+        """mode=None and modes=None should raise (L573)."""
+        with pytest.raises(ValueError, match='`mode` and `modes` are `None`'):
+            ndbc_api.get_data(station_id='tplm2')

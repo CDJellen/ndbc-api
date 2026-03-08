@@ -38,6 +38,12 @@ The `ndbc-api` can be installed via PIP:
 pip install ndbc-api
 ```
 
+To use the async API, install the optional `async` extra:
+
+```sh
+pip install ndbc-api[async]
+```
+
 Conda users can install the `ndbc-api` via the `conda-forge` channel:
 
 ```sh
@@ -47,19 +53,27 @@ conda install -c conda-forge ndbc-api
 Finally, to install the `ndbc-api` from source, clone the repository and run the following command:
 
 ```sh
-python setup.py install
+pip install .
 ```
 
 #### Requirements
-The `ndbc-api` has been tested on Python 3.6, 3.7, 3.8, 3.9, and 3.10. Python 2 support is not currently planned, but could be implemented based on the needs of the atmospheric research community.
+The `ndbc-api` has been tested on Python 3.9, 3.10, 3.12, and 3.13.
 
 The API uses synchronous HTTP requests to compile data matching the user-supplied parameters. The `ndbc-api` package depends on:
 * requests>=2.10.0
-* pandas
-* bs4
+* pandas>=2.0.0
+* numpy>=1.26.3
+* beautifulsoup4
 * html5lib>=1.1
 * xarray
 * scipy
+* h5netcdf
+
+##### Async
+The async API additionally requires:
+* aiohttp>=3.9.0
+
+Install it with `pip install ndbc-api[async]`.
 
 ##### Development
 If you would like to contribute to the growth and maintenance of the `ndbc-api`, please feel free to open a PR with tests covering your changes. The tests leverage `pytest` and depend on the above requirements, as well as:
@@ -67,6 +81,8 @@ If you would like to contribute to the growth and maintenance of the `ndbc-api`,
 * httpretty
 * pytest
 * pytest-cov
+* pytest-asyncio
+* aioresponses
 * pyyaml
 * pyarrow
 
@@ -259,6 +275,62 @@ stdmet_df = api.get_data(
     start_time='2022-01-01',
     end_time='2023-01-01',
 )
+```
+
+#### Async API
+
+The `ndbc-api` also provides an async API, `AsyncNdbcApi`, for use in `asyncio` applications. All public methods mirror those of the synchronous `NdbcApi`, but are defined as `async def` and use `aiohttp` for non-blocking I/O.
+
+Install the async extra if you haven't already:
+
+```sh
+pip install ndbc-api[async]
+```
+
+The `AsyncNdbcApi` is used as an async context manager:
+
+```python3
+import asyncio
+from ndbc_api import AsyncNdbcApi
+
+async def main():
+    async with AsyncNdbcApi() as api:
+        # get all stations
+        stations_df = await api.stations()
+
+        # find the nearest station
+        nearest = await api.nearest_station(lat='38.88N', lon='76.43W')
+
+        # get standard meteorological data
+        stdmet_df = await api.get_data(
+            station_id='tplm2',
+            mode='stdmet',
+            start_time='2020-01-01',
+            end_time='2022-01-01',
+        )
+
+        # concurrent multi-station query
+        multi_df = await api.get_data(
+            station_ids=['tplm2', 'apam2'],
+            mode='stdmet',
+            start_time='2022-01-01',
+            end_time='2023-01-01',
+        )
+
+asyncio.run(main())
+```
+
+The async API supports the same `use_opendap` / `as_xarray_dataset` options as the synchronous API for accessing data via the THREDDS/OpenDAP service:
+
+```python3
+async with AsyncNdbcApi() as api:
+    ds = await api.get_data(
+        station_id='tplm2',
+        mode='stdmet',
+        start_time='2020-01-01',
+        end_time='2022-01-01',
+        use_opendap=True,
+    )
 ```
 
 #### More Information

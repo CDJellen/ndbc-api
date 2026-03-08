@@ -92,7 +92,7 @@ def read_parsed_df():
     yield parsed
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def mock_socket():
     httpretty.enable(verbose=True, allow_net_connect=False)
     yield True
