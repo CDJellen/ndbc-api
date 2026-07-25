@@ -1,7 +1,6 @@
 import xarray
 
 import pytest
-import yaml
 
 from ndbc_api.api.parsers.opendap.wlevel import WlevelParser
 from tests.api.parsers.opendap._base import PARSED_TESTS_DIR, RESPONSES_TESTS_DIR

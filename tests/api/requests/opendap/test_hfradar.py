@@ -3,8 +3,7 @@ import pytest
 import yaml
 
 from ndbc_api.api.requests.opendap.hfradar import HfradarRequest
-from tests.api.requests.opendap._base import (HISTORICAL_END, HISTORICAL_START,
-                                              REALTIME_END, REALTIME_START,
+from tests.api.requests.opendap._base import (HISTORICAL_START,
                                               REQUESTS_TESTS_DIR)
 
 TEST_FP = REQUESTS_TESTS_DIR.joinpath('hfradar.yml')

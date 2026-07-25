@@ -6,10 +6,22 @@ no I/O — so that they can be imported without pulling either API class
 into scope.
 """
 from datetime import datetime
-from typing import Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
-import pandas as pd
-import xarray
+try:
+    import pandas as pd
+except ImportError:
+    pd = None
+
+try:
+    import polars as pl
+except ImportError:
+    pl = None
+
+try:
+    import xarray
+except ImportError:
+    xarray = None
 
 from ..exceptions import (
     HandlerException,
@@ -39,29 +51,47 @@ def handle_timestamp(timestamp: Union[datetime, str]) -> datetime:
 
 
 def enforce_timerange(
-    df: pd.DataFrame,
+    df: Union[List[dict], Any],
     start_time: datetime,
     end_time: datetime,
-) -> pd.DataFrame:
+) -> Union[List[dict], Any]:
     """Down-select *df* to rows within [*start_time*, *end_time*].
 
     Raises:
         TimestampException: If the index slice fails.
     """
-    try:
-        df = df.loc[(df.index.values >= pd.Timestamp(start_time)) &
-                    (df.index.values <= pd.Timestamp(end_time))]
-    except ValueError as e:
-        raise TimestampException(
-            'Failed to enforce `start_time` to `end_time` range.') from e
+    if isinstance(df, list):
+        filtered = []
+        for row in df:
+            ts = row.get('timestamp')
+            if ts is not None:
+                if start_time <= ts <= end_time:
+                    filtered.append(row)
+        return filtered
+
+    if pd is not None and isinstance(df, pd.DataFrame):
+        try:
+            df = df.loc[(df.index.values >= pd.Timestamp(start_time)) &
+                        (df.index.values <= pd.Timestamp(end_time))]
+        except ValueError as e:
+            raise TimestampException(
+                'Failed to enforce `start_time` to `end_time` range.') from e
+        return df
+
+    if pl is not None and isinstance(df, pl.DataFrame):
+        if 'timestamp' in df.columns:
+            return df.filter((pl.col('timestamp') >= start_time) & (pl.col('timestamp') <= end_time))
+        return df
+
     return df
 
 
 def handle_data(
-    data: pd.DataFrame,
+    data: Any,
     as_df: bool = True,
+    as_pl: bool = False,
     cols: Optional[List[str]] = None,
-) -> Union[pd.DataFrame, dict]:
+) -> Any:
     """Apply optional column selection and return-format conversion.
 
     Raises:
@@ -70,35 +100,94 @@ def handle_data(
     """
     if cols:
         try:
-            data = data[[*cols]]
+            if isinstance(data, list):
+                if data and cols:
+                    first_row = data[0]
+                    for col in cols:
+                        if col not in first_row:
+                            raise KeyError(f"Column '{col}' not found in data.")
+                new_data = []
+                preserve_cols = set(cols) | {'timestamp', 'station_id'}
+                for row in data:
+                    new_row = {k: v for k, v in row.items() if k in preserve_cols}
+                    new_data.append(new_row)
+                data = new_data
+            elif isinstance(data, dict):
+                new_data = {}
+                for k, v in data.items():
+                    if isinstance(v, dict):
+                        new_data[k] = {col: val for col, val in v.items() if col in cols}
+                    elif k in cols:
+                        new_data[k] = v
+                data = new_data
+            elif pd is not None and isinstance(data, pd.DataFrame):
+                data = data[[*cols]]
+            elif pl is not None and isinstance(data, pl.DataFrame):
+                data = data.select([col for col in cols if col in data.columns])
         except (KeyError, ValueError) as e:
             raise ParserException(
                 'Failed to parse column selection.') from e
-    if as_df and isinstance(data, pd.DataFrame):
-        return data
-    elif isinstance(data, pd.DataFrame) and not as_df:
-        return data.to_dict()
-    elif as_df:
-        try:
-            return pd.DataFrame().from_dict(data, orient='index')
-        except (NotImplementedError, ValueError, TypeError) as e:
-            raise HandlerException(
-                'Failed to convert `pd.DataFrame` to `dict`.') from e
-    else:
-        return data
+
+    if as_pl:
+        if pl is None:
+            raise ImportError("Polars is not installed. Please install it using `pip install polars`.")
+        if isinstance(data, list):
+            return pl.DataFrame(data, infer_schema_length=None)
+        elif isinstance(data, dict):
+            rows = []
+            for k, v in data.items():
+                if isinstance(v, dict):
+                    row = {'index': k}
+                    row.update(v)
+                    rows.append(row)
+                else:
+                    rows.append({'index': k, 'value': v})
+            return pl.DataFrame(rows, infer_schema_length=None)
+        elif pd is not None and isinstance(data, pd.DataFrame):
+            return pl.from_pandas(data)
+        elif isinstance(data, pl.DataFrame):
+            return data
+        else:
+            try:
+                return pl.DataFrame(data, infer_schema_length=None)
+            except Exception as e:
+                raise HandlerException('Failed to convert data to pl.DataFrame.') from e
+
+    if as_df:
+        if pd is None:
+            raise ImportError("Pandas is not installed. Please install it using `pip install pandas`.")
+        if isinstance(data, list):
+            return pd.DataFrame(data)
+        elif isinstance(data, dict):
+            try:
+                return pd.DataFrame().from_dict(data, orient='index')
+            except (NotImplementedError, ValueError, TypeError) as e:
+                raise HandlerException(
+                    'Failed to convert `pd.DataFrame` to `dict`.') from e
+        elif isinstance(data, pd.DataFrame):
+            return data
+        else:
+            try:
+                return pd.DataFrame(data)
+            except Exception as e:
+                raise HandlerException('Failed to convert data to pd.DataFrame.') from e
+
+    if not as_df and not as_pl:
+        if pd is not None and isinstance(data, pd.DataFrame):
+            return data.to_dict()
+        elif pl is not None and isinstance(data, pl.DataFrame):
+            return data.to_dict(as_series=False)
+
+    return data
 
 
 def handle_accumulate_data(
-    accumulated_data: Dict[str, List[Union[pd.DataFrame, dict,
-                                           xarray.Dataset]]],
+    accumulated_data: Dict[str, List[Any]],
+    as_df: bool = True,
+    as_pl: bool = False,
     as_xarray_dataset: bool = False,
-) -> Union[pd.DataFrame, dict, xarray.Dataset]:
-    """Coalesce data from multiple stations and modes.
-
-    Accepts the ``accumulated_data`` dict keyed by mode name, where
-    each value is a list of per-station results (DataFrames, dicts, or
-    xarray Datasets).  Returns a single merged result.
-    """
+) -> Any:
+    """Coalesce data from multiple stations and modes."""
     # Prune any modalities that returned no data
     for k in list(accumulated_data.keys()):
         if not accumulated_data[k]:
@@ -106,6 +195,8 @@ def handle_accumulate_data(
 
     if not accumulated_data:
         if as_xarray_dataset:
+            if xarray is None:
+                raise ImportError("xarray is required for OpenDAP support. If you uninstalled it to create a lightweight environment, you must reinstall it to use this feature.")
             return xarray.Dataset()
         return {}
 
@@ -113,60 +204,77 @@ def handle_accumulate_data(
     first_key = list(accumulated_data.keys())[0]
     first_item = accumulated_data[first_key][0]
 
-    return_as_df = isinstance(first_item, pd.DataFrame)
-    use_opendap = isinstance(first_item, xarray.Dataset)
+    use_opendap = (xarray is not None and isinstance(first_item, xarray.Dataset)) or as_xarray_dataset
 
-    # Flatten all data into a single list if df or xarray
-    if return_as_df or use_opendap:
+    if use_opendap:
         data_list = []
         for mode, station_data in accumulated_data.items():
             data_list.extend(station_data)
+        return merge_datasets(data_list)
 
-        if not data_list:
-            return pd.DataFrame() if return_as_df else xarray.Dataset()
-
-    else:
-        # For dict response, return data grouped by modality.
-        # Coalescence does not apply to this structure.
+    if isinstance(first_item, dict):
         return accumulated_data
 
-    if return_as_df:
-        df = pd.concat(data_list, axis=0)
+    # Funnel all data through the List[dict] IR
+    raw_list = []
+    for mode, station_data in accumulated_data.items():
+        for item in station_data:
+            if pd is not None and isinstance(item, pd.DataFrame):
+                raw_list.extend(item.reset_index().to_dict(orient='records'))
+            elif pl is not None and isinstance(item, pl.DataFrame):
+                raw_list.extend(item.to_dicts())
+            elif isinstance(item, list):
+                raw_list.extend(item)
+            elif isinstance(item, dict):
+                raw_list.append(item)
+
+    if not raw_list:
+        if as_pl:
+            return pl.DataFrame()
+        if as_df:
+            return pd.DataFrame()
+        return {}
+
+    index_cols = ['timestamp', 'station_id']
+    has_index = any(col in row for row in raw_list for col in index_cols)
+
+    if not has_index:
+        merged_list = raw_list
+    else:
+        grouped = {}
+        for row in raw_list:
+            ts = row.get('timestamp')
+            st_id = row.get('station_id')
+            key = (ts, st_id)
+            if key not in grouped:
+                grouped[key] = row.copy()
+            else:
+                existing = grouped[key]
+                for k, v in row.items():
+                    if existing.get(k) is None:
+                        existing[k] = v
+        merged_list = list(grouped.values())
+
+    if as_pl:
+        if pl is None:
+            raise ImportError("Polars is not installed.")
+        df = pl.DataFrame(merged_list, infer_schema_length=None)
+        if 'timestamp' in df.columns:
+            df = df.sort('timestamp')
+        return df
+
+    if as_df:
+        if pd is None:
+            raise ImportError("Pandas is not installed.")
+        df = pd.DataFrame(merged_list)
         if df.empty:
             return df
-
-        df.reset_index(inplace=True, drop=False)
-
-        # Group by the intended index to merge rows for the same timestamp
-        index_cols = ['timestamp', 'station_id']
-
         present_index_cols = [
             col for col in index_cols if col in df.columns
         ]
-        if not present_index_cols:
-            return df
-
-        # Aggregate all other columns by taking the first non-null value
-        agg_cols = [
-            col for col in df.columns if col not in present_index_cols
-        ]
-
-        # Only aggregate if there are columns to aggregate
-        if agg_cols:
-            agg_funcs = {col: 'first' for col in agg_cols}
-            df = df.groupby(present_index_cols,
-                            as_index=False).agg(agg_funcs)
-        else:
-            df = df.drop_duplicates(subset=present_index_cols)
-
-        df.set_index(present_index_cols, inplace=True)
-        # Normalize null representation: concat/groupby may
-        # introduce None for object-dtype columns.
+        if present_index_cols:
+            df.set_index(present_index_cols, inplace=True)
+            df.sort_index(inplace=True)
         return df.where(df.notna())
 
-    elif use_opendap:
-        # xarray's merge function handles this type of coalescence.
-        return merge_datasets(data_list)
-    if as_xarray_dataset:  # pragma: no cover
-        return xarray.Dataset()
-    return {}  # pragma: no cover
+    return accumulated_data

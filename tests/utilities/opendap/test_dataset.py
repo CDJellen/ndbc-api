@@ -1,12 +1,8 @@
-from datetime import datetime
 
 import pytest
 import xarray
 
-from ndbc_api.utilities.opendap.dataset import (concat_datasets,
-                                                merge_datasets,
-                                                filter_dataset_by_variable,
-                                                filter_dataset_by_time_range)
+from ndbc_api.utilities.opendap.dataset import (merge_datasets)
 from tests.api.parsers.opendap._base import PARSED_TESTS_DIR
 
 STDMET_TEST_FP = PARSED_TESTS_DIR.joinpath('stdmet.nc')

@@ -1,9 +1,14 @@
+from datetime import datetime
 from io import StringIO
 from typing import List, Tuple
 
-import pandas as pd
-
 from ndbc_api.exceptions import ParserException
+
+
+try:
+    import pandas as pd
+except ImportError:
+    pd = None
 
 
 class BaseParser:
@@ -16,68 +21,82 @@ class BaseParser:
     REVERT_COL_NAMES = []
 
     @classmethod
-    def df_from_responses(cls,
-                          responses: List[dict],
-                          use_timestamp: bool = True) -> pd.DataFrame:
+    def parse_responses(cls,
+                        responses: List[dict],
+                        use_timestamp: bool = True) -> List[dict]:
         components = []
         for response in responses:
             if response.get('status') == 200:
-                components.append(
-                    cls._read_response(response, use_timestamp=use_timestamp))
-        df = pd.concat(components)
+                components.extend(
+                    cls._read_response_fallback(response, use_timestamp=use_timestamp))
         if use_timestamp:
-            try:
-                df = df.reset_index().drop_duplicates(subset='timestamp',
-                                                      keep='first')
-                df = df.set_index('timestamp').sort_index()
-            except KeyError as e:
-                raise ParserException from e
-        # Normalize null representation: concat may introduce
-        # None when aligning DataFrames with different columns.
-        return df.where(df.notna())
+            # drop duplicates by timestamp, keeping first
+            seen = set()
+            unique_components = []
+            for row in components:
+                ts = row.get('timestamp')
+                if ts not in seen:
+                    seen.add(ts)
+                    unique_components.append(row)
+            # sort by timestamp
+            unique_components.sort(key=lambda x: x.get('timestamp') or datetime.min)
+            components = unique_components
+        return components
+
 
     @classmethod
-    def _read_response(cls, response: dict,
-                       use_timestamp: bool) -> pd.DataFrame:
+    def _read_response_fallback(cls, response: dict,
+                                use_timestamp: bool) -> List[dict]:
         body = response.get('body')
         header, data = cls._parse_body(body)
         names = cls._parse_header(header)
-        if not data:
-            return pd.DataFrame()
+        if not data or not names:
+            return []
         # check that parsed names match parsed values or revert
         if len([v.strip() for v in data[0].strip('\n').split(' ') if v
                ]) != len(names):
             names = cls.REVERT_COL_NAMES
         if '(' in data[0]:
             data = cls._clean_data(data)
+        if not data:
+            return []
 
-        try:
-            df = pd.read_csv(
-                StringIO('\n'.join(data)),
-                names=names,
-                sep=r'\s+',
-                na_values=cls.NAN_VALUES,
-                index_col=cls.INDEX_COL,
-            )
+        rows = []
+        for line in data:
+            parts = [v.strip() for v in line.strip('\n').split(' ') if v]
+            if not parts:
+                continue
+            row = {}
+            for name, val in zip(names, parts):
+                # Check string representation first
+                if cls.NAN_VALUES and val in cls.NAN_VALUES:
+                    row[name] = None
+                    continue
+                
+                # Convert to numeric if possible
+                try:
+                    parsed_val = float(val) if '.' in val else int(val)
+                except ValueError:
+                    parsed_val = val
+                
+                # Check numeric representation
+                if cls.NAN_VALUES and parsed_val in cls.NAN_VALUES:
+                    row[name] = None
+                else:
+                    row[name] = parsed_val
+
             if use_timestamp:
-                # Reset index so date columns are accessible as
-                # regular columns (INDEX_COL=0 absorbs column 0).
-                df = df.reset_index()
-                date_col_names = [names[i] for i in cls.PARSE_DATES]
-                date_strings = (
-                    df[date_col_names].astype(str).agg(' '.join, axis=1))
-                df['timestamp'] = pd.to_datetime(
-                    date_strings, format=cls.DATE_PARSER)
-                df = df.drop(columns=date_col_names)
-                df = df.set_index('timestamp')
-
-        except (NotImplementedError, TypeError, ValueError) as e:
-            print(e)
-            return pd.DataFrame()
-
-        # Normalize null representation: read_csv may produce
-        # None for object-dtype columns; standardize to NaN.
-        return df.where(df.notna())
+                date_col_names = [names[i] for i in cls.PARSE_DATES if i < len(names)]
+                date_parts = [str(row.get(col, '')) for col in date_col_names]
+                date_str = ' '.join(date_parts)
+                try:
+                    row['timestamp'] = datetime.strptime(date_str, cls.DATE_PARSER)
+                except ValueError:
+                    row['timestamp'] = None
+                for col in date_col_names:
+                    row.pop(col, None)
+            rows.append(row)
+        return rows
 
     @staticmethod
     def _parse_body(body: str) -> Tuple[List[str], List[str]]:

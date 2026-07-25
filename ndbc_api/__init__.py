@@ -15,7 +15,7 @@ from ndbc_api.ndbc_api import NdbcApi
 __all__ = ["NdbcApi"]
 
 try:
-    from ndbc_api.async_ndbc_api import AsyncNdbcApi
+    from ndbc_api.async_ndbc_api import AsyncNdbcApi as AsyncNdbcApi
 
     __all__.append("AsyncNdbcApi")
 except ImportError:  # aiohttp not installed
