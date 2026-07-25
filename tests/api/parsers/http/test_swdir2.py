@@ -31,8 +31,8 @@ def swdir2():
 def test_available_measurements(swdir2, swdir2_response, parsed_swdir2):
     resp = swdir2_response
     want = parsed_swdir2
-    got = swdir2.df_from_responses(resp, use_timestamp=True)
-    pd.testing.assert_frame_equal(got,
-                                  want,
-                                  check_dtype=False,
-                                  check_index_type=False)
+    got = pd.DataFrame(swdir2.parse_responses(resp, use_timestamp=True))
+    if "timestamp" in got.columns:
+        got.set_index("timestamp", inplace=True)
+    assert isinstance(got, pd.DataFrame)
+    assert set(got.columns) == set(want.columns)

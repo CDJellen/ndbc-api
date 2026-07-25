@@ -30,17 +30,27 @@ import pickle
 
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta
-from typing import Any, List, Sequence, Tuple, Union, Dict, Optional
+from typing import Any, List, Sequence, Tuple, Union, Dict, Optional, TYPE_CHECKING
 
-import xarray
-import pandas as pd
+try:
+    import pandas as pd
+except ImportError:
+    pd = None
+try:
+    import polars as pl
+except ImportError:
+    pl = None
+try:
+    import xarray
+except ImportError:
+    xarray = None
 
 from .api.handlers.http.data import DataHandler
 from .api.handlers.http.stations import StationsHandler
 from .config import (DEFAULT_CACHE_LIMIT, HTTP_BACKOFF_FACTOR, HTTP_DEBUG,
                      HTTP_DELAY, HTTP_RETRY, LOGGER_NAME, VERIFY_HTTPS)
 from .exceptions import (HandlerException, ParserException, RequestException,
-                         ResponseException, TimestampException)
+                         ResponseException)
 from .utilities.req_handler import RequestHandler
 from .utilities.singleton import Singleton
 from .utilities.log_formatter import LogFormatter
@@ -52,7 +62,11 @@ from .utilities.data_helpers import (
     handle_accumulate_data as _handle_accumulate_data_impl,
 )
 from .api.handlers.opendap.data import OpenDapDataHandler
-from .utilities.opendap.dataset import concat_datasets, merge_datasets, filter_dataset_by_variable, filter_dataset_by_time_range
+from .utilities.opendap.dataset import filter_dataset_by_variable, filter_dataset_by_time_range
+from .api.requests.http.active_stations import ActiveStationsRequest
+from .api.requests.http.historical_stations import HistoricalStationsRequest
+from .api.parsers.http.active_stations import ActiveStationsParser
+from .api.parsers.http.historical_stations import HistoricalStationsParser
 
 
 class NdbcApi(metaclass=Singleton):
@@ -230,36 +244,39 @@ class NdbcApi(metaclass=Singleton):
             log_data[k] = v
         self.logger.log(level, log_data)
 
-    def stations(self, as_df: bool = True) -> Union[pd.DataFrame, dict]:
+
+    def stations(self, as_df: bool = True, as_pl: bool = False) -> Any:
         """Get all stations and station metadata from the NDBC.
 
         Query the NDBC data service for the current available data buoys
         (stations), both those maintained by the NDBC and those whose
-        measurements are managed by the NDBC. Stations are returned by default
-        as rows of a `pandas.DataFrame`, alongside their realtime data coverage
-        for some common measurements, their latitude and longitude, and current
-        station status notes maintained by the NDBC.
+        measurements are managed by the NDBC.
 
         Args:
             as_df: Flag indicating whether to return current station data as a
                 `pandas.DataFrame` if set to `True` or as a `dict` if `False`.
+            as_pl: Flag indicating whether to return current station data as a
+                `polars.DataFrame` if set to `True`.
 
         Returns:
             The current station data from the NDBC data service, either as a
-            `pandas.DataFrame` or as a `dict` depending on the value of `as_df`.
+            `pandas.DataFrame`, `polars.DataFrame`, or as a `dict`.
 
         Raises:
             ResponseException: An error occurred while retrieving and parsing
                 responses from the NDBC data service.
         """
         try:
-            data = self._stations_api.stations(handler=self._handler)
-            return self._handle_data(data, as_df, cols=None)
+            req = ActiveStationsRequest.build_request()
+            resp = self._handler.handle_request('stn_active', req)
+            data = ActiveStationsParser.parse_response(resp, use_timestamp=False)
+            return self._handle_data(data, as_df=as_df, as_pl=as_pl, cols=None)
         except (ResponseException, ValueError, KeyError) as e:
             raise ResponseException('Failed to handle returned data.') from e
 
     def historical_stations(self,
-                            as_df: bool = True) -> Union[pd.DataFrame, dict]:
+                            as_df: bool = True,
+                            as_pl: bool = False) -> Any:
         """Get historical stations and station metadata from the NDBC.
 
         Query the NDBC data service for the historical data buoys
@@ -271,19 +288,23 @@ class NdbcApi(metaclass=Singleton):
         Args:
             as_df: Flag indicating whether to return current station data as a
                 `pandas.DataFrame` if set to `True` or as a `dict` if `False`.
+            as_pl: Flag indicating whether to return current station data as a
+                `polars.DataFrame` if set to `True`.
 
         Returns:
             The current station data from the NDBC data service, either as a
-            `pandas.DataFrame` or as a `dict` depending on the value of `as_df`.
+            `pandas.DataFrame`, `polars.DataFrame`, or as a `dict`.
 
         Raises:
             ResponseException: An error occurred while retrieving and parsing
                 responses from the NDBC data service.
         """
-        try:  # pragma: no cover — requires live NDBC station index
-            data = self._stations_api.historical_stations(handler=self._handler)
-            return self._handle_data(data, as_df, cols=None)
-        except (ResponseException, ValueError, KeyError) as e:  # pragma: no cover
+        try:
+            req = HistoricalStationsRequest.build_request()
+            resp = self._handler.handle_request('stn_historical', req)
+            data = HistoricalStationsParser.parse_response(resp, use_timestamp=False)
+            return self._handle_data(data, as_df=as_df, as_pl=as_pl, cols=None)
+        except (ResponseException, ValueError, KeyError) as e:
             raise ResponseException('Failed to handle returned data.') from e
 
     def nearest_station(
@@ -313,9 +334,16 @@ class NdbcApi(metaclass=Singleton):
         """
         if not (lat and lon):
             raise ValueError('lat and lon must be specified.')
-        nearest_station = self._stations_api.nearest_station(
-            handler=self._handler, lat=lat, lon=lon)
-        return nearest_station
+        df = self.stations(as_df=False, as_pl=False)
+        if isinstance(lat, str):
+            lat = StationsHandler.LAT_MAP(lat)
+        if isinstance(lon, str):
+            lon = StationsHandler.LON_MAP(lon)
+        try:
+            closest = StationsHandler._nearest(df, lat, lon)
+        except (TypeError, KeyError, ValueError) as e:
+            raise ParserException from e
+        return closest.get('Station', 'UNK')
 
     def radial_search(
         self,
@@ -323,7 +351,9 @@ class NdbcApi(metaclass=Singleton):
         lon: Union[str, float, None] = None,
         radius: float = -1,
         units: str = 'km',
-    ) -> pd.DataFrame:
+        as_df: bool = True,
+        as_pl: bool = False,
+    ) -> Any:
         """Get all stations within radius units of the specified lat/lon.
 
         Use the NDBC data service's current station data to determine the
@@ -338,9 +368,13 @@ class NdbcApi(metaclass=Singleton):
             radius (float): The radius in the specified units to search for stations
                 within.
             units (str: 'nm', 'km', or 'mi'): The units of the radius, either 'nm', 'km', or 'mi'.
+            as_df: Flag indicating whether to return current station data as a
+                `pandas.DataFrame` if set to `True` or as a `dict` if `False`.
+            as_pl: Flag indicating whether to return current station data as a
+                `polars.DataFrame` if set to `True`.
 
         Returns:
-            A `pandas.DataFrame` of the stations within the specified radius of
+            A `pandas.DataFrame`, `polars.DataFrame`, or dict of the stations within the specified radius of
             the given lat/lon pair.
 
         Raises:
@@ -350,13 +384,33 @@ class NdbcApi(metaclass=Singleton):
         """
         if not (lat and lon):
             raise ValueError('lat and lon must be specified.')
-        stations_in_radius = self._stations_api.radial_search(
-            handler=self._handler, lat=lat, lon=lon, radius=radius, units=units)
-        return stations_in_radius
+        if units not in StationsHandler.UNITS:
+            raise ValueError(
+                f'Invalid unit: {units}, must be one of {StationsHandler.UNITS}.'
+            )
+        if radius < 0:
+            raise ValueError(
+                f'Invalid radius: {radius}, must be non-negative.')
+        if units == 'nm':
+            radius = radius * 1.852
+        elif units == 'mi':
+            radius = radius * 1.60934
+
+        df = self.stations(as_df=False, as_pl=False)
+        if isinstance(lat, str):
+            lat = StationsHandler.LAT_MAP(lat)
+        if isinstance(lon, str):
+            lon = StationsHandler.LON_MAP(lon)
+        try:
+            stations_in_radius = StationsHandler._radial_search(df, lat, lon, radius)
+            return self._handle_data(stations_in_radius, as_df=as_df, as_pl=as_pl, cols=None)
+        except (TypeError, KeyError, ValueError) as e:
+            raise ParserException from e
 
     def station(self,
                 station_id: Union[str, int],
-                as_df: bool = False) -> Union[pd.DataFrame, dict]:
+                as_df: bool = False,
+                as_pl: bool = False) -> Any:
         """Get metadata for the given station from the NDBC.
 
         The NDBC maintains some station-level metadata including status notes,
@@ -369,10 +423,12 @@ class NdbcApi(metaclass=Singleton):
                 station of interest.
             as_df: Whether to return station-level data as a `pandas.DataFrame`,
                 defaults to `False`, and a `dict` is returned.
+            as_pl: Whether to return station-level data as a `polars.DataFrame`,
+                defaults to `False`.
 
         Returns:
-            The station metadata for the given station, either as a `dict` or as
-            a `pandas.DataFrame` if the `as_df` flag is set to `True`.
+            The station metadata for the given station, either as a `dict`,
+            `pandas.DataFrame`, or `polars.DataFrame`.
 
         Raises:
             ResponseException: An error occurred when requesting and parsing
@@ -382,7 +438,7 @@ class NdbcApi(metaclass=Singleton):
         try:
             data = self._stations_api.metadata(handler=self._handler,
                                                station_id=station_id)
-            return self._handle_data(data, as_df, cols=None)
+            return self._handle_data(data, as_df=as_df, as_pl=as_pl, cols=None)
         except (ResponseException, ValueError, KeyError) as e:
             raise ResponseException('Failed to handle returned data.') from e
 
@@ -391,7 +447,8 @@ class NdbcApi(metaclass=Singleton):
         station_id: Union[str, int],
         full_response: bool = False,
         as_df: Optional[bool] = None,
-    ) -> Union[List[str], pd.DataFrame, dict]:
+        as_pl: bool = False,
+    ) -> Any:
         """Get the available realtime modalities for a station.
 
         While most data buoy (station) measurements are available over
@@ -409,11 +466,13 @@ class NdbcApi(metaclass=Singleton):
                 included in the returned `dict` or `pandas.DataFrame`.
             as_df: Whether to return station-level data as a `pandas.DataFrame`,
                 defaults to `False`, and a `dict` is returned.
+            as_pl: Whether to return station-level data as a `polars.DataFrame`,
+                defaults to `False`.
 
         Returns:
             The available realtime measurements for the specified station,
-            alongside their NDBC data links, either as a `dict` or as a
-            `pandas.DataFrame` if the `as_df` flag is set to `True`.
+            alongside their NDBC data links, either as a `dict`, `pandas.DataFrame`,
+            or `polars.DataFrame`.
 
         Raises:
             ResponseException: An error occurred when requesting and parsing
@@ -425,15 +484,17 @@ class NdbcApi(metaclass=Singleton):
                 handler=self._handler, station_id=station_id)
             full_data = {}
             if full_response:
-                if as_df is None:
+                if as_df is None and not as_pl:
                     as_df = False
                 full_data = self._handle_data(station_realtime,
-                                              as_df,
+                                              as_df=as_df,
+                                              as_pl=as_pl,
                                               cols=None)
                 return full_data
             else:
                 full_data = self._handle_data(station_realtime,
                                               as_df=False,
+                                              as_pl=False,
                                               cols=None)
 
             # Parse the modes from the full response
@@ -449,7 +510,8 @@ class NdbcApi(metaclass=Singleton):
 
     def available_historical(self,
                              station_id: Union[str, int],
-                             as_df: bool = False) -> Union[pd.DataFrame, dict]:
+                             as_df: bool = False,
+                             as_pl: bool = False) -> Any:
         """Get the available historical measurements for a station.
 
         This method queries the NDBC station webpage for historical, quality
@@ -460,11 +522,13 @@ class NdbcApi(metaclass=Singleton):
                 station of interest.
             as_df: Whether to return station-level data as a `pandas.DataFrame`,
                 defaults to `False`, and a `dict` is returned.
+            as_pl: Whether to return station-level data as a `polars.DataFrame`,
+                defaults to `False`.
 
         Returns:
             The available historical measurements for the specified station,
-            alongside their NDBC data links, either as a `dict` or as a
-            `pandas.DataFrame` if the `as_df` flag is set to `True`.
+            alongside their NDBC data links, either as a `dict`, `pandas.DataFrame`,
+            or `polars.DataFrame`.
 
         Raises:
             ResponseException: An error occurred when requesting and parsing
@@ -474,7 +538,7 @@ class NdbcApi(metaclass=Singleton):
         try:
             data = self._stations_api.historical(handler=self._handler,
                                                  station_id=station_id)
-            return self._handle_data(data, as_df, cols=None)
+            return self._handle_data(data, as_df=as_df, as_pl=as_pl, cols=None)
         except (ResponseException, ValueError, KeyError) as e:  # pragma: no cover
             raise ResponseException('Failed to handle returned data.') from e
 
@@ -486,12 +550,13 @@ class NdbcApi(metaclass=Singleton):
         end_time: Union[str, datetime] = datetime.now(),
         use_timestamp: bool = True,
         as_df: bool = True,
+        as_pl: bool = False,
         cols: List[str] = None,
         station_ids: Union[Sequence[Union[int, str]], None] = None,
         modes: Union[List[str], None] = None,
         as_xarray_dataset: bool = False,
         use_opendap: Optional[bool] = None,
-    ) -> Union[pd.DataFrame, xarray.Dataset, dict]:
+    ) -> Any:
         """Execute data query against the specified NDBC station(s).
 
         Query the NDBC data service for station-level measurements, using the
@@ -525,6 +590,8 @@ class NdbcApi(metaclass=Singleton):
             as_df: Whether to return station-level data as a `pandas.DataFrame`,
                 defaults to `True`, if `False` a `dict` is returned unless
                 `as_xarray_dataset` is set to `True`.
+            as_pl: Whether to return station-level data as a `polars.DataFrame`,
+                defaults to `False`.
             as_xarray_dataset: Whether to return tbe data as an `xarray.Dataset`,
                 defaults to `False`.
             cols: A list of columns of interest which are selected from the 
@@ -534,8 +601,8 @@ class NdbcApi(metaclass=Singleton):
 
         Returns:
             The available station(s) measurements for the specified modes, time
-            range, and columns, either as a `dict` or as a `pandas.DataFrame`
-            if the `as_df` flag is set to `True`.
+            range, and columns, either as a `dict`, `pandas.DataFrame`, or
+            `polars.DataFrame`.
 
         Raises:
             ValueError: Both `station_id` and `station_ids` are `None`, or both
@@ -550,6 +617,8 @@ class NdbcApi(metaclass=Singleton):
         if use_opendap is not None:
             as_xarray_dataset = use_opendap
 
+        if as_pl:
+            as_df = False
         as_df = as_df and not as_xarray_dataset
 
         self.log(logging.DEBUG,
@@ -559,7 +628,7 @@ class NdbcApi(metaclass=Singleton):
             raise ValueError('Both `station_id` and `station_ids` are `None`.')
         if station_id is not None and station_ids is not None:
             raise ValueError('`station_id` and `station_ids` cannot both be '
-                            'specified.')
+                             'specified.')
         if modes is not None:
             if not isinstance(modes, list):
                 raise ValueError('`modes` must be a list of strings.')
@@ -597,7 +666,7 @@ class NdbcApi(metaclass=Singleton):
 
         # accumulated_data records the handled response and parsed station_id
         # as a tuple, with the data as the first value and the id as the second.
-        accumulated_data: Dict[str, Dict[str, Union[pd.DataFrame, dict]]] = {}
+        accumulated_data: Dict[str, List[Any]] = {}
         for mode in handle_modes:
             accumulated_data[mode] = []
 
@@ -613,6 +682,7 @@ class NdbcApi(metaclass=Singleton):
                         end_time=end_time,
                         use_timestamp=use_timestamp,
                         as_df=as_df,
+                        as_pl=as_pl,
                         cols=cols,
                         use_opendap=as_xarray_dataset,
                     )
@@ -626,8 +696,10 @@ class NdbcApi(metaclass=Singleton):
                             message=
                             f"Successfully processed request for station_id {station_id}"
                         )
-                        if as_df:
-                            station_data['station_id'] = station_id
+                        if not as_xarray_dataset:
+                            # station_data is a list of dicts
+                            for row in station_data:
+                                row['station_id'] = station_id
                         accumulated_data[mode].append(station_data)
                     except (RequestException, ResponseException,
                             HandlerException) as e:  # pragma: no cover
@@ -640,6 +712,8 @@ class NdbcApi(metaclass=Singleton):
         self.log(logging.INFO, message="Finished processing request.")
         return self._handle_accumulate_data(
             accumulated_data,
+            as_df=as_df,
+            as_pl=as_pl,
             as_xarray_dataset=as_xarray_dataset,
         )
 
@@ -666,7 +740,7 @@ class NdbcApi(metaclass=Singleton):
         return [v for v in vars(self._data_api) if not v.startswith('_')]
 
     @staticmethod
-    def save_xarray_dataset(dataset: xarray.Dataset, output_filepath: str,
+    def save_xarray_dataset(dataset: 'xarray.Dataset', output_filepath: str,
                             **kwargs) -> None:
         """
         Saves an `xarray.Dataset` to netCDF a user-specified file path.
@@ -679,6 +753,11 @@ class NdbcApi(metaclass=Singleton):
         Returns:
             None: The dataset is written to disk
         """
+        if xarray is None:
+            raise ImportError(
+                "xarray is required for OpenDAP support. If you uninstalled it "
+                "to create a lightweight environment, you must reinstall it to use this feature."
+            )
         if not isinstance(dataset, xarray.Dataset):
             raise ValueError(
                 f'Expected an xarray.Dataset, got {type(dataset).__name__}. '
@@ -722,29 +801,36 @@ class NdbcApi(metaclass=Singleton):
         return _handle_timestamp_impl(timestamp)
 
     @staticmethod
-    def _enforce_timerange(df: pd.DataFrame, start_time: datetime,
-                           end_time: datetime) -> pd.DataFrame:
+    def _enforce_timerange(df: Any, start_time: datetime,
+                           end_time: datetime) -> Any:
         """Down-select to the data within the specified `datetime` range."""
         return _enforce_timerange_impl(df, start_time, end_time)
 
     @staticmethod
-    def _handle_data(data: pd.DataFrame,
+    def _handle_data(data: Any,
                      as_df: bool = True,
-                     cols: List[str] = None) -> Union[pd.DataFrame, dict]:
+                     as_pl: bool = False,
+                     cols: List[str] = None) -> Any:
         """Apply column down selection and return format handling."""
-        return _handle_data_impl(data, as_df, cols)
+        return _handle_data_impl(data, as_df, as_pl, cols)
 
     def _handle_accumulate_data(
         self,
-        accumulated_data: Dict[str, List[Union[pd.DataFrame, dict,
-                                               xarray.Dataset]]],
+        accumulated_data: Dict[str, List[Any]],
+        as_df: bool = True,
+        as_pl: bool = False,
         as_xarray_dataset: bool = False,
-    ) -> Union[pd.DataFrame, dict, xarray.Dataset]:
+    ) -> Any:
         """
         Accumulate the data from multiple stations and modes, coalescing
         overlapping data.
         """
-        return _handle_accumulate_data_impl(accumulated_data, as_xarray_dataset)
+        return _handle_accumulate_data_impl(
+            accumulated_data,
+            as_df=as_df,
+            as_pl=as_pl,
+            as_xarray_dataset=as_xarray_dataset,
+        )
 
     def _handle_get_data(
         self,
@@ -754,9 +840,10 @@ class NdbcApi(metaclass=Singleton):
         end_time: datetime,
         use_timestamp: bool,
         as_df: bool = True,
+        as_pl: bool = False,
         cols: List[str] = None,
         use_opendap: bool = False,
-    ) -> Tuple[Union[pd.DataFrame, xarray.Dataset, dict], str]:
+    ) -> Tuple[Any, str]:
         start_time = self._handle_timestamp(start_time)
         end_time = self._handle_timestamp(end_time)
         station_id = self._parse_station_id(station_id)
@@ -792,7 +879,8 @@ class NdbcApi(metaclass=Singleton):
                 else:
                     handled_data = data
             else:
-                handled_data = self._handle_data(data, as_df, cols)
+                # Keep it as raw list of dicts during accumulation to make merging easy!
+                handled_data = self._handle_data(data, as_df=False, as_pl=False, cols=cols)
         except (ValueError, KeyError, AttributeError) as e:  # pragma: no cover
             raise ParserException(
                 f'Failed to handle returned data.\nRaised from {e}') from e

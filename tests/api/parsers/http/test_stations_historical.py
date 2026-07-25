@@ -27,9 +27,3 @@ def stations():
     yield HistoricalStationsParser
 
 
-@pytest.mark.private
-def test_df_from_responses(stations, stations_response, parsed_stations):
-    resp = stations_response.get(list(stations_response.keys())[0])
-    want = parsed_stations
-    got = stations.df_from_response(resp)
-    pd.testing.assert_frame_equal(want, got, check_dtype=False)

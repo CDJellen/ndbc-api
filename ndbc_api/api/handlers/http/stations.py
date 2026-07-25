@@ -1,7 +1,5 @@
 from math import asin, cos, pi, sqrt
-from typing import Any, Union
-
-import pandas as pd
+from typing import Any, Union, List
 
 from ndbc_api.api.handlers._base import BaseHandler
 from ndbc_api.api.parsers.http.station_historical import HistoricalParser
@@ -28,7 +26,7 @@ class StationsHandler(BaseHandler):
     UNITS = ('nm', 'km', 'mi')
 
     @classmethod
-    def stations(cls, handler: Any) -> pd.DataFrame:
+    def stations(cls, handler: Any) -> List[dict]:
         """Get all active stations from NDBC."""
         req = ActiveStationsRequest.build_request()
         try:
@@ -36,10 +34,10 @@ class StationsHandler(BaseHandler):
         except (AttributeError, ValueError, TypeError) as e:
             raise ResponseException(
                 'Failed to execute `station` request.') from e
-        return ActiveStationsParser.df_from_response(resp, use_timestamp=False)
+        return ActiveStationsParser.parse_response(resp, use_timestamp=False)
 
     @classmethod
-    def historical_stations(cls, handler: Any) -> pd.DataFrame:
+    def historical_stations(cls, handler: Any) -> List[dict]:
         """Get historical stations from NDBC."""
         req = HistoricalStationsRequest.build_request()
         try:
@@ -47,8 +45,7 @@ class StationsHandler(BaseHandler):
         except (AttributeError, ValueError, TypeError) as e:
             raise ResponseException(
                 'Failed to execute `station` request.') from e
-        return HistoricalStationsParser.df_from_response(resp,
-                                                         use_timestamp=False)
+        return HistoricalStationsParser.parse_response(resp, use_timestamp=False)
 
     @classmethod
     def nearest_station(
@@ -67,8 +64,7 @@ class StationsHandler(BaseHandler):
             closest = cls._nearest(df, lat, lon)
         except (TypeError, KeyError, ValueError) as e:
             raise ParserException from e
-        closest = closest.to_dict().get('Station', {'UNK': 'UNK'})
-        return list(closest.values())[0]
+        return closest.get('Station', 'UNK')
 
     @classmethod
     def radial_search(
@@ -78,7 +74,7 @@ class StationsHandler(BaseHandler):
         lon: Union[str, float],
         radius: float,
         units: str = 'km',
-    ) -> pd.DataFrame:
+    ) -> List[dict]:
         """Get stations within <radius> of the specified lat/lon."""
         if units not in cls.UNITS:
             raise ValueError(
@@ -103,7 +99,7 @@ class StationsHandler(BaseHandler):
         return sations_in_radius
 
     @classmethod
-    def metadata(cls, handler: Any, station_id: str) -> pd.DataFrame:
+    def metadata(cls, handler: Any, station_id: str) -> dict:
         """Get station description."""
         req = MetadataRequest.build_request(station_id=station_id)
         try:
@@ -114,7 +110,7 @@ class StationsHandler(BaseHandler):
         return MetadataParser.metadata(resp)
 
     @classmethod
-    def realtime(cls, handler: Any, station_id: str) -> pd.DataFrame:
+    def realtime(cls, handler: Any, station_id: str) -> dict:
         """Get the available realtime measurements for a station."""
         req = RealtimeRequest.build_request(station_id=station_id)
         try:
@@ -126,7 +122,7 @@ class StationsHandler(BaseHandler):
 
     @classmethod
     def historical(cls, handler: Any,
-                   station_id: str) -> Union[pd.DataFrame, dict]:
+                   station_id: str) -> dict:
         """Get the available historical measurements for a station."""
         req = HistoricalRequest.build_request(station_id=station_id)
         try:
@@ -148,39 +144,49 @@ class StationsHandler(BaseHandler):
         return StationsHandler.DIAM_OF_EARTH * asin(sqrt(haversine))
 
     @staticmethod
-    def _nearest(df: pd.DataFrame, lat_a: float, lon_a: float):
+    def _nearest(stations: Any, lat_a: float, lon_a: float) -> dict:
         """Get the nearest station from specified `float`-valued lat/lon."""
-        # Drop rows with missing latitude or longitude
-        df_filtered = df.dropna(subset=['Lat', 'Lon'])
-
-        # Calculate distances using Haversine formula
-        df_filtered['distance'] = df_filtered.apply(
-            lambda row: StationsHandler._distance(lat_a, lon_a, row['Lat'], row[
-                'Lon']),
-            axis=1)
-
-        # Find the index of the closest row
-        smallest_distance = df_filtered['distance'].min()
-
-        # Return the row corresponding to the nearest station
-        return df_filtered.loc[df_filtered['distance'] == smallest_distance]
+        if hasattr(stations, 'to_dict'):
+            stations = stations.to_dict(orient='records')
+        elif hasattr(stations, 'to_dicts'):
+            stations = stations.to_dicts()
+        closest = None
+        min_dist = float('inf')
+        for s in stations:
+            lat_val = s.get('Lat')
+            lon_val = s.get('Lon')
+            if lat_val is None or lon_val is None or (isinstance(lat_val, float) and lat_val != lat_val):
+                continue
+            try:
+                dist = StationsHandler._distance(lat_a, lon_a, float(lat_val), float(lon_val))
+                if dist < min_dist:
+                    min_dist = dist
+                    closest = s
+            except (ValueError, TypeError):
+                continue
+        return closest or {}
 
     @staticmethod
-    def _radial_search(df: pd.DataFrame, lat_a: float, lon_a: float,
-                       radius: float):
+    def _radial_search(stations: Any, lat_a: float, lon_a: float,
+                       radius: float) -> List[dict]:
         """Get the stations within radius km from specified `float`-valued lat/lon."""
-        # Drop rows with missing latitude or longitude
-        df_filtered = df.dropna(subset=['Lat', 'Lon'])
-
-        # Calculate distances using Haversine formula
-        df_filtered['distance'] = df_filtered.apply(
-            lambda row: StationsHandler._distance(lat_a, lon_a, row['Lat'], row[
-                'Lon']),
-            axis=1)
-
-        df_filtered.sort_values(by='distance', inplace=True)
-
-        # Filter rows within the radius
-        stations_within_radius = df_filtered[df_filtered['distance'] <= radius]
-
-        return stations_within_radius
+        if hasattr(stations, 'to_dict'):
+            stations = stations.to_dict(orient='records')
+        elif hasattr(stations, 'to_dicts'):
+            stations = stations.to_dicts()
+        results = []
+        for s in stations:
+            lat_val = s.get('Lat')
+            lon_val = s.get('Lon')
+            if lat_val is None or lon_val is None or (isinstance(lat_val, float) and lat_val != lat_val):
+                continue
+            try:
+                dist = StationsHandler._distance(lat_a, lon_a, float(lat_val), float(lon_val))
+                if dist <= radius:
+                    s_copy = s.copy()
+                    s_copy['distance'] = dist
+                    results.append(s_copy)
+            except (ValueError, TypeError):
+                continue
+        results.sort(key=lambda x: x.get('distance', 0.0))
+        return results

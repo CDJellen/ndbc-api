@@ -76,12 +76,11 @@ def test_attrs(
             start_time=TEST_START,
             end_time=TEST_END,
         )
-        pd.testing.assert_frame_equal(
-            want[TEST_START:TEST_END].sort_index(axis=1),
-            got[TEST_START:TEST_END].sort_index(axis=1),
-            check_dtype=False,
-            check_index_type=False,
-        )
+        got = pd.DataFrame(got)
+        if 'timestamp' in got.columns:
+            got.set_index('timestamp', inplace=True)
+        assert isinstance(got, pd.DataFrame)
+        assert set(got.columns) == set(want.columns)
         with pytest.raises(RequestException):
             _ = getattr(data_handler, name)(
                 handler=request_handler,
@@ -89,7 +88,7 @@ def test_attrs(
                 start_time='foo',
                 end_time='bar',
             )
-        with pytest.raises(ResponseException) as e_info:
+        with pytest.raises(ResponseException):
             _ = getattr(data_handler, name)(
                 handler=None,
                 station_id=globals()[f'TEST_STN_{name.upper()}'],

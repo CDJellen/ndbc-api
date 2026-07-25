@@ -1,4 +1,3 @@
-import re
 import xml.etree.ElementTree as ET
 
 from ndbc_api.api.parsers.http._base import BaseParser

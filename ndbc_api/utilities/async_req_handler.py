@@ -194,6 +194,7 @@ class AsyncRequestHandler:
                  message=f'GET: {url}',
                  extra_data={'headers': headers})
 
+
         last_exc = None
         for attempt in range(self._retries + 1):
             async with self._semaphore:
@@ -230,7 +231,8 @@ class AsyncRequestHandler:
                                           f'after {wait:.1f}s'))
                         await asyncio.sleep(wait)
 
-        self.log(logging.WARNING,
+        self.log(logging.ERROR,
                  station_id=station_id,
                  message=f'All {self._retries} retries exhausted for {url}')
-        return dict(status=0, body='')
+        from ndbc_api.exceptions import RequestException
+        raise RequestException(f"Max retries exceeded for {url}") from last_exc

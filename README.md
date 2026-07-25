@@ -44,6 +44,24 @@ To use the async API, install the optional `async` extra:
 pip install ndbc-api[async]
 ```
 
+To use Polars instead of Pandas, install the optional `polars` extra:
+
+```sh
+pip install ndbc-api[polars]
+```
+
+**Lightweight Environments & Polars-Only Support**
+The `ndbc-api` features a dependency-free parser core that uses a `List[dict]` intermediate representation. This architecture allows the core API to function without heavy data-science libraries.
+
+By default, `pandas` and `xarray` are installed as hard dependencies to ensure compatibility with existing users. However, if you are building a lightweight application or prefer to use Polars exclusively, you can safely uninstall them post-installation:
+
+```sh
+pip install ndbc-api[polars]
+pip uninstall pandas xarray
+```
+
+When uninstalled, the API will gracefully fall back to returning data as a list of dictionaries (`as_df=False`), or as a Polars DataFrame if requested (`as_pl=True`).
+
 Conda users can install the `ndbc-api` via the `conda-forge` channel:
 
 ```sh
@@ -59,12 +77,15 @@ pip install .
 #### Requirements
 The `ndbc-api` has been tested on Python 3.9, 3.10, 3.12, and 3.13.
 
-The API uses synchronous HTTP requests to compile data matching the user-supplied parameters. The `ndbc-api` package depends on:
+The API uses synchronous HTTP requests to compile data matching the user-supplied parameters. The `ndbc-api` package requires:
 * requests>=2.10.0
-* pandas>=2.0.0
-* numpy>=1.26.3
 * beautifulsoup4
 * html5lib>=1.1
+
+**Legacy Compatibility Dependencies:**
+To ensure backward compatibility for existing users, the following libraries are installed by default but can be safely uninstalled for lightweight or Polars-only environments:
+* pandas>=2.0.0
+* numpy>=1.26.3
 * xarray
 * scipy
 * h5netcdf

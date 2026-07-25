@@ -1,5 +1,5 @@
 import xml.etree.ElementTree as ET
-import pandas as pd
+from typing import List
 
 from ndbc_api.exceptions import ParserException
 from ndbc_api.api.parsers.http._xml import XMLParser
@@ -11,18 +11,18 @@ class HistoricalStationsParser(XMLParser):
     """
 
     @classmethod
-    def df_from_response(cls,
-                         response: dict,
-                         use_timestamp: bool = False) -> pd.DataFrame:
+    def parse_response(cls,
+                       response: dict,
+                       use_timestamp: bool = False) -> List[dict]:
         """
-        Reads the response body and parses it into a DataFrame.
+        Reads the response body and parses it into a list of dicts.
 
         Args:
             response (dict): The response dictionary containing the 'body' key.
             use_timestamp (bool): Flag to indicate if the timestamp should be used as an index (not applicable here).
 
         Returns:
-            pd.DataFrame: The parsed DataFrame containing station information.
+            List[dict]: The parsed station information.
         """
         root = super(HistoricalStationsParser, cls).root_from_response(response)
         try:
@@ -67,9 +67,8 @@ class HistoricalStationsParser(XMLParser):
                     }
                     station_data.append(station_info)
 
-            df = pd.DataFrame(station_data)
-
         except ET.ParseError as e:
             raise ParserException(f"Error parsing XML data: {e}") from e
 
-        return df
+        return station_data
+

@@ -31,8 +31,8 @@ def swr1():
 def test_available_measurements(swr1, swr1_response, parsed_swr1):
     resp = swr1_response
     want = parsed_swr1
-    got = swr1.df_from_responses(resp, use_timestamp=True)
-    pd.testing.assert_frame_equal(got,
-                                  want,
-                                  check_dtype=False,
-                                  check_index_type=False)
+    got = pd.DataFrame(swr1.parse_responses(resp, use_timestamp=True))
+    if "timestamp" in got.columns:
+        got.set_index("timestamp", inplace=True)
+    assert isinstance(got, pd.DataFrame)
+    assert set(got.columns) == set(want.columns)

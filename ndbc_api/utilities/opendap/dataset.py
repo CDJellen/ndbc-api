@@ -1,14 +1,16 @@
 from datetime import datetime
-from typing import List, Union
+from typing import List, Union, TYPE_CHECKING
 
-import xarray
-import numpy as np
+try:
+    import xarray
+except ImportError:
+    xarray = None
 
 
 def concat_datasets(
-    datasets: List[xarray.Dataset],
+    datasets: List['xarray.Dataset'],
     temporal_dim_name: str = 'time',
-) -> xarray.Dataset:
+) -> 'xarray.Dataset':
     """Joins multiple xarray datasets using their shared dimensions.
 
     Handles cases where datasets might not have the same variables, 
@@ -25,11 +27,13 @@ def concat_datasets(
     Returns:
         A xarray.Dataset object containing the joined data.
     """
+    if xarray is None:
+        raise ImportError("xarray is required for OpenDAP support.")
     result = xarray.concat(datasets, dim=temporal_dim_name)
     return result
 
 
-def merge_datasets(datasets: List[xarray.Dataset],) -> xarray.Dataset:
+def merge_datasets(datasets: List['xarray.Dataset'],) -> 'xarray.Dataset':
     """Merges multiple xarray datasets using their shared dimensions.
 
     Handles cases where datasets might not have the same variables,
@@ -44,16 +48,18 @@ def merge_datasets(datasets: List[xarray.Dataset],) -> xarray.Dataset:
     Returns:
         A xarray.Dataset object containing the merged data.
     """
+    if xarray is None:
+        raise ImportError("xarray is required for OpenDAP support.")
     result = xarray.merge(datasets, compat='override')
     return result
 
 
 def filter_dataset_by_time_range(
-    dataset: xarray.Dataset,
+    dataset: 'xarray.Dataset',
     start_time: datetime,
     end_time: datetime,
     temporal_dim_name: str = 'time',
-) -> xarray.Dataset:
+) -> 'xarray.Dataset':
     """
     Filters a netCDF4 Dataset to keep only data within a specified time range.
 
@@ -70,9 +76,9 @@ def filter_dataset_by_time_range(
 
 
 def filter_dataset_by_variable(
-    dataset: xarray.Dataset,
+    dataset: 'xarray.Dataset',
     cols: Union[List[str], None] = None,
-) -> xarray.Dataset:
+) -> 'xarray.Dataset':
     """
     Filters a netCDF4 Dataset to keep only data with variables whose names are in cols.
 

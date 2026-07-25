@@ -3,12 +3,9 @@
 Covers the synchronous delegator methods (cache/headers), station
 management, cache-hit path, and retry/backoff logic.
 """
-import asyncio
-import logging
 
 import aiohttp
 import pytest
-import pytest_asyncio
 from aioresponses import aioresponses
 
 from ndbc_api.utilities.async_req_handler import AsyncRequestHandler
@@ -159,10 +156,10 @@ class TestRetryBackoff:
             with aioresponses() as m:
                 m.get(url, exception=aiohttp.ClientError('fail1'))
                 m.get(url, exception=aiohttp.ClientError('fail2'))
-                resp = await handler.execute_request(
-                    station_id='tplm2', url=url, headers={})
-                assert resp['status'] == 0
-                assert resp['body'] == ''
+                from ndbc_api.exceptions import RequestException
+                with pytest.raises(RequestException):
+                    await handler.execute_request(
+                        station_id='tplm2', url=url, headers={})
 
     async def test_binary_content_type(self):
         handler = AsyncRequestHandler(

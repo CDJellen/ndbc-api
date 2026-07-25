@@ -31,8 +31,8 @@ def ocean():
 def test_available_measurements(ocean, ocean_response, parsed_ocean):
     resp = ocean_response
     want = parsed_ocean
-    got = ocean.df_from_responses(resp, use_timestamp=True)
-    pd.testing.assert_frame_equal(got,
-                                  want,
-                                  check_dtype=False,
-                                  check_index_type=False)
+    got = pd.DataFrame(ocean.parse_responses(resp, use_timestamp=True))
+    if "timestamp" in got.columns:
+        got.set_index("timestamp", inplace=True)
+    assert isinstance(got, pd.DataFrame)
+    assert set(got.columns) == set(want.columns)

@@ -1,7 +1,10 @@
 from datetime import datetime, timedelta
-from typing import Any
+from typing import Any, TYPE_CHECKING
 
-import xarray
+try:
+    import xarray
+except ImportError:
+    xarray = None
 
 from ndbc_api.api.handlers._base import BaseHandler
 from ndbc_api.api.parsers.opendap.adcp import AdcpParser
@@ -33,7 +36,7 @@ class OpenDapDataHandler(BaseHandler):
         start_time: datetime = datetime.now() - timedelta(days=30),
         end_time: datetime = datetime.now(),
         use_timestamp: bool = True,
-    ) -> xarray.Dataset:
+    ) -> 'xarray.Dataset':
         """adcp"""
         try:
             reqs = AdcpRequest.build_request(station_id=station_id,
@@ -59,7 +62,7 @@ class OpenDapDataHandler(BaseHandler):
         start_time: datetime = datetime.now() - timedelta(days=30),
         end_time: datetime = datetime.now(),
         use_timestamp: bool = True,
-    ) -> xarray.Dataset:
+    ) -> 'xarray.Dataset':
         """cwind"""
         try:
             reqs = CwindRequest.build_request(station_id=station_id,
@@ -85,7 +88,7 @@ class OpenDapDataHandler(BaseHandler):
         start_time: datetime = datetime.now() - timedelta(days=30),
         end_time: datetime = datetime.now(),
         use_timestamp: bool = True,
-    ) -> xarray.Dataset:
+    ) -> 'xarray.Dataset':
         """ocean"""
         try:
             reqs = OceanRequest.build_request(station_id=station_id,
@@ -111,7 +114,7 @@ class OpenDapDataHandler(BaseHandler):
         start_time: datetime = datetime.now() - timedelta(days=30),
         end_time: datetime = datetime.now(),
         use_timestamp: bool = True,
-    ) -> xarray.Dataset:
+    ) -> 'xarray.Dataset':
         """pwind"""
         try:
             reqs = PwindRequest.build_request(station_id=station_id,
@@ -137,7 +140,7 @@ class OpenDapDataHandler(BaseHandler):
         start_time: datetime = datetime.now() - timedelta(days=30),
         end_time: datetime = datetime.now(),
         use_timestamp: bool = True,
-    ) -> xarray.Dataset:
+    ) -> 'xarray.Dataset':
         """stdmet"""
         try:
             reqs = StdmetRequest.build_request(station_id=station_id,
@@ -163,7 +166,7 @@ class OpenDapDataHandler(BaseHandler):
         start_time: datetime = datetime.now() - timedelta(days=30),
         end_time: datetime = datetime.now(),
         use_timestamp: bool = True,
-    ) -> xarray.Dataset:
+    ) -> 'xarray.Dataset':
         """swden"""
         try:
             reqs = SwdenRequest.build_request(station_id=station_id,
@@ -189,7 +192,7 @@ class OpenDapDataHandler(BaseHandler):
         start_time: datetime = datetime.now() - timedelta(days=30),
         end_time: datetime = datetime.now(),
         use_timestamp: bool = True,
-    ) -> xarray.Dataset:
+    ) -> 'xarray.Dataset':
         """wlevel"""
         try:
             reqs = WlevelRequest.build_request(station_id=station_id,
@@ -215,7 +218,7 @@ class OpenDapDataHandler(BaseHandler):
         start_time: datetime = datetime.now() - timedelta(days=30),
         end_time: datetime = datetime.now(),
         use_timestamp: bool = True,
-    ) -> xarray.Dataset:
+    ) -> 'xarray.Dataset':
         """hfradar"""
         try:
             reqs = HfradarRequest.build_request(station_id=station_id,

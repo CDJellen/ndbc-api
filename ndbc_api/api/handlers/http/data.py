@@ -1,7 +1,5 @@
 from datetime import datetime, timedelta
-from typing import Any
-
-import pandas as pd
+from typing import Any, List
 
 from ndbc_api.api.handlers._base import BaseHandler
 from ndbc_api.api.parsers.http.adcp import AdcpParser
@@ -39,7 +37,7 @@ class DataHandler(BaseHandler):
         start_time: datetime = datetime.now() - timedelta(days=30),
         end_time: datetime = datetime.now(),
         use_timestamp: bool = True,
-    ) -> pd.DataFrame:
+    ) -> List[dict]:
         """adcp"""
         try:
             reqs = AdcpRequest.build_request(station_id=station_id,
@@ -51,7 +49,7 @@ class DataHandler(BaseHandler):
             resps = handler.handle_requests(station_id=station_id, reqs=reqs)
         except Exception as e:
             raise ResponseException('Failed to execute requests.') from e
-        return AdcpParser.df_from_responses(responses=resps,
+        return AdcpParser.parse_responses(responses=resps,
                                             use_timestamp=use_timestamp)
 
     @classmethod
@@ -62,7 +60,7 @@ class DataHandler(BaseHandler):
         start_time: datetime = datetime.now() - timedelta(days=30),
         end_time: datetime = datetime.now(),
         use_timestamp: bool = True,
-    ) -> pd.DataFrame:
+    ) -> List[dict]:
         """cwind"""
         try:
             reqs = CwindRequest.build_request(station_id=station_id,
@@ -74,7 +72,7 @@ class DataHandler(BaseHandler):
             resps = handler.handle_requests(station_id=station_id, reqs=reqs)
         except Exception as e:
             raise ResponseException('Failed to execute requests.') from e
-        return CwindParser.df_from_responses(responses=resps,
+        return CwindParser.parse_responses(responses=resps,
                                              use_timestamp=use_timestamp)
 
     @classmethod
@@ -85,7 +83,7 @@ class DataHandler(BaseHandler):
         start_time: datetime = datetime.now() - timedelta(days=30),
         end_time: datetime = datetime.now(),
         use_timestamp: bool = True,
-    ) -> pd.DataFrame:
+    ) -> List[dict]:
         """ocean"""
         try:
             reqs = OceanRequest.build_request(station_id=station_id,
@@ -97,7 +95,7 @@ class DataHandler(BaseHandler):
             resps = handler.handle_requests(station_id=station_id, reqs=reqs)
         except Exception as e:
             raise ResponseException('Failed to execute requests.') from e
-        return OceanParser.df_from_responses(responses=resps,
+        return OceanParser.parse_responses(responses=resps,
                                              use_timestamp=use_timestamp)
 
     @classmethod
@@ -108,7 +106,7 @@ class DataHandler(BaseHandler):
         start_time: datetime = datetime.now() - timedelta(days=30),
         end_time: datetime = datetime.now(),
         use_timestamp: bool = True,
-    ) -> pd.DataFrame:
+    ) -> List[dict]:
         """spec"""
         try:
             reqs = SpecRequest.build_request(station_id=station_id,
@@ -120,7 +118,7 @@ class DataHandler(BaseHandler):
             resps = handler.handle_requests(station_id=station_id, reqs=reqs)
         except Exception as e:
             raise ResponseException('Failed to execute requests.') from e
-        return SpecParser.df_from_responses(responses=resps,
+        return SpecParser.parse_responses(responses=resps,
                                             use_timestamp=use_timestamp)
 
     @classmethod
@@ -131,7 +129,7 @@ class DataHandler(BaseHandler):
         start_time: datetime = datetime.now() - timedelta(days=30),
         end_time: datetime = datetime.now(),
         use_timestamp: bool = True,
-    ) -> pd.DataFrame:
+    ) -> List[dict]:
         """stdmet"""
         try:
             reqs = StdmetRequest.build_request(station_id=station_id,
@@ -143,7 +141,7 @@ class DataHandler(BaseHandler):
             resps = handler.handle_requests(station_id=station_id, reqs=reqs)
         except Exception as e:
             raise ResponseException('Failed to execute requests.') from e
-        return StdmetParser.df_from_responses(responses=resps,
+        return StdmetParser.parse_responses(responses=resps,
                                               use_timestamp=use_timestamp)
 
     @classmethod
@@ -154,7 +152,7 @@ class DataHandler(BaseHandler):
         start_time: datetime = datetime.now() - timedelta(days=30),
         end_time: datetime = datetime.now(),
         use_timestamp: bool = True,
-    ) -> pd.DataFrame:
+    ) -> List[dict]:
         """supl"""
         try:
             reqs = SuplRequest.build_request(station_id=station_id,
@@ -166,7 +164,7 @@ class DataHandler(BaseHandler):
             resps = handler.handle_requests(station_id=station_id, reqs=reqs)
         except Exception as e:
             raise ResponseException('Failed to execute requests.') from e
-        return SuplParser.df_from_responses(responses=resps,
+        return SuplParser.parse_responses(responses=resps,
                                             use_timestamp=use_timestamp)
 
     @classmethod
@@ -177,7 +175,7 @@ class DataHandler(BaseHandler):
         start_time: datetime = datetime.now() - timedelta(days=30),
         end_time: datetime = datetime.now(),
         use_timestamp: bool = True,
-    ) -> pd.DataFrame:
+    ) -> List[dict]:
         """swden"""
         try:
             reqs = SwdenRequest.build_request(station_id=station_id,
@@ -189,7 +187,7 @@ class DataHandler(BaseHandler):
             resps = handler.handle_requests(station_id=station_id, reqs=reqs)
         except Exception as e:
             raise ResponseException('Failed to execute requests.') from e
-        return SwdenParser.df_from_responses(responses=resps,
+        return SwdenParser.parse_responses(responses=resps,
                                              use_timestamp=use_timestamp)
 
     @classmethod
@@ -200,7 +198,7 @@ class DataHandler(BaseHandler):
         start_time: datetime = datetime.now() - timedelta(days=30),
         end_time: datetime = datetime.now(),
         use_timestamp: bool = True,
-    ) -> pd.DataFrame:
+    ) -> List[dict]:
         """swdir"""
         try:
             reqs = SwdirRequest.build_request(station_id=station_id,
@@ -212,7 +210,7 @@ class DataHandler(BaseHandler):
             resps = handler.handle_requests(station_id=station_id, reqs=reqs)
         except Exception as e:
             raise ResponseException('Failed to execute requests.') from e
-        return SwdirParser.df_from_responses(responses=resps,
+        return SwdirParser.parse_responses(responses=resps,
                                              use_timestamp=use_timestamp)
 
     @classmethod
@@ -223,7 +221,7 @@ class DataHandler(BaseHandler):
         start_time: datetime = datetime.now() - timedelta(days=30),
         end_time: datetime = datetime.now(),
         use_timestamp: bool = True,
-    ) -> pd.DataFrame:
+    ) -> List[dict]:
         """swdir2"""
         try:
             reqs = Swdir2Request.build_request(station_id=station_id,
@@ -235,7 +233,7 @@ class DataHandler(BaseHandler):
             resps = handler.handle_requests(station_id=station_id, reqs=reqs)
         except Exception as e:
             raise ResponseException('Failed to execute requests.') from e
-        return Swdir2Parser.df_from_responses(responses=resps,
+        return Swdir2Parser.parse_responses(responses=resps,
                                               use_timestamp=use_timestamp)
 
     @classmethod
@@ -246,7 +244,7 @@ class DataHandler(BaseHandler):
         start_time: datetime = datetime.now() - timedelta(days=30),
         end_time: datetime = datetime.now(),
         use_timestamp: bool = True,
-    ) -> pd.DataFrame:
+    ) -> List[dict]:
         """swr1"""
         try:
             reqs = Swr1Request.build_request(station_id=station_id,
@@ -258,7 +256,7 @@ class DataHandler(BaseHandler):
             resps = handler.handle_requests(station_id=station_id, reqs=reqs)
         except Exception as e:
             raise ResponseException('Failed to execute requests.') from e
-        return Swr1Parser.df_from_responses(responses=resps,
+        return Swr1Parser.parse_responses(responses=resps,
                                             use_timestamp=use_timestamp)
 
     @classmethod
@@ -269,7 +267,7 @@ class DataHandler(BaseHandler):
         start_time: datetime = datetime.now() - timedelta(days=30),
         end_time: datetime = datetime.now(),
         use_timestamp: bool = True,
-    ) -> pd.DataFrame:
+    ) -> List[dict]:
         """swr2"""
         try:
             reqs = Swr2Request.build_request(station_id=station_id,
@@ -281,5 +279,5 @@ class DataHandler(BaseHandler):
             resps = handler.handle_requests(station_id=station_id, reqs=reqs)
         except Exception as e:
             raise ResponseException('Failed to execute requests.') from e
-        return Swr2Parser.df_from_responses(responses=resps,
+        return Swr2Parser.parse_responses(responses=resps,
                                             use_timestamp=use_timestamp)

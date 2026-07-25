@@ -1,8 +1,11 @@
 import os
 import tempfile
-from typing import List, Optional
+from typing import List, Optional, TYPE_CHECKING
 
-import xarray
+try:
+    import xarray
+except ImportError:
+    xarray = None
 
 from ndbc_api.exceptions import ParserException
 from ndbc_api.utilities.opendap.dataset import concat_datasets
@@ -18,7 +21,7 @@ class BaseParser:
         cls,
         responses: List[dict],
         use_timestamp: bool = False,
-    ) -> xarray.Dataset:
+    ) -> 'xarray.Dataset':
         """Build the netCDF dataset from the responses.
         
         Args: 
@@ -28,6 +31,8 @@ class BaseParser:
         Returns:
             xarray.open_dataset: The netCDF dataset.
         """
+        if xarray is None:
+            raise ImportError("xarray is required for OpenDAP support. If you uninstalled it to create a lightweight environment, you must reinstall it to use this feature.")
         datasets = []
         for r in responses:
             if isinstance(r, dict):
@@ -56,9 +61,9 @@ class BaseParser:
     @classmethod
     def _merge_datasets(
         cls,
-        datasets: List[xarray.Dataset],
+        datasets: List['xarray.Dataset'],
         temporal_dim_name: Optional[str] = None,
-    ) -> xarray.Dataset:
+    ) -> 'xarray.Dataset':
         """Joins multiple xarray datasets using their shared dimensions.
 
         Handles cases where datasets might not have the same variables, 
