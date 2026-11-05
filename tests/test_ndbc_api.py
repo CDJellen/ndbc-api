@@ -82,12 +82,13 @@ def test_dump_cache_empty(ndbc_api):
     test_fp.unlink()
 
 
-def test_configure_logging(ndbc_api):
+def test_configure_logging(ndbc_api, tmp_path):
+    log_fp = str(tmp_path / 'foo.log')
     ndbc_api.configure_logging(level=logging.INFO)
     assert ndbc_api.logger.level == logging.INFO
     ndbc_api.configure_logging(level=logging.WARNING)
     assert ndbc_api.logger.level == logging.WARNING
-    ndbc_api.configure_logging(level=logging.ERROR, filename='foo.log')
+    ndbc_api.configure_logging(level=logging.ERROR, filename=log_fp)
     assert ndbc_api.logger.level == logging.ERROR
     ndbc_api.configure_logging(level=logging.DEBUG, filename=None)
     assert ndbc_api.logger.level == logging.DEBUG

@@ -1,8 +1,9 @@
-from typing import List
-
-
+from typing import List, TYPE_CHECKING
 
 from ndbc_api.api.parsers.opendap._base import BaseParser
+
+if TYPE_CHECKING:
+    import xarray
 
 
 class AdcpParser(BaseParser):

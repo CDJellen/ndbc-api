@@ -1,13 +1,13 @@
 import xml.etree.ElementTree as ET
-from typing import List
+from typing import Any, List
 
-from ndbc_api.exceptions import ParserException
 from ndbc_api.api.parsers.http._xml import XMLParser
+from ndbc_api.exceptions import ParserException
 
 
 class HistoricalStationsParser(XMLParser):
     """
-    Parser for active station information from XML data.
+    Parser for historical station information from XML data.
     """
 
     @classmethod
@@ -39,12 +39,11 @@ class HistoricalStationsParser(XMLParser):
                         'Station':
                             station_id,
                         'Lat':
-                            float(history.get('lat')),
+                            cls._safe_float(history.get('lat')),
                         'Lon':
-                            float(history.get('lng')),
+                            cls._safe_float(history.get('lng')),
                         'Elevation':
-                            float(history.get('elev'))
-                            if history.get('elev') else float('nan'),
+                            cls._safe_float(history.get('elev')),
                         'Name':
                             station_name,
                         'Owner':
@@ -58,8 +57,7 @@ class HistoricalStationsParser(XMLParser):
                         'Hull Type':
                             history.get('hull'),
                         'Anemometer Height':
-                            float(history.get('anemom_height'))
-                            if history.get('anemom_height') else float('nan'),
+                            cls._safe_float(history.get('anemom_height')),
                         'Start Date':
                             history.get('start'),
                         'End Date':
@@ -67,8 +65,28 @@ class HistoricalStationsParser(XMLParser):
                     }
                     station_data.append(station_info)
 
-        except ET.ParseError as e:
-            raise ParserException(f"Error parsing XML data: {e}") from e
+        except (ET.ParseError, ValueError, TypeError) as e:
+            raise ParserException(f'Error parsing XML data: {e}') from e
 
         return station_data
 
+    @classmethod
+    def df_from_responses(cls,
+                          response: dict,
+                          use_timestamp: bool = False):
+        """Parse response into a `pandas.DataFrame` (backward-compatible helper)."""
+        from ndbc_api.api.parsers.http._base import pd
+        if pd is None:
+            raise ImportError(
+                'Pandas is not installed. Please install it using `pip install pandas`.'
+            )
+        rows = cls.parse_response(response=response, use_timestamp=use_timestamp)
+        return pd.DataFrame(rows)
+
+    """ PRIVATE """
+
+    @staticmethod
+    def _safe_float(val: Any) -> float:
+        if val is None or val == '':
+            return float('nan')
+        return float(val)

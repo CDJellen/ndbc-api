@@ -1,11 +1,8 @@
-from typing import List
-
 from ndbc_api.api.parsers.http._base import BaseParser
 
 
 class AdcpParser(BaseParser):
 
-    INDEX_COL = 0
     NAN_VALUES = None
     REVERT_COL_NAMES = [
         'YY',

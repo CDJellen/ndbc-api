@@ -25,7 +25,8 @@ Attributes:
         been made.
 """
 import logging
-from typing import List, Union, Callable
+import threading
+from typing import Callable, List, Optional, Union
 
 import requests
 from urllib3.util import Retry
@@ -35,15 +36,7 @@ from .singleton import Singleton
 
 
 class RequestHandler(metaclass=Singleton):
-    """The summary line for a class docstring should fit on one line.
-
-    If the class has public attributes, they may be documented here
-    in an ``Attributes`` section and follow the same formatting as a
-    function's ``Args`` section. Alternatively, attributes may be documented
-    inline with the attribute's declaration (see __init__ method below).
-
-    Properties created with the ``@property`` decorator should be documented
-    in the property's getter method.
+    """Singleton HTTP request handler with per-station LRU caching.
 
     Attributes:
         cache_limit (:int:): The handler's global limit for caching
@@ -54,7 +47,7 @@ class RequestHandler(metaclass=Singleton):
             request and response status codes and headers used for debug
             purposes.
         delay (:int:): The HTTP(s) request delay parameter, in seconds.
-        retries (:int:): = The number of times to retry a request to the NDBC data
+        retries (:int:): The number of times to retry a request to the NDBC data
             service.
         backoff_factor (:float:): The back-off parameter, used in conjunction with
             `retries` to re-attempt requests to the NDBC data service.
@@ -68,15 +61,7 @@ class RequestHandler(metaclass=Singleton):
     """
 
     class Station:
-        """The summary line for a class docstring should fit on one line.
-
-        If the class has public attributes, they may be documented here
-        in an ``Attributes`` section and follow the same formatting as a
-        function's ``Args`` section. Alternatively, attributes may be documented
-        inline with the attribute's declaration (see __init__ method below).
-
-        Properties created with the ``@property`` decorator should be documented
-        in the property's getter method.
+        """Per-station request cache container.
 
         Attributes:
             id_ (:str:): The key for the `Station` object.
@@ -93,17 +78,18 @@ class RequestHandler(metaclass=Singleton):
     def __init__(
         self,
         cache_limit: int,
-        log: Callable[[Union[str, int, dict]], None],
-        delay: int,
-        retries: int,
-        backoff_factor: float,
-        headers: dict = None,
+        log: Optional[Callable] = None,
+        delay: int = 0,
+        retries: int = 3,
+        backoff_factor: float = 0.5,
+        headers: Optional[dict] = None,
         debug: bool = True,
         verify_https: bool = True,
     ) -> None:
+        self._lock = threading.RLock()
         self._cache_limit = cache_limit
         self._request_headers = headers or {}
-        self.log = log
+        self.log = log or (lambda *args, **kwargs: None)
         self.stations = []
         self._delay = delay
         self._retries = retries
@@ -112,57 +98,70 @@ class RequestHandler(metaclass=Singleton):
         self._verify_https = verify_https
         self._session = self._create_session()
 
+    def close(self) -> None:
+        """Close the underlying HTTP session."""
+        if getattr(self, '_session', None) is not None:
+            self._session.close()
+
     def get_cache_limit(self) -> int:
         """Return the current station-level cache limit for NDBC requests."""
         return self._cache_limit
 
     def set_cache_limit(self, cache_limit: int) -> None:
         """Set a new station-level cache limit for NDBC requests."""
-        self._cache_limit = cache_limit
+        with self._lock:
+            self._cache_limit = cache_limit
+            for s in self.stations:
+                s.reqs.set_capacity(cache_limit)
 
     def get_headers(self) -> dict:
-        """Add new headers to future NDBC data service requests."""
+        """Return the current headers used for NDBC data service requests."""
         return self._request_headers
 
     def update_headers(self, new: dict) -> None:
         """Add new headers to future NDBC data service requests."""
-        self._request_headers.update(new)
+        with self._lock:
+            self._request_headers.update(new)
 
     def set_headers(self, request_headers: dict) -> None:
         """Reset the request headers using the new supplied headers."""
-        self._request_headers = request_headers
+        with self._lock:
+            self._request_headers = request_headers
 
     def has_station(self, station_id: Union[str, int]) -> bool:
         """Determine if the NDBC API already made a request to this station."""
-        for s in self.stations:
-            if s.id_ == station_id:
-                return True
-        return False
+        with self._lock:
+            for s in self.stations:
+                if s.id_ == station_id:
+                    return True
+            return False
 
     def get_station(self, station_id: Union[str, int]) -> Station:
-        """Get `RequestCache` with  `id_` matching the supplied `station_id`."""
+        """Get `RequestCache` with `id_` matching the supplied `station_id`."""
         if isinstance(station_id, int):
             station_id = str(station_id)
-        if not self.has_station(station_id):
-            self.log(logging.DEBUG,
-                     station_id=station_id,
-                     message=f'Adding station {station_id} to cache.')
-            self.add_station(station_id=station_id)
-        for s in self.stations:
-            if s.id_ == station_id:
+        with self._lock:
+            if not self.has_station(station_id):
                 self.log(logging.DEBUG,
                          station_id=station_id,
-                         message=f'Found station {station_id} in cache.')
-                return s
+                         message=f'Adding station {station_id} to cache.')
+                self.add_station(station_id=station_id)
+            for s in self.stations:
+                if s.id_ == station_id:
+                    self.log(logging.DEBUG,
+                             station_id=station_id,
+                             message=f'Found station {station_id} in cache.')
+                    return s
 
     def add_station(self, station_id: Union[str, int]) -> None:
-        """Add new new `RequestCache` for the supplied `station_id`."""
-        self.stations.append(
-            RequestHandler.Station(station_id=station_id,
-                                   cache_limit=self._cache_limit))
+        """Add new `RequestCache` for the supplied `station_id`."""
+        with self._lock:
+            self.stations.append(
+                RequestHandler.Station(station_id=station_id,
+                                       cache_limit=self._cache_limit))
 
     def handle_requests(self, station_id: Union[str, int],
-                        reqs: List[str]) -> List[str]:  # pragma: no cover
+                        reqs: List[str]) -> List[dict]:  # pragma: no cover
         """Handle many string-valued requests against a supplied station."""
         responses = []
         self.log(
@@ -174,18 +173,21 @@ class RequestHandler(metaclass=Singleton):
         return responses
 
     def handle_request(self, station_id: Union[str, int], req: str) -> dict:
-        """Handle a string-valued requests against a supplied station."""
-        stn = self.get_station(station_id=station_id)
-        self.log(logging.DEBUG, message=f'Handling request {req}.')
-        if req not in stn.reqs.cache:
-            self.log(logging.DEBUG, message=f'Adding request {req} to cache.')
-            resp = self.execute_request(url=req,
-                                        station_id=station_id,
-                                        headers=self._request_headers)
+        """Handle a string-valued request against a supplied station."""
+        with self._lock:
+            stn = self.get_station(station_id=station_id)
+            self.log(logging.DEBUG, message=f'Handling request {req}.')
+            if req in stn.reqs.cache:
+                self.log(logging.DEBUG, message=f'Request {req} already in cache.')
+                return stn.reqs.get(request=req)
+
+        self.log(logging.DEBUG, message=f'Adding request {req} to cache.')
+        resp = self.execute_request(url=req,
+                                    station_id=station_id,
+                                    headers=self._request_headers)
+        with self._lock:
             stn.reqs.put(request=req, response=resp)
-        else:
-            self.log(logging.DEBUG, message=f'Request {req} already in cache.')
-        return stn.reqs.get(request=req)
+            return stn.reqs.get(request=req)
 
     def execute_request(self, station_id: Union[str, int], url: str,
                         headers: dict) -> dict:  # pragma: no cover
@@ -205,9 +207,10 @@ class RequestHandler(metaclass=Singleton):
                  message=f'Response status: {response.status_code}')
         if response.status_code != 200:  # web request did not succeed
             return dict(status=response.status_code, body='')
-        elif any([
-                'netcdf' in response.headers.get('Content-Type').lower(),
-                'octet' in response.headers.get('Content-Type').lower()
+        content_type = (response.headers.get('Content-Type') or '').lower()
+        if any([
+                'netcdf' in content_type,
+                'octet' in content_type,
         ]):
             return dict(status=response.status_code, body=response.content)
         return dict(status=response.status_code, body=response.text)

@@ -1,10 +1,10 @@
-from typing import List
-
 from ndbc_api.api.parsers.http._base import BaseParser
 
 
 class SpecParser(BaseParser):
 
-    INDEX_COL = 0
-    NAN_VALUES = ['N/A']
+    NAN_VALUES = ['N/A', 'MM', 99.0, 999, 999.0]
+    COLUMN_NAN_VALUES = {
+        'MWD': {'N/A', 'MM', 999, 999.0},
+    }
 

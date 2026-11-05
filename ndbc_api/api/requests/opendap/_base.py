@@ -33,6 +33,8 @@ class BaseRequest(CoreRequest):
             )
         return cls._build_request_realtime(station_id=station_id)
 
+    """ PRIVATE """
+
     @classmethod
     def _build_request_historical(
         cls,

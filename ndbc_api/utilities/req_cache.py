@@ -10,12 +10,20 @@ class RequestCache:
             self.next = self.prev = None
 
     def __init__(self, capacity: int) -> None:
-        self.capacity = capacity
+        self.capacity = max(0, int(capacity))
         self.cache = dict()
         self.left = RequestCache.Request('$', '$')
         self.right = RequestCache.Request('$', '$')
         self.left.next = self.right
         self.right.prev = self.left
+
+    def set_capacity(self, capacity: int) -> None:
+        """Update cache capacity and evict least-recently-used entries if over capacity."""
+        self.capacity = max(0, int(capacity))
+        while len(self.cache) > self.capacity and self.left.next is not self.right:
+            to_remove = self.left.next
+            self.remove(to_remove)
+            del self.cache[to_remove.k]
 
     def remove(self, node: Request) -> None:
         node.prev.next = node.next
@@ -36,13 +44,19 @@ class RequestCache:
             return dict()
 
     def put(self, request: str, response: dict) -> None:
+        if self.capacity <= 0:
+            self.cache.clear()
+            self.left.next = self.right
+            self.right.prev = self.left
+            return
+
         if request in self.cache:
             self.remove(self.cache[request])
 
         self.cache[request] = RequestCache.Request(request, response)
         self.add(self.cache[request])
 
-        if len(self.cache) > self.capacity:
+        while len(self.cache) > self.capacity and self.left.next is not self.right:
             to_remove = self.left.next
             self.remove(to_remove)
             del self.cache[to_remove.k]

@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, Union, TYPE_CHECKING
+from typing import List, Union
 
 try:
     import xarray
@@ -21,15 +21,22 @@ def concat_datasets(
     Args:
         datasets (List[xarray.Dataset]): A list of xarray datasets
             to join.
-        dimension_names (List[str]): A list of dimension names to join
-            the datasets on. Defaults to `['time', 'latitude', 'longitude']`.
+        temporal_dim_name (str): Dimension name to concatenate along.
+            Defaults to `'time'`.
     
     Returns:
         A xarray.Dataset object containing the joined data.
     """
     if xarray is None:
-        raise ImportError("xarray is required for OpenDAP support.")
+        raise ImportError('xarray is required for OpenDAP support.')
+    if not datasets:
+        return xarray.Dataset()
     result = xarray.concat(datasets, dim=temporal_dim_name)
+    if temporal_dim_name in result.coords or temporal_dim_name in result.dims:
+        try:
+            result = result.sortby(temporal_dim_name)
+        except Exception:
+            pass
     return result
 
 
@@ -37,9 +44,10 @@ def merge_datasets(datasets: List['xarray.Dataset'],) -> 'xarray.Dataset':
     """Merges multiple xarray datasets using their shared dimensions.
 
     Handles cases where datasets might not have the same variables,
-    but requires that all datasets share the same dimensions. For
-    data stored on the THREDDS server, all datasets are expected to
-    have `time`, `latitude`, and `longitude` dimensions.
+    but requires that all datasets share the same dimensions. When datasets
+    from multiple stations are tagged with a `station_id` coordinate or
+    attribute, variables are first merged per station and then concatenated
+    along the `station_id` dimension so no station's data is overwritten.
 
     Args:
         datasets (List[xarray.Dataset]): A list of xarray datasets
@@ -49,7 +57,40 @@ def merge_datasets(datasets: List['xarray.Dataset'],) -> 'xarray.Dataset':
         A xarray.Dataset object containing the merged data.
     """
     if xarray is None:
-        raise ImportError("xarray is required for OpenDAP support.")
+        raise ImportError('xarray is required for OpenDAP support.')
+    if not datasets:
+        return xarray.Dataset()
+
+    # Check whether datasets carry distinct station_id tags
+    station_groups = {}
+    untagged = []
+    for ds in datasets:
+        sid = None
+        if 'station_id' in ds.coords:
+            val = ds.coords['station_id'].values
+            sid = str(val.item() if hasattr(val, 'item') and val.ndim == 0 else val[0])
+        elif 'station_id' in ds.attrs:
+            sid = str(ds.attrs['station_id'])
+        if sid is not None:
+            station_groups.setdefault(sid, []).append(ds)
+        else:
+            untagged.append(ds)
+
+    if len(station_groups) > 1:
+        per_station = []
+        for sid, stn_ds_list in station_groups.items():
+            merged_stn = xarray.merge(stn_ds_list, compat='override')
+            if 'station_id' not in merged_stn.dims:
+                if 'station_id' in merged_stn.coords:
+                    merged_stn = merged_stn.expand_dims('station_id')
+                else:
+                    merged_stn = merged_stn.expand_dims({'station_id': [sid]})
+            per_station.append(merged_stn)
+        result = xarray.concat(per_station, dim='station_id')
+        if untagged:
+            result = xarray.merge([result, *untagged], compat='override')
+        return result
+
     result = xarray.merge(datasets, compat='override')
     return result
 
@@ -65,12 +106,14 @@ def filter_dataset_by_time_range(
 
     Args:
         dataset: The netCDF4 Dataset object.
-        start_time: The start of the time range (inclusive) as an ISO 8601 string (e.g., '2023-01-01T00:00:00Z').
-        end_time: The end of the time range (inclusive) as an ISO 8601 string.
+        start_time: The start of the time range (inclusive) as a datetime or ISO 8601 string.
+        end_time: The end of the time range (inclusive) as a datetime or ISO 8601 string.
 
     Returns:
         The modified netCDF4 Dataset object with data outside the time range removed.
     """
+    if temporal_dim_name not in dataset.coords and temporal_dim_name not in dataset.dims:
+        return dataset
     filtered_ds = dataset.sel({temporal_dim_name: slice(start_time, end_time)})
     return filtered_ds
 

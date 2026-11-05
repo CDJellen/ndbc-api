@@ -1,11 +1,8 @@
-from typing import List
-
 from ndbc_api.api.parsers.http._base import BaseParser
 
 
 class SwdirParser(BaseParser):
 
-    INDEX_COL = 0
     NAN_VALUES = [99.0, 999, 999.0, 9999, 9999.0, 'MM']
     REVERT_COL_NAMES = [
         'YY',

@@ -1,6 +1,4 @@
-"""
-A metaclass for singleton types.
-"""
+"""Custom log formatter for the NDBC API."""
 
 import pprint
 from logging import Formatter
@@ -10,7 +8,10 @@ class LogFormatter(Formatter):
     """Formatter that pretty-prints dictionaries in log messages."""
 
     def format(self, record):
-        formatted_message = super().format(record)
-        if isinstance(record.msg, dict):
-            formatted_message += "\n" + pprint.pformat(record.msg)
-        return formatted_message
+        orig_msg = record.msg
+        try:
+            if isinstance(orig_msg, dict):
+                record.msg = pprint.pformat(orig_msg)
+            return super().format(record)
+        finally:
+            record.msg = orig_msg
