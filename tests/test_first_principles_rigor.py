@@ -33,6 +33,7 @@ from ndbc_api.api.parsers.http.active_stations import ActiveStationsParser
 from ndbc_api.api.parsers.http.adcp import AdcpParser
 from ndbc_api.api.parsers.http.cwind import CwindParser
 from ndbc_api.api.parsers.http.historical_stations import HistoricalStationsParser
+from ndbc_api.api.parsers.http.ocean import OceanParser
 from ndbc_api.api.parsers.http.spec import SpecParser
 from ndbc_api.api.parsers.http.station_historical import HistoricalParser
 from ndbc_api.api.parsers.http.station_metadata import MetadataParser
@@ -659,13 +660,14 @@ class TestStationAndTabularParserHardening:
         hist_xml = """<?xml version="1.0" encoding="UTF-8"?>
         <stations>
           <station id="old01" name="Old Buoy">
-            <history start="1980-01-01" stop="1985-01-01" lat="" lng="" elev="" met="y" hull="3D" anemo="4.9" />
+            <history start="1980-01-01" stop="1985-01-01" lat="" lng="" elev="" met="y" hull="3D" anemom_height="4.9" />
           </station>
         </stations>
         """
         df_hist = HistoricalStationsParser.df_from_responses({'status': 200, 'body': hist_xml})
         assert len(df_hist) == 1
         assert pd.isna(df_hist.iloc[0]['Lat'])
+        assert df_hist.iloc[0]['Anemometer Height'] == pytest.approx(4.9)
 
         with pytest.raises(ParserException):
             ActiveStationsParser.df_from_responses({'status': 200, 'body': '<unclosed>'})
@@ -928,6 +930,195 @@ class TestHighConvictionRefinementsAndExtensions:
         assert hasattr(MetadataParser, '_meta_from_response')
         assert hasattr(MetadataParser, '_meta_from_respose')
 
+    def test_ocean_parser_preserves_99_percent_o2_and_99m_depth(self):
+        body = (
+            '#YY  MM DD hh mm DEPTH  OTMP  COND   SAL   O2% O2PPM  CLCON  TURB    PH    EH\n'
+            '#yr  mo dy hr mn     m  degC mS/cm   psu     %   ppm   ug/L   FTU     -    mV\n'
+            '2022 06 01 00 00  99.0  18.5  45.2  35.1  99.0   7.8   1.20  99.0  8.10 210.0\n'
+            '2022 06 01 01 00 999.0 999.0 999.0  99.9 999.0  99.9   99.9 999.0  99.9 999.0\n'
+        )
+        rows = OceanParser.parse_responses([{'status': 200, 'body': body}], use_timestamp=True)
+        assert len(rows) == 2
+        assert rows[0]['DEPTH'] == 99.0
+        assert rows[0]['O2%'] == 99.0
+        assert rows[0]['TURB'] == 99.0
+        assert rows[0]['SAL'] == 35.1
 
+        assert rows[1]['DEPTH'] is None
+        assert rows[1]['OTMP'] is None
+        assert rows[1]['COND'] is None
+        assert rows[1]['SAL'] is None
+        assert rows[1]['O2%'] is None
+        assert rows[1]['O2PPM'] is None
+        assert rows[1]['CLCON'] is None
+        assert rows[1]['TURB'] is None
+        assert rows[1]['PH'] is None
+        assert rows[1]['EH'] is None
+
+    def test_parenthesized_data_rows_recover_original_headers_when_no_revert_cols(self):
+        body = (
+            '#YY  MM DD hh mm BIN1 BIN2\n'
+            '2022 01 01 00 00 1.25 (0.033) 2.50 (0.040)\n'
+        )
+        rows = BaseParser.parse_responses([{'status': 200, 'body': body}], use_timestamp=True)
+        assert len(rows) == 1
+        assert rows[0]['BIN1'] == 1.25
+        assert rows[0]['BIN2'] == 2.50
+
+    def test_multi_station_opendap_ignores_empty_and_preserves_station_id_dim(self):
+        ds_tplm2 = xarray.Dataset(
+            {'wind_spd': (['time'], [5.0, 6.0])},
+            coords={
+                'time': pd.to_datetime(['2022-01-01', '2022-01-02']),
+                'station_id': 'tplm2',
+            },
+        )
+        ds_empty = xarray.Dataset()
+        merged = merge_datasets([ds_tplm2, ds_empty])
+        assert 'station_id' in merged.dims
+        assert list(merged.sel(station_id='tplm2')['wind_spd'].values) == [5.0, 6.0]
+
+    def test_polars_column_selection_raises_on_missing_column(self):
+        rows = [{'timestamp': datetime(2022, 1, 1, 0, 0), 'WSPD': 5.0, 'GST': 7.0}]
+        pl_df = handle_data(rows, as_df=False, as_pl=True)
+        selected = handle_data(pl_df, as_df=False, as_pl=True, cols=['WSPD'])
+        assert 'WSPD' in selected.columns
+        with pytest.raises(ParserException):
+            handle_data(pl_df, as_df=False, as_pl=True, cols=['NONEXISTENT'])
+
+    def test_opendap_concat_deduplicates_overlapping_timestamps_and_attaches_cf_units(self):
+        ds_hist = xarray.Dataset(
+            {'wind_spd': (['time'], [5.0, 6.0])},
+            coords={'time': pd.to_datetime(['2022-01-01', '2022-01-02'])},
+        )
+        ds_rt = xarray.Dataset(
+            {'wind_spd': (['time'], [6.5, 7.0])},
+            coords={'time': pd.to_datetime(['2022-01-02', '2022-01-03'])},
+        )
+        combined = concat_datasets([ds_hist, ds_rt], temporal_dim_name='time')
+        assert len(combined['time']) == 3
+        # Historical (first) record takes precedence at overlapping 2022-01-02 timestamp
+        assert list(combined['wind_spd'].values) == [5.0, 6.0, 7.0]
+        assert combined['wind_spd'].attrs.get('units') == 'm/s'
+
+    def test_adcp_parser_sentinels_and_99_preservation(self):
+        body = (
+            '#YY  MM DD hh mm DEP01 DIR01 SPD01 DEP02 DIR02 SPD02\n'
+            '#yr  mo dy hr mn     m  degT  cm/s     m  degT  cm/s\n'
+            '2022 01 01 00 00  99.0    99  99.0 999.0   999    MM\n'
+        )
+        rows = AdcpParser.parse_responses([{'status': 200, 'body': body}], use_timestamp=True)
+        assert len(rows) == 1
+        assert rows[0]['DEP01'] == 99.0
+        assert rows[0]['DIR01'] == 99
+        assert rows[0]['SPD01'] == 99.0
+        assert rows[0]['DEP02'] is None
+        assert rows[0]['DIR02'] is None
+        assert rows[0]['SPD02'] is None
+
+    def test_legacy_to_canonical_header_coalescing_and_selection(self):
+        legacy_body = (
+            'YY MM DD hh WD   WSPD BAR\n'
+            '98 05 15 12 180  6.2  1015.2\n'
+        )
+        modern_body = (
+            '#YY  MM DD hh mm WDIR WSPD PRES\n'
+            '2020 05 15 12 00  190  7.1 1012.0\n'
+        )
+        rows = StdmetParser.parse_responses(
+            [
+                {'status': 200, 'body': legacy_body},
+                {'status': 200, 'body': modern_body},
+            ],
+            use_timestamp=True,
+        )
+        assert len(rows) == 2
+        # Multi-era union automatically backfills WDIR and PRES from WD and BAR
+        assert rows[0]['WDIR'] == 180
+        assert rows[0]['PRES'] == 1015.2
+        assert rows[0]['WD'] == 180
+        assert rows[0]['BAR'] == 1015.2
+
+        # Selecting canonical cols=['WDIR', 'PRES'] on a legacy-only dataset succeeds
+        legacy_only = StdmetParser.parse_responses(
+            [{'status': 200, 'body': legacy_body}],
+            use_timestamp=True,
+        )
+        df_sel = handle_data(legacy_only, as_df=True, cols=['WDIR', 'PRES'])
+        assert {'WDIR', 'PRES'}.issubset(set(df_sel.columns))
+        assert df_sel.iloc[0]['WDIR'] == 180
+        assert df_sel.iloc[0]['PRES'] == 1015.2
+        assert df_sel.attrs['units']['WDIR'] == 'degT'
+        assert df_sel.attrs['units']['PRES'] == 'hPa'
+
+        # Also works when selecting canonical columns on a pd.DataFrame or pl.DataFrame
+        raw_df = pd.DataFrame(legacy_only)
+        pd_sel = handle_data(raw_df, as_df=True, cols=['WDIR', 'PRES'])
+        assert list(pd_sel.columns) == ['WDIR', 'PRES']
+        assert pd_sel.iloc[0]['WDIR'] == 180
+
+        pl_raw = handle_data(legacy_only, as_df=False, as_pl=True)
+        pl_sel = handle_data(pl_raw, as_df=False, as_pl=True, cols=['WDIR', 'PRES'])
+        assert 'WDIR' in pl_sel.columns
+        assert 'PRES' in pl_sel.columns
+        assert pl_sel['WDIR'][0] == 180
+
+    def test_station_metadata_station_type_alias_backward_compatible(self):
+        html = (
+            '<html><body>'
+            '<h1>Station TPLM2 - Thomas Point</h1>'
+            '<div id="stn_metadata"><p>'
+            'Owned and maintained by National Data Buoy Center\n'
+            'C-MAN Station\n'
+            '38.88N 76.43W\n\n'
+            'Site elevation: sea level'
+            '</p></div>'
+            '</body></html>'
+        )
+        meta = MetadataParser.metadata({'status': 200, 'body': html})
+        expected_type = 'Owned and maintained by National Data Buoy Center, C-MAN Station'
+        assert meta['Statation Type'] == expected_type
+        assert meta['Station Type'] == expected_type
+        assert meta.get('Station Type') == expected_type
+        assert 'Station Type' in meta
+        assert 'Statation Type' in meta
+
+    def test_build_requests_validates_modes_and_opendap_mode_metadata(self):
+        api = NdbcApi(logging_level=logging.DEBUG, cache_limit=10000)
+        with pytest.raises(ValueError, match='must be a list'):
+            api.build_requests(station_id='tplm2', modes='stdmet')
+        with pytest.raises(ValueError, match='HF radar'):
+            api.build_requests(station_id='uswc_6km', modes=['hfradar'], use_opendap=True)
+
+        assert 'water_level' in api.describe_mode('wlevel')['columns']
+        assert 'gust_wspd' in api.describe_mode('pwind')['columns']
+        assert 'u' in api.describe_mode('hfradar')['columns']
+
+    def test_timestamp_none_filtering_empty_polars_and_handler_case_normalization(self):
+        # 1. Malformed rows that produce timestamp=None are dropped when use_timestamp=True
+        body = (
+            '#YY  MM DD hh mm WDIR WSPD\n'
+            '2022 99 01 00 00  180  5.0\n'
+            '2022 01 01 00 00  190  6.0\n'
+        )
+        rows = StdmetParser.parse_responses([{'status': 200, 'body': body}], use_timestamp=True)
+        assert len(rows) == 1
+        assert rows[0]['WDIR'] == 190
+        assert rows[0]['timestamp'] == datetime(2022, 1, 1, 0, 0)
+
+        # 2. handle_accumulate_data returns empty pl.DataFrame when as_pl=True and empty
+        import polars as pl
+
+        empty_pl = handle_accumulate_data({'stdmet': []}, as_df=False, as_pl=True)
+        assert isinstance(empty_pl, pl.DataFrame)
+        assert empty_pl.is_empty()
+
+        # 3. RequestHandler normalizes station_id case in get_station / has_station
+        api = NdbcApi(logging_level=logging.DEBUG, cache_limit=10000)
+        stn_upper = api._handler.get_station('TPLM2')
+        stn_lower = api._handler.get_station('tplm2')
+        assert stn_upper is stn_lower
+        assert api._handler.has_station('TPLM2') is True
+        assert api._handler.has_station('tplm2') is True
 
 

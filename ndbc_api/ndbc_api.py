@@ -27,7 +27,6 @@ Attributes:
 """
 import logging
 import os
-import pickle
 
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta
@@ -46,7 +45,11 @@ try:
 except ImportError:
     xarray = None
 
-from .api.dispatch import HTTP_DISPATCH, OPENDAP_DISPATCH, build_mode_requests
+from .api.dispatch import (
+    HTTP_DISPATCH,
+    OPENDAP_DISPATCH,
+    build_requests as _build_requests_impl,
+)
 from .api.handlers.http.data import DataHandler
 from .api.handlers.http.stations import StationsHandler
 from .config import (DEFAULT_CACHE_LIMIT, HTTP_BACKOFF_FACTOR, HTTP_DEBUG,
@@ -66,6 +69,8 @@ from .utilities.data_helpers import (
     extract_realtime_modes as _extract_realtime_modes_impl,
     summarize_historical_modes as _summarize_historical_modes_impl,
     filter_station_deployments as _filter_station_deployments_impl,
+    dump_handler_cache as _dump_handler_cache_impl,
+    load_handler_cache as _load_handler_cache_impl,
 )
 from .api.handlers.opendap.data import OpenDapDataHandler
 from .utilities.opendap.dataset import filter_dataset_by_variable, filter_dataset_by_time_range
@@ -136,6 +141,8 @@ class NdbcApi(metaclass=Singleton):
 
     def __enter__(self) -> 'NdbcApi':
         """Enter the runtime context related to the `NdbcApi` instance."""
+        if getattr(self, '_handler', None) is not None and getattr(self._handler, '_closed', False):
+            self._handler._reconfigure()
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb) -> None:
@@ -163,21 +170,10 @@ class NdbcApi(metaclass=Singleton):
             The cached request, response pairs as a `dict`, or `None` if a
             `dest_fp` is specified when calling the method.
         """
-        data = dict()
-        ids = [r.id_ for r in self._handler.stations]
-        caches = [r.reqs.cache for r in self._handler.stations]
-        if ids:
-            for station_id, cache in zip(ids, caches):
-                data[station_id] = dict()
-                reqs = cache.keys()
-                for req in reqs:
-                    resp = cache[req].v
-                    data[station_id][req] = resp
-        if dest_fp:
-            with open(dest_fp, 'wb') as f:
-                pickle.dump(data, f)
-        else:
-            return data
+        return _dump_handler_cache_impl(
+            getattr(self, '_handler', None),
+            dest_fp=dest_fp,
+        )
 
     def load_cache(self, src: Union[dict, str, os.PathLike]) -> None:
         """Load cached request/response pairs from a `dict` or pickle filepath.
@@ -195,24 +191,7 @@ class NdbcApi(metaclass=Singleton):
             ValueError: If `src` is not a `dict` or a pickle file containing
                 a `dict`.
         """
-        if isinstance(src, dict):
-            data = src
-        elif isinstance(src, (str, os.PathLike)):
-            with open(src, 'rb') as f:
-                data = pickle.load(f)
-            if not isinstance(data, dict):
-                raise ValueError('Pickled cache must deserialize to a dict.')
-        else:
-            raise ValueError('`src` must be a dict or a filepath to a pickled cache.')
-
-        if getattr(self, '_handler', None) is None:
-            return
-        for station_id, req_map in data.items():
-            if not isinstance(req_map, dict):
-                continue
-            stn = self._handler.get_station(station_id)
-            for req_url, resp in req_map.items():
-                stn.reqs.put(request=req_url, response=resp)
+        _load_handler_cache_impl(getattr(self, '_handler', None), src=src)
 
     def clear_cache(self) -> None:
         """Clear the request cache and reset handler state."""
@@ -737,77 +716,16 @@ class NdbcApi(metaclass=Singleton):
             TimestampException: If `start_time` or `end_time` is invalid or
                 `start_time > end_time`.
         """
-        if station_id is None and station_ids is None:
-            raise ValueError('Both `station_id` and `station_ids` are `None`.')
-        if station_id is not None and station_ids is not None:
-            raise ValueError('`station_id` and `station_ids` cannot both be specified.')
-        if mode is None and modes is None:
-            raise ValueError('Both `mode` and `modes` are `None`.')
-        if mode is not None and modes is not None:
-            raise ValueError('`mode` and `modes` cannot both be specified.')
-
-        if as_xarray_dataset is not None:
-            use_opendap = as_xarray_dataset
-        now = datetime.now()
-        start_dt = self._handle_timestamp(
-            start_time if start_time is not None else now - timedelta(days=30)
+        return _build_requests_impl(
+            station_id=station_id,
+            mode=mode,
+            start_time=start_time,
+            end_time=end_time,
+            use_opendap=use_opendap,
+            as_xarray_dataset=as_xarray_dataset,
+            station_ids=station_ids,
+            modes=modes,
         )
-        end_dt = self._handle_timestamp(
-            end_time if end_time is not None else now
-        )
-        if start_dt > end_dt:
-            raise TimestampException(
-                f'`start_time` ({start_dt}) must be <= `end_time` ({end_dt}).'
-            )
-
-        if station_id is not None and mode is not None:
-            sid = self._parse_station_id(station_id)
-            return build_mode_requests(
-                mode=mode,
-                station_id=sid,
-                start_time=start_dt,
-                end_time=end_dt,
-                use_opendap=use_opendap,
-            )
-
-        sids = [self._parse_station_id(s) for s in (station_ids if station_ids is not None else [station_id])]
-        ms = list(modes if modes is not None else [mode])
-
-        if station_ids is not None and mode is not None:
-            return {
-                sid: build_mode_requests(
-                    mode=mode,
-                    station_id=sid,
-                    start_time=start_dt,
-                    end_time=end_dt,
-                    use_opendap=use_opendap,
-                )
-                for sid in sids
-            }
-        if station_id is not None and modes is not None:
-            return {
-                m: build_mode_requests(
-                    mode=m,
-                    station_id=sids[0],
-                    start_time=start_dt,
-                    end_time=end_dt,
-                    use_opendap=use_opendap,
-                )
-                for m in ms
-            }
-        return {
-            sid: {
-                m: build_mode_requests(
-                    mode=m,
-                    station_id=sid,
-                    start_time=start_dt,
-                    end_time=end_dt,
-                    use_opendap=use_opendap,
-                )
-                for m in ms
-            }
-            for sid in sids
-        }
 
     def get_data(
         self,
@@ -959,7 +877,7 @@ class NdbcApi(metaclass=Singleton):
                 continue
 
             with ThreadPoolExecutor(
-                    max_workers=max(1, len(handle_station_ids))) as station_executor:
+                    max_workers=min(32, max(1, len(handle_station_ids)))) as station_executor:
                 future_to_station = {
                     station_executor.submit(
                         self._handle_get_data,
@@ -991,15 +909,20 @@ class NdbcApi(metaclass=Singleton):
                             # station_data is a list of dicts
                             for row in station_data:
                                 row['station_id'] = parsed_sid
+                            accumulated_data[m].append(station_data)
                         elif (
-                            len(handle_station_ids) > 1
-                            and xarray is not None
+                            xarray is not None
                             and isinstance(station_data, xarray.Dataset)
                         ):
-                            station_data = station_data.assign_coords(
-                                station_id=parsed_sid
-                            )
-                        accumulated_data[m].append(station_data)
+                            if len(handle_station_ids) > 1:
+                                if not station_data.data_vars and not station_data.coords:
+                                    continue
+                                station_data = station_data.assign_coords(
+                                    station_id=parsed_sid
+                                )
+                            accumulated_data[m].append(station_data)
+                        else:
+                            accumulated_data[m].append(station_data)
                     except (RequestException, ResponseException,
                             HandlerException) as e:  # pragma: no cover
                         self.log(
@@ -1104,20 +1027,23 @@ class NdbcApi(metaclass=Singleton):
                 self._handler._delay = delay
         if retries is not None:
             self._retries = retries
-            if self._handler is not None:
-                self._handler._retries = retries
         if backoff_factor is not None:
             self._backoff_factor = backoff_factor
-            if self._handler is not None:
-                self._handler._backoff_factor = backoff_factor
         if verify_https is not None:
             self._verify_https = verify_https
-            if self._handler is not None:
-                self._handler._verify_https = verify_https
         if debug is not None:
             self._debug = debug
-            if self._handler is not None:
-                self._handler._debug = debug
+        if self._handler is not None:
+            self._handler._reconfigure(
+                cache_limit=cache_limit,
+                log=self.log,
+                delay=delay,
+                retries=retries,
+                backoff_factor=backoff_factor,
+                headers=headers,
+                debug=debug,
+                verify_https=verify_https,
+            )
         if logging_level is not None or filename is not None:
             lvl = logging_level if logging_level is not None else self.logger.level
             self.configure_logging(level=lvl, filename=filename)

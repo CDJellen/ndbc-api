@@ -11,7 +11,9 @@ from ndbc_api.exceptions import (
 )
 from ndbc_api.ndbc_api import NdbcApi
 from ndbc_api.utilities.mode_metadata import (
+    CANONICAL_COLUMN_MAP,
     COLUMN_UNITS,
+    LEGACY_COLUMN_ALIASES,
     MODE_METADATA,
     describe_mode,
 )
@@ -27,6 +29,8 @@ __all__ = [
     'describe_mode',
     'MODE_METADATA',
     'COLUMN_UNITS',
+    'LEGACY_COLUMN_ALIASES',
+    'CANONICAL_COLUMN_MAP',
 ]
 
 try:

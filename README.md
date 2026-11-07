@@ -130,13 +130,14 @@ The `api` supports a range of public methods for accessing data from the above c
 
 ##### Station metadata
 
-The `api` has five key public methods for accessing NDBC metadata.
+The `api` provides public methods for accessing NDBC station metadata and capabilities:
 
-1. The `stations` method, which returns all NDBC stations.
-2. The `nearest_station` method, which returns the station ID of the nearest station.
-3. The `station` method, which returns station metadata from a given station ID.
-4. The `available_realtime` method, which returns hyperlinks and measurement names for realtime measurements captured by a given station.
-5. The `available_historical` method, which returns hyperlinks and measurement names for historical measurements captured by a given station.
+1. `stations`: Returns all active NDBC stations.
+2. `historical_stations` and `station_deployments`: Returns historical station deployments and sensor history across hull/location changes.
+3. `nearest_station` and `radial_search`: Geodesic spatial search with optional capability filtering (`met`, `currents`, `waterquality`, `dart`, `owner`, `program`, `station_type`) and `k`-nearest / `limit` support.
+4. `station`: Returns station metadata from a given station ID.
+5. `available_realtime` and `available_historical`: Returns hyperlinks and measurement names for realtime and historical measurements captured by a given station.
+6. `explain_station`: Synthesizes station metadata, realtime modes, and historical coverage into a unified dictionary.
 
 ###### `stations`
 
@@ -156,37 +157,44 @@ lon = '76.43W'
 
 # find the station ID of the nearest NDBC station
 nearest = api.nearest_station(lat=lat, lon=lon)
-print(nearest_station)
+print(nearest)
 ```
 
 ```python3
 'tplm2'
+```
+
+```python3
+# find the 3 nearest stations equipped with meteorological sensors
+nearest_3_ids = api.nearest_station(lat=lat, lon=lon, k=3, met=True)
 ```
 
 ###### `radial_search`
 
 ```python3
-# specify desired latitude, longitude, radius, and units
+# specify desired latitude, longitude, radius, and units ('km', 'nm', or 'mi')
 lat = '38.88N'
 lon = '76.43W'
 radius = 100
 units = 'km'
 
-# find the station IDs of all NDBC stations within the radius
+# find all NDBC stations within the radius, sorted by geodesic distance
 nearby_stations_df = api.radial_search(lat=lat, lon=lon, radius=radius, units=units)
 ```
 
-```python3
-'tplm2'
-```
-
-###### `station`
+###### `station`, `station_deployments`, and `explain_station`
 
 ```python3
 # get station metadata
 tplm2_meta = api.station(station_id='tplm2')
 # parse the response as a Pandas DataFrame
 tplm2_df = api.station(station_id='tplm2', as_df=True)
+
+# inspect historical deployment spans for a single station
+deployments_df = api.station_deployments(station_id='41001')
+
+# get a unified summary of metadata, realtime modes, and historical coverage
+summary = api.explain_station(station_id='tplm2')
 ```
 
 ###### `available_realtime`
@@ -209,20 +217,33 @@ tplm2_historical_df = api.available_historical(station_id='tplm2', as_df=True)
 
 ##### Station measurements
 
-The `api` has two public methods which support accessing supported NDBC station measurements.
+The `api` provides methods for inspecting, planning, and executing NDBC station measurement queries:
 
-1. The `get_modes` method, which returns a list of supported `mode`s, corresponding to the data formats provided by the NDBC data service. For example, the `adcp` mode represents "Acoustic Doppler Current Profiler" measurements, providing information about ocean currents at different depths, while `cwind` represents "Continuous winds" data, offering high-frequency wind speed and direction measurements.
+1. `get_modes`: Returns a list of supported `mode`s corresponding to the data formats provided by the NDBC data service.
+2. `describe_mode`: Returns structured schema metadata, physical units, and missing-data sentinel values for one or all NDBC modes without network I/O.
+3. `build_requests`: Pure dry-run URL builder returning the exact NDBC HTTP or THREDDS/OpenDAP URLs for a query without network I/O.
+4. `get_data`: Returns measurements of a given type for one or more stations (`pandas.DataFrame` with `df.attrs['units']`, `polars.DataFrame`, `xarray.Dataset`, or `dict`).
+5. `dump_cache` and `load_cache`: Persist and restore per-station LRU request caches to/from a `dict` or pickle filepath for reproducible offline workflows.
 
-Note that not all stations provide the same set of measurements. The `available_realtime` and `available_historical` methods can be called on a station-by station basis to ensure a station has the desired data available, before building and executing requests with `get_data`. 
+Note that not all stations provide the same set of measurements. The `available_realtime`, `available_historical`, or `explain_station` methods can be called on a station-by-station basis to ensure a station has the desired data available before building and executing requests with `get_data`.
 
-2. The `get_data` method, which returns measurements of a given type for a given station.
-
-###### `get_modes`
+###### `get_modes` and `describe_mode`
 
 ```python3
-# get the list of supported meterological measurement modes
+# get the list of supported meteorological measurement modes
 modes = api.get_modes()
 print(modes)
+
+# inspect schema, column units, and missing-value sentinels for 'stdmet'
+stdmet_schema = api.describe_mode('stdmet')
+
+# preview the exact archive URLs that get_data will fetch
+urls = api.build_requests(
+    station_id='tplm2',
+    mode='stdmet',
+    start_time='2020-01-01',
+    end_time='2022-01-01',
+)
 ```
 
 ```python3
@@ -241,7 +262,9 @@ print(modes)
 ]
 ```
 
-The mode values above map directly to the identifiers used buy the NDBC. Desriptions for each mode are presented below:
+Passing `use_opendap=True` (or `as_xarray_dataset=True`) to `api.get_modes(use_opendap=True)` returns the supported THREDDS/OpenDAP modes (`'adcp'`, `'cwind'`, `'hfradar'`, `'ocean'`, `'pwind'`, `'stdmet'`, `'swden'`, `'wlevel'`).
+
+The mode values above map directly to the identifiers used by the NDBC. Descriptions for each mode are presented below:
 * `adcp`: Acoustic Doppler Current Profiler measurements, providing information about ocean currents at different depths.
 * `cwind`: Continuous winds data, offering high-frequency wind speed and direction measurements.
 * `ocean`: Oceanographic data, including water temperature, salinity, and wave measurements.

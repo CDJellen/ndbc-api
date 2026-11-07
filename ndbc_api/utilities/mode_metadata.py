@@ -27,6 +27,13 @@ MODE_METADATA: Dict[str, Dict[str, Any]] = {
                 'description': 'Wind direction (degrees clockwise from true North).',
                 'missing_sentinel': [999, 'MM'],
             },
+            'WD': {
+                'name': 'Wind Direction (Legacy)',
+                'units': 'degT',
+                'description': 'Wind direction (degrees clockwise from true North, pre-2005 legacy header).',
+                'missing_sentinel': [999, 'MM'],
+                'canonical_name': 'WDIR',
+            },
             'WSPD': {
                 'name': 'Wind Speed',
                 'units': 'm/s',
@@ -68,6 +75,13 @@ MODE_METADATA: Dict[str, Dict[str, Any]] = {
                 'units': 'hPa',
                 'description': 'Sea level atmospheric pressure.',
                 'missing_sentinel': [9999.0, 'MM'],
+            },
+            'BAR': {
+                'name': 'Sea Level Pressure (Legacy)',
+                'units': 'hPa',
+                'description': 'Sea level atmospheric pressure (pre-2005 legacy header).',
+                'missing_sentinel': [9999.0, 'MM'],
+                'canonical_name': 'PRES',
             },
             'ATMP': {
                 'name': 'Air Temperature',
@@ -157,19 +171,19 @@ MODE_METADATA: Dict[str, Dict[str, Any]] = {
                 'name': 'Measurement Depth',
                 'units': 'm',
                 'description': 'Depth below sea surface at which measurements were taken.',
-                'missing_sentinel': [99.0, 999, 'MM'],
+                'missing_sentinel': [999, 999.0, 'MM'],
             },
             'OTMP': {
                 'name': 'Ocean Temperature',
                 'units': 'degC',
                 'description': 'Subsurface ocean temperature.',
-                'missing_sentinel': [99.0, 999.0, 'MM'],
+                'missing_sentinel': [999, 999.0, 'MM'],
             },
             'COND': {
                 'name': 'Conductivity',
                 'units': 'mS/cm',
                 'description': 'Electrical conductivity of seawater.',
-                'missing_sentinel': [99.0, 999.0, 'MM'],
+                'missing_sentinel': [999, 999.0, 'MM'],
             },
             'SAL': {
                 'name': 'Salinity',
@@ -181,7 +195,7 @@ MODE_METADATA: Dict[str, Dict[str, Any]] = {
                 'name': 'Dissolved Oxygen Saturation',
                 'units': '%',
                 'description': 'Dissolved oxygen as a percentage of saturation.',
-                'missing_sentinel': [99.0, 99.9, 999.0, 'MM'],
+                'missing_sentinel': [999, 999.0, 'MM'],
             },
             'O2PPM': {
                 'name': 'Dissolved Oxygen Concentration',
@@ -199,7 +213,7 @@ MODE_METADATA: Dict[str, Dict[str, Any]] = {
                 'name': 'Turbidity',
                 'units': 'FTU',
                 'description': 'Turbidity in Formazin Turbidity Units.',
-                'missing_sentinel': [99.0, 99.9, 999.0, 'MM'],
+                'missing_sentinel': [999, 999.0, 'MM'],
             },
             'PH': {
                 'name': 'pH',
@@ -302,6 +316,7 @@ MODE_METADATA: Dict[str, Dict[str, Any]] = {
                 'units': 'hPa',
                 'description': 'Lowest 1-minute sea level pressure recorded during the hour (legacy header).',
                 'missing_sentinel': [9999.0, 'MM'],
+                'canonical_name': 'PRES',
             },
             'PTIME': {
                 'name': 'Lowest Pressure Time',
@@ -416,7 +431,26 @@ MODE_METADATA: Dict[str, Dict[str, Any]] = {
         'description': 'Peak wind speed and direction via THREDDS/OpenDAP.',
         'http_supported': False,
         'opendap_supported': True,
-        'columns': {},
+        'columns': {
+            'gust_wdir': {
+                'name': 'Peak Wind Gust Direction',
+                'units': 'degT',
+                'description': 'Direction (true) of the peak wind gust.',
+                'missing_sentinel': [999],
+            },
+            'gust_wspd': {
+                'name': 'Peak Wind Gust Speed',
+                'units': 'm/s',
+                'description': 'Peak wind gust speed.',
+                'missing_sentinel': [99.0],
+            },
+            'gust_time': {
+                'name': 'Peak Wind Gust Time',
+                'units': 's',
+                'description': 'Epoch timestamp (seconds since 1970-01-01T00:00:00Z) of peak gust.',
+                'missing_sentinel': [],
+            },
+        },
     },
     'wlevel': {
         'mode': 'wlevel',
@@ -424,7 +458,14 @@ MODE_METADATA: Dict[str, Dict[str, Any]] = {
         'description': 'Six-minute water level (tide) measurements via THREDDS/OpenDAP.',
         'http_supported': False,
         'opendap_supported': True,
-        'columns': {},
+        'columns': {
+            'water_level': {
+                'name': 'Water Level',
+                'units': 'm',
+                'description': 'Six-minute water level height relative to station datum.',
+                'missing_sentinel': [99.0],
+            },
+        },
     },
     'hfradar': {
         'mode': 'hfradar',
@@ -432,12 +473,80 @@ MODE_METADATA: Dict[str, Dict[str, Any]] = {
         'description': 'Gridded surface ocean current velocity vectors from national HF Radar networks via THREDDS/OpenDAP.',
         'http_supported': False,
         'opendap_supported': True,
-        'columns': {},
+        'columns': {
+            'u': {
+                'name': 'Eastward Surface Current Velocity',
+                'units': 'm/s',
+                'description': 'Eastward component of surface ocean current velocity.',
+                'missing_sentinel': [],
+            },
+            'v': {
+                'name': 'Northward Surface Current Velocity',
+                'units': 'm/s',
+                'description': 'Northward component of surface ocean current velocity.',
+                'missing_sentinel': [],
+            },
+            'dopx': {
+                'name': 'Longitudinal Dilution of Precision',
+                'units': '1',
+                'description': 'Geometric dilution of precision along the x-axis.',
+                'missing_sentinel': [],
+            },
+            'dopy': {
+                'name': 'Latitudinal Dilution of Precision',
+                'units': '1',
+                'description': 'Geometric dilution of precision along the y-axis.',
+                'missing_sentinel': [],
+            },
+        },
     },
 }
 
-# Build flat column -> unit lookup for DataFrame.attrs['units'] enrichment
-COLUMN_UNITS: Dict[str, str] = {}
+# Mapping from canonical column name -> tuple of legacy NDBC header aliases
+LEGACY_COLUMN_ALIASES: Dict[str, tuple] = {
+    'WDIR': ('WD',),
+    'PRES': ('BAR', 'PRESS'),
+}
+
+# Mapping from legacy NDBC header alias -> canonical column name
+CANONICAL_COLUMN_MAP: Dict[str, str] = {
+    alias: canonical
+    for canonical, aliases in LEGACY_COLUMN_ALIASES.items()
+    for alias in aliases
+}
+
+# CF-convention variable units for OpenDAP NetCDF datasets
+OPENDAP_VARIABLE_UNITS: Dict[str, str] = {
+    'wind_dir': 'degT',
+    'wind_spd': 'm/s',
+    'gust': 'm/s',
+    'gust_wdir': 'degT',
+    'gust_wspd': 'm/s',
+    'gust_time': 's',
+    'wave_height': 'm',
+    'dominant_wpd': 's',
+    'average_wpd': 's',
+    'mean_wave_dir': 'degT',
+    'air_pressure': 'hPa',
+    'air_temperature': 'degC',
+    'sea_surface_temperature': 'degC',
+    'dewpt_temperature': 'degC',
+    'visibility': 'nmi',
+    'pressure_tendency': 'hPa',
+    'water_level': 'm',
+    'water_dir': 'degT',
+    'water_spd': 'cm/s',
+    'spectral_wave_density': 'm^2/Hz',
+    'mean_wave_dir_spec': 'degT',
+    'principal_wave_dir': 'degT',
+    'wave_spectrum_r1': '1',
+    'wave_spectrum_r2': '1',
+    'u': 'm/s',
+    'v': 'm/s',
+}
+
+# Build flat column -> unit lookup for DataFrame.attrs['units'] & xarray enrichment
+COLUMN_UNITS: Dict[str, str] = dict(OPENDAP_VARIABLE_UNITS)
 for _mode_info in MODE_METADATA.values():
     for _col_name, _col_meta in _mode_info.get('columns', {}).items():
         if _col_name not in COLUMN_UNITS and 'units' in _col_meta:

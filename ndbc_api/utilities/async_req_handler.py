@@ -111,6 +111,7 @@ class AsyncRequestHandler:
 
     def has_station(self, station_id: Union[str, int]) -> bool:
         """Determine if the NDBC API already made a request to this station."""
+        station_id = str(station_id).lower()
         for s in self.stations:
             if s.id_ == station_id:
                 return True
@@ -118,19 +119,19 @@ class AsyncRequestHandler:
 
     def get_station(self, station_id: Union[str, int]) -> 'Station':
         """Get `RequestCache` with `id_` matching the supplied `station_id`."""
-        if isinstance(station_id, int):
-            station_id = str(station_id)
-        if not self.has_station(station_id):
-            self.log(logging.DEBUG,
-                     station_id=station_id,
-                     message=f'Adding station {station_id} to cache.')
-            self.add_station(station_id=station_id)
+        station_id = str(station_id).lower()
         for s in self.stations:
             if s.id_ == station_id:
                 return s
+        self.log(logging.DEBUG,
+                 station_id=station_id,
+                 message=f'Adding station {station_id} to cache.')
+        self.add_station(station_id=station_id)
+        return self.stations[-1]
 
     def add_station(self, station_id: Union[str, int]) -> None:
         """Add new `RequestCache` for the supplied `station_id`."""
+        station_id = str(station_id).lower()
         self.stations.append(
             AsyncRequestHandler.Station(station_id=station_id,
                                         cache_limit=self._cache_limit))
@@ -161,8 +162,7 @@ class AsyncRequestHandler:
         coroutines requesting the same URL do not both fire the HTTP
         request.
         """
-        if isinstance(station_id, int):
-            station_id = str(station_id)
+        station_id = str(station_id).lower()
         if station_id not in self._station_locks:
             self._station_locks[station_id] = asyncio.Lock()
 

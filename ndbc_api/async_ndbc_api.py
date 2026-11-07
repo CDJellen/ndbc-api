@@ -31,7 +31,6 @@ Attributes:
 import asyncio
 import logging
 import os
-import pickle
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
 
@@ -48,7 +47,11 @@ try:
 except ImportError:
     xarray = None
 
-from .api.dispatch import HTTP_DISPATCH, OPENDAP_DISPATCH, build_mode_requests
+from .api.dispatch import (
+    HTTP_DISPATCH,
+    OPENDAP_DISPATCH,
+    build_requests as _build_requests_impl,
+)
 from .api.handlers.http.stations import StationsHandler
 from .api.parsers.http.active_stations import ActiveStationsParser
 from .api.parsers.http.historical_stations import HistoricalStationsParser
@@ -78,12 +81,14 @@ from .exceptions import (
 )
 from .utilities.async_req_handler import AsyncRequestHandler
 from .utilities.data_helpers import (
+    dump_handler_cache as _dump_handler_cache_impl,
     enforce_timerange as _enforce_timerange_impl,
     extract_realtime_modes as _extract_realtime_modes_impl,
     filter_station_deployments as _filter_station_deployments_impl,
     handle_accumulate_data as _handle_accumulate_data_impl,
     handle_data as _handle_data_impl,
     handle_timestamp as _handle_timestamp_impl,
+    load_handler_cache as _load_handler_cache_impl,
     parse_station_id as _parse_station_id_impl,
     summarize_historical_modes as _summarize_historical_modes_impl,
 )
@@ -196,19 +201,7 @@ class AsyncNdbcApi:
             The cached request/response pairs as a `dict`, or `None`
             if `dest_fp` is specified.
         """
-        data = dict()
-        if self._handler:
-            ids = [r.id_ for r in self._handler.stations]
-            caches = [r.reqs.cache for r in self._handler.stations]
-            for station_id, cache in zip(ids, caches):
-                data[station_id] = dict()
-                for req in cache.keys():
-                    data[station_id][req] = cache[req].v
-        if dest_fp:  # pragma: no cover
-            with open(dest_fp, 'wb') as f:
-                pickle.dump(data, f)
-        else:
-            return data
+        return _dump_handler_cache_impl(self._handler, dest_fp=dest_fp)
 
     def load_cache(self, src: Union[dict, str, os.PathLike]) -> None:
         """Load cached request/response pairs from a `dict` or pickle filepath.
@@ -225,29 +218,14 @@ class AsyncNdbcApi:
             ValueError: If `src` is not a `dict` or a pickle file containing
                 a `dict`.
         """
-        if isinstance(src, dict):
-            data = src
-        elif isinstance(src, (str, os.PathLike)):
-            with open(src, 'rb') as f:
-                data = pickle.load(f)
-            if not isinstance(data, dict):
-                raise ValueError('Pickled cache must deserialize to a dict.')
-        else:
-            raise ValueError('`src` must be a dict or a filepath to a pickled cache.')
-
-        if self._handler is None:
-            return
-        for station_id, req_map in data.items():
-            if not isinstance(req_map, dict):
-                continue
-            stn = self._handler.get_station(station_id)
-            for req_url, resp in req_map.items():
-                stn.reqs.put(request=req_url, response=resp)
+        _load_handler_cache_impl(self._handler, src=src)
 
     def clear_cache(self):
         """Clear all cached requests and station state."""
         if self._handler:
             self._handler.stations = []
+            if hasattr(self._handler, '_station_locks'):
+                self._handler._station_locks.clear()
 
     def set_cache_limit(self, new_limit: int):
         """Set the per-station LRU cache limit.
@@ -307,16 +285,17 @@ class AsyncNdbcApi:
             self.logger.removeHandler(handler)
             if isinstance(handler, logging.FileHandler):
                 handler.close()
-        formatter = LogFormatter()
         if filename:
             fh = logging.FileHandler(filename)
             fh.setLevel(level)
-            fh.setFormatter(formatter)
+            fh.setFormatter(
+                LogFormatter('[%(asctime)s][%(levelname)s]: %(message)s')
+            )
             self.logger.addHandler(fh)
         else:
             ch = logging.StreamHandler()
             ch.setLevel(level)
-            ch.setFormatter(formatter)
+            ch.setFormatter(LogFormatter('[%(levelname)s]: %(message)s'))
             self.logger.addHandler(ch)
 
     def log(
@@ -757,77 +736,16 @@ class AsyncNdbcApi:
             TimestampException: If `start_time` or `end_time` is invalid or
                 `start_time > end_time`.
         """
-        if station_id is None and station_ids is None:
-            raise ValueError('Both `station_id` and `station_ids` are `None`.')
-        if station_id is not None and station_ids is not None:
-            raise ValueError('`station_id` and `station_ids` cannot both be specified.')
-        if mode is None and modes is None:
-            raise ValueError('Both `mode` and `modes` are `None`.')
-        if mode is not None and modes is not None:
-            raise ValueError('`mode` and `modes` cannot both be specified.')
-
-        if as_xarray_dataset is not None:
-            use_opendap = as_xarray_dataset
-        now = datetime.now()
-        start_dt = self._handle_timestamp(
-            start_time if start_time is not None else now - timedelta(days=30)
+        return _build_requests_impl(
+            station_id=station_id,
+            mode=mode,
+            start_time=start_time,
+            end_time=end_time,
+            use_opendap=use_opendap,
+            as_xarray_dataset=as_xarray_dataset,
+            station_ids=station_ids,
+            modes=modes,
         )
-        end_dt = self._handle_timestamp(
-            end_time if end_time is not None else now
-        )
-        if start_dt > end_dt:
-            raise TimestampException(
-                f'`start_time` ({start_dt}) must be <= `end_time` ({end_dt}).'
-            )
-
-        if station_id is not None and mode is not None:
-            sid = self._parse_station_id(station_id)
-            return build_mode_requests(
-                mode=mode,
-                station_id=sid,
-                start_time=start_dt,
-                end_time=end_dt,
-                use_opendap=use_opendap,
-            )
-
-        sids = [self._parse_station_id(s) for s in (station_ids if station_ids is not None else [station_id])]
-        ms = list(modes if modes is not None else [mode])
-
-        if station_ids is not None and mode is not None:
-            return {
-                sid: build_mode_requests(
-                    mode=mode,
-                    station_id=sid,
-                    start_time=start_dt,
-                    end_time=end_dt,
-                    use_opendap=use_opendap,
-                )
-                for sid in sids
-            }
-        if station_id is not None and modes is not None:
-            return {
-                m: build_mode_requests(
-                    mode=m,
-                    station_id=sids[0],
-                    start_time=start_dt,
-                    end_time=end_dt,
-                    use_opendap=use_opendap,
-                )
-                for m in ms
-            }
-        return {
-            sid: {
-                m: build_mode_requests(
-                    mode=m,
-                    station_id=sid,
-                    start_time=start_dt,
-                    end_time=end_dt,
-                    use_opendap=use_opendap,
-                )
-                for m in ms
-            }
-            for sid in sids
-        }
 
     async def get_data(
         self,
@@ -992,15 +910,20 @@ class AsyncNdbcApi:
                         # station_data is a list of dicts
                         for row in station_data:
                             row['station_id'] = sid
+                        accumulated_data[m].append(station_data)
                     elif (
-                        len(handle_station_ids) > 1
-                        and xarray is not None
+                        xarray is not None
                         and isinstance(station_data, xarray.Dataset)
                     ):
-                        station_data = station_data.assign_coords(
-                            station_id=sid
-                        )
-                    accumulated_data[m].append(station_data)
+                        if len(handle_station_ids) > 1:
+                            if not station_data.data_vars and not station_data.coords:
+                                continue
+                            station_data = station_data.assign_coords(
+                                station_id=sid
+                            )
+                        accumulated_data[m].append(station_data)
+                    else:
+                        accumulated_data[m].append(station_data)
 
         self.log(logging.INFO, message='Finished processing request.')
         return self._handle_accumulate_data(

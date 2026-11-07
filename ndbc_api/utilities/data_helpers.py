@@ -5,6 +5,8 @@ intentionally stateless — no `self`, no I/O — so that they can be imported
 without pulling either API class into scope.
 """
 from datetime import date, datetime, timezone
+import os
+import pickle
 import re
 from typing import Any, Dict, List, Optional, Sequence, Union
 
@@ -28,8 +30,19 @@ from ..exceptions import (
     ParserException,
     TimestampException,
 )
-from .mode_metadata import COLUMN_UNITS
+from .mode_metadata import CANONICAL_COLUMN_MAP, COLUMN_UNITS, LEGACY_COLUMN_ALIASES
 from .opendap.dataset import merge_datasets
+
+
+def _resolve_col_candidates(col: str) -> tuple:
+    """Return ordered candidate column names (exact match first, then legacy/canonical aliases)."""
+    aliases = LEGACY_COLUMN_ALIASES.get(col, ())
+    canonical = CANONICAL_COLUMN_MAP.get(col)
+    if aliases:
+        return (col, *aliases)
+    if canonical:
+        return (col, canonical)
+    return (col,)
 
 
 _REALTIME_EXT_TO_MODE: Dict[str, str] = {
@@ -186,6 +199,63 @@ def _attach_units(df: Any) -> Any:
 def parse_station_id(station_id: Union[str, int]) -> str:
     """Normalise a station identifier to a lowercase string."""
     return str(station_id).lower()
+
+
+def dump_handler_cache(
+    handler: Any,
+    dest_fp: Union[str, os.PathLike, None] = None,
+) -> Union[dict, None]:
+    """Serialize per-station LRU request caches to a `dict` or pickle file."""
+    data: Dict[str, dict] = {}
+    if handler is not None:
+        lock = getattr(handler, '_lock', None)
+        if lock is not None:
+            with lock:
+                for stn in handler.stations:
+                    data[stn.id_] = {req: node.v for req, node in stn.reqs.cache.items()}
+        else:
+            for stn in handler.stations:
+                data[stn.id_] = {req: node.v for req, node in stn.reqs.cache.items()}
+    if dest_fp:
+        with open(dest_fp, 'wb') as f:
+            pickle.dump(data, f)
+        return None
+    return data
+
+
+def load_handler_cache(
+    handler: Any,
+    src: Union[dict, str, os.PathLike],
+) -> None:
+    """Populate per-station LRU request caches from a `dict` or pickle file."""
+    if isinstance(src, dict):
+        data = src
+    elif isinstance(src, (str, os.PathLike)):
+        with open(src, 'rb') as f:
+            data = pickle.load(f)
+        if not isinstance(data, dict):
+            raise ValueError('Pickled cache must deserialize to a dict.')
+    else:
+        raise ValueError('`src` must be a dict or a filepath to a pickled cache.')
+
+    if handler is None:
+        return
+    lock = getattr(handler, '_lock', None)
+    if lock is not None:
+        with lock:
+            for station_id, req_map in data.items():
+                if not isinstance(req_map, dict):
+                    continue
+                stn = handler.get_station(station_id)
+                for req_url, resp in req_map.items():
+                    stn.reqs.put(request=req_url, response=resp)
+    else:
+        for station_id, req_map in data.items():
+            if not isinstance(req_map, dict):
+                continue
+            stn = handler.get_station(station_id)
+            for req_url, resp in req_map.items():
+                stn.reqs.put(request=req_url, response=resp)
 
 
 def filter_station_deployments(
@@ -353,14 +423,23 @@ def handle_data(
     if cols:
         try:
             if isinstance(data, list):
+                col_candidates = {col: _resolve_col_candidates(col) for col in cols}
                 if data and cols:
                     available_cols = {k for row in data for k in row.keys()}
-                    for col in cols:
-                        if col not in available_cols:
+                    for col, candidates in col_candidates.items():
+                        if not any(c in available_cols for c in candidates):
                             raise KeyError(f"Column '{col}' not found in data.")
                 new_data = []
                 for row in data:
-                    new_row = {col: row.get(col) for col in cols}
+                    new_row = {}
+                    for col, candidates in col_candidates.items():
+                        val = None
+                        for c in candidates:
+                            v = row.get(c)
+                            if v is not None:
+                                val = v
+                                break
+                        new_row[col] = val
                     if 'timestamp' in row:
                         new_row['timestamp'] = row['timestamp']
                     if 'station_id' in row:
@@ -376,9 +455,37 @@ def handle_data(
                         new_data[k] = v
                 data = new_data
             elif pd is not None and isinstance(data, pd.DataFrame):
+                need_copy = any(
+                    col not in data.columns
+                    and any(c in data.columns for c in _resolve_col_candidates(col)[1:])
+                    for col in cols
+                )
+                if need_copy:
+                    data = data.copy()
+                    for col in cols:
+                        if col not in data.columns:
+                            for alias_col in _resolve_col_candidates(col)[1:]:
+                                if alias_col in data.columns:
+                                    data[col] = data[alias_col]
+                                    break
                 data = data[[*cols]]
             elif pl is not None and isinstance(data, pl.DataFrame):
-                data = data.select([col for col in cols if col in data.columns])
+                select_exprs = []
+                selected_names = set()
+                for col in cols:
+                    candidates = _resolve_col_candidates(col)
+                    matched = [c for c in candidates if c in data.columns]
+                    if not matched:
+                        raise KeyError(f"Column '{col}' not found in data.")
+                    if len(matched) == 1:
+                        select_exprs.append(pl.col(matched[0]).alias(col))
+                    else:
+                        select_exprs.append(pl.coalesce([pl.col(c) for c in matched]).alias(col))
+                    selected_names.add(col)
+                for meta_col in ('timestamp', 'station_id'):
+                    if meta_col in data.columns and meta_col not in selected_names:
+                        select_exprs.append(pl.col(meta_col))
+                data = data.select(select_exprs)
         except (KeyError, ValueError) as e:
             raise ParserException(
                 'Failed to parse column selection.') from e
@@ -460,6 +567,10 @@ def handle_accumulate_data(
                     'to create a lightweight environment, you must reinstall it to use this feature.'
                 )
             return xarray.Dataset()
+        if as_pl:
+            if pl is None:
+                raise ImportError('Polars is not installed.')
+            return pl.DataFrame()
         return {}
 
     # Determine return type from the first available data item
@@ -476,6 +587,11 @@ def handle_accumulate_data(
 
     if isinstance(first_item, dict):
         return accumulated_data
+
+    if not as_df and not as_pl:
+        if any(item for station_data in accumulated_data.values() for item in station_data):
+            return accumulated_data
+        return {}
 
     # Funnel all data through the List[dict] IR
     raw_list = []

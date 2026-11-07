@@ -3,8 +3,8 @@
 Provides the single source of truth mapping each supported NDBC measurement
 mode to its corresponding `(RequestBuilder, Parser)` pair.
 """
-from datetime import datetime
-from typing import Dict, List, Tuple, Type
+from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional, Sequence, Tuple, Type, Union
 
 from ndbc_api.api.parsers.http.adcp import AdcpParser as HttpAdcpParser
 from ndbc_api.api.parsers.http.cwind import CwindParser as HttpCwindParser
@@ -44,7 +44,8 @@ from ndbc_api.api.requests.opendap.pwind import PwindRequest as OpendapPwindRequ
 from ndbc_api.api.requests.opendap.stdmet import StdmetRequest as OpendapStdmetRequest
 from ndbc_api.api.requests.opendap.swden import SwdenRequest as OpendapSwdenRequest
 from ndbc_api.api.requests.opendap.wlevel import WlevelRequest as OpendapWlevelRequest
-from ndbc_api.exceptions import RequestException
+from ndbc_api.exceptions import RequestException, TimestampException
+from ndbc_api.utilities.data_helpers import handle_timestamp, parse_station_id
 
 HTTP_DISPATCH: Dict[str, Tuple[Type, Type]] = {
     'adcp': (HttpAdcpRequest, HttpAdcpParser),
@@ -93,4 +94,102 @@ def build_mode_requests(
         )
     except Exception as e:
         raise RequestException('Failed to build request.') from e
+
+
+def build_requests(
+    station_id: Union[int, str, None] = None,
+    mode: Union[str, None] = None,
+    start_time: Union[str, datetime, None] = None,
+    end_time: Union[str, datetime, None] = None,
+    use_opendap: bool = False,
+    as_xarray_dataset: Optional[bool] = None,
+    station_ids: Union[Sequence[Union[int, str]], None] = None,
+    modes: Union[List[str], None] = None,
+) -> Union[List[str], Dict[str, Any]]:
+    """Build the ordered list of NDBC/THREDDS archive URLs for a query without network I/O."""
+    if station_id is None and station_ids is None:
+        raise ValueError('Both `station_id` and `station_ids` are `None`.')
+    if station_id is not None and station_ids is not None:
+        raise ValueError('`station_id` and `station_ids` cannot both be specified.')
+    if mode is None and modes is None:
+        raise ValueError('Both `mode` and `modes` are `None`.')
+    if mode is not None and modes is not None:
+        raise ValueError('`mode` and `modes` cannot both be specified.')
+    if modes is not None:
+        if not isinstance(modes, list):
+            raise ValueError('`modes` must be a list of strings.')
+        if any(not isinstance(m, str) for m in modes):
+            raise ValueError('All elements in `modes` must be strings.')
+        if any(m == 'hfradar' for m in modes):
+            raise ValueError(
+                'HF radar data cannot be requested with `modes`. '
+                'Please use `mode` to specify a single `hfradar` mode.'
+            )
+
+    if as_xarray_dataset is not None:
+        use_opendap = as_xarray_dataset
+    now = datetime.now()
+    start_dt = handle_timestamp(
+        start_time if start_time is not None else now - timedelta(days=30)
+    )
+    end_dt = handle_timestamp(
+        end_time if end_time is not None else now
+    )
+    if start_dt > end_dt:
+        raise TimestampException(
+            f'`start_time` ({start_dt}) must be <= `end_time` ({end_dt}).'
+        )
+
+    if station_id is not None and mode is not None:
+        sid = parse_station_id(station_id)
+        return build_mode_requests(
+            mode=mode,
+            station_id=sid,
+            start_time=start_dt,
+            end_time=end_dt,
+            use_opendap=use_opendap,
+        )
+
+    sids = [
+        parse_station_id(s)
+        for s in (station_ids if station_ids is not None else [station_id])
+    ]
+    ms = list(modes if modes is not None else [mode])
+
+    if station_ids is not None and mode is not None:
+        return {
+            sid: build_mode_requests(
+                mode=mode,
+                station_id=sid,
+                start_time=start_dt,
+                end_time=end_dt,
+                use_opendap=use_opendap,
+            )
+            for sid in sids
+        }
+    if station_id is not None and modes is not None:
+        return {
+            m: build_mode_requests(
+                mode=m,
+                station_id=sids[0],
+                start_time=start_dt,
+                end_time=end_dt,
+                use_opendap=use_opendap,
+            )
+            for m in ms
+        }
+    return {
+        sid: {
+            m: build_mode_requests(
+                mode=m,
+                station_id=sid,
+                start_time=start_dt,
+                end_time=end_dt,
+                use_opendap=use_opendap,
+            )
+            for m in ms
+        }
+        for sid in sids
+    }
+
 

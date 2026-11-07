@@ -6,6 +6,39 @@ import bs4
 from ndbc_api.api.parsers.http._station import StationParser
 
 
+class _StationMetadataDict(dict):
+    """Backward-compatible station metadata dictionary.
+
+    Preserves the historical `'Statation Type'` key so equality checks and
+    existing callers remain 100% intact, while transparently resolving
+    `'Station Type'` lookups (`d['Station Type']`, `d.get('Station Type')`,
+    `'Station Type' in d`).
+    """
+
+    def __getitem__(self, key):
+        if (
+            key == 'Station Type'
+            and not super().__contains__('Station Type')
+            and super().__contains__('Statation Type')
+        ):
+            return super().__getitem__('Statation Type')
+        return super().__getitem__(key)
+
+    def get(self, key, default=None):
+        if (
+            key == 'Station Type'
+            and not super().__contains__('Station Type')
+            and super().__contains__('Statation Type')
+        ):
+            return super().get('Statation Type', default)
+        return super().get(key, default)
+
+    def __contains__(self, key):
+        if key == 'Station Type' and super().__contains__('Statation Type'):
+            return True
+        return super().__contains__(key)
+
+
 class MetadataParser(StationParser):
 
     @classmethod
@@ -13,9 +46,9 @@ class MetadataParser(StationParser):
         if response.get('status') == 200:
             soup = bs4.BeautifulSoup(response.get('body') or '', 'html.parser')
             metadata = cls._meta_from_response(soup=soup)
-            return dict(ChainMap(*metadata))
+            return _StationMetadataDict(ChainMap(*metadata))
         else:
-            return dict()
+            return _StationMetadataDict()
 
     """ PRIVATE """
 

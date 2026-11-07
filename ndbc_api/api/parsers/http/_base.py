@@ -3,6 +3,7 @@ from io import StringIO
 from typing import Any, Dict, List, Set, Tuple
 
 from ndbc_api.exceptions import ParserException
+from ndbc_api.utilities.mode_metadata import COLUMN_UNITS
 
 
 try:
@@ -32,17 +33,26 @@ class BaseParser:
             if response.get('status') == 200:
                 rows = cls._read_response(response, use_timestamp=use_timestamp)
                 if rows:
+                    first_len = len(rows[0])
                     for k in rows[0].keys():
                         if k not in seen_cols:
                             seen_cols.add(k)
                             all_cols.append(k)
+                    for row in rows[1:]:
+                        if len(row) != first_len:
+                            for k in row.keys():
+                                if k not in seen_cols:
+                                    seen_cols.add(k)
+                                    all_cols.append(k)
                     components.extend(rows)
         if use_timestamp:
-            # drop duplicates by timestamp, keeping first
+            # drop invalid/missing timestamps and deduplicate by timestamp (keeping first)
             seen = set()
             unique_components = []
             for row in components:
                 ts = row.get('timestamp')
+                if ts is None:
+                    continue
                 if ts not in seen:
                     seen.add(ts)
                     unique_components.append(row)
@@ -50,11 +60,17 @@ class BaseParser:
             unique_components.sort(key=lambda x: x.get('timestamp') or datetime.min)
             components = unique_components
         if len(all_cols) > 0 and components:
+            coalesce_wdir = 'WDIR' in seen_cols and 'WD' in seen_cols
+            coalesce_pres = 'PRES' in seen_cols and 'BAR' in seen_cols
             for row in components:
                 if len(row) < len(all_cols):
                     for col in all_cols:
                         if col not in row:
                             row[col] = None
+                if coalesce_wdir and row.get('WDIR') is None and row.get('WD') is not None:
+                    row['WDIR'] = row['WD']
+                if coalesce_pres and row.get('PRES') is None and row.get('BAR') is not None:
+                    row['PRES'] = row['BAR']
         return components
 
     @classmethod
@@ -68,13 +84,19 @@ class BaseParser:
             )
         rows = cls.parse_responses(responses=responses, use_timestamp=use_timestamp)
         if not rows:
-            return pd.DataFrame()
+            df = pd.DataFrame()
+            df.attrs['units'] = {}
+            return df
         df = pd.DataFrame(rows)
         if use_timestamp:
             if 'timestamp' not in df.columns:
                 raise ParserException('Missing `timestamp` column in parsed data.')
             df = df.set_index('timestamp').sort_index()
-        return df.where(df.notna())
+        df = df.where(df.notna())
+        df.attrs['units'] = {
+            c: COLUMN_UNITS[c] for c in df.columns if c in COLUMN_UNITS
+        }
+        return df
 
     """ PRIVATE """
 
@@ -142,11 +164,14 @@ class BaseParser:
         names = cls._parse_header(header)
         if not data or not names:
             return []
+        orig_names = names
         # check that parsed names match parsed values or revert
         if len(data[0].split()) != len(names):
             names = cls.REVERT_COL_NAMES
         if '(' in data[0]:
             data = cls._clean_data(data)
+            if not names and data and len(data[0].split()) == len(orig_names):
+                names = orig_names
         if not data or not names:
             return []
 

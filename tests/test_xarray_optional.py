@@ -2,8 +2,6 @@ import sys
 import unittest
 from unittest.mock import patch
 
-import pytest
-
 
 class TestXarrayOptional(unittest.TestCase):
 
@@ -35,8 +33,9 @@ class TestXarrayOptional(unittest.TestCase):
     def test_import_without_xarray(self):
         """Test that NdbcApi can be imported without xarray installed."""
         try:
-            from ndbc_api import NdbcApi
-            from ndbc_api import AsyncNdbcApi
+            from ndbc_api import AsyncNdbcApi, NdbcApi
+            self.assertIsNotNone(NdbcApi)
+            self.assertIsNotNone(AsyncNdbcApi)
         except ImportError as e:
             self.fail(f"ImportError raised unexpectedly: {e}")
 
@@ -47,7 +46,7 @@ class TestXarrayOptional(unittest.TestCase):
         api = NdbcApi()
         
         # Mock the handler to avoid actual network requests
-        with patch.object(api._handler, 'handle_request') as mock_handle:
+        with patch.object(api._handler, 'handle_request'):
             # We just want to ensure it doesn't crash before making the request
             # or during the setup phase.
             try:
@@ -79,6 +78,49 @@ class TestXarrayOptional(unittest.TestCase):
             NdbcApi.save_xarray_dataset(None, 'test.nc')
             
         self.assertIn("xarray is required for OpenDAP support", str(context.exception))
+
+    @patch.dict('sys.modules', {'xarray': None})
+    def test_async_get_data_as_xarray_dataset_raises_error(self):
+        """Test that AsyncNdbcApi.get_data(..., as_xarray_dataset=True) raises an ImportError."""
+        import asyncio
+        from ndbc_api import AsyncNdbcApi
+        api = AsyncNdbcApi()
+
+        with self.assertRaises(ImportError) as context:
+            asyncio.run(api.get_data(station_id='tplm2', mode='stdmet', as_xarray_dataset=True))
+
+        self.assertIn("xarray is required for OpenDAP support", str(context.exception))
+
+    @patch.dict('sys.modules', {'xarray': None})
+    def test_async_save_xarray_dataset_raises_error(self):
+        """Test that AsyncNdbcApi.save_xarray_dataset raises an ImportError."""
+        from ndbc_api import AsyncNdbcApi
+
+        with self.assertRaises(ImportError) as context:
+            AsyncNdbcApi.save_xarray_dataset(None, 'test.nc')
+
+        self.assertIn("xarray is required for OpenDAP support", str(context.exception))
+
+    @patch.dict('sys.modules', {'xarray': None})
+    def test_dataset_helpers_raise_error_without_xarray(self):
+        """Test that dataset helpers raise standardized ImportError when xarray is None."""
+        from datetime import datetime
+        from ndbc_api.utilities.opendap.dataset import (
+            concat_datasets,
+            merge_datasets,
+            filter_dataset_by_time_range,
+            filter_dataset_by_variable,
+        )
+
+        for fn, args in [
+            (concat_datasets, ([],)),
+            (merge_datasets, ([],)),
+            (filter_dataset_by_time_range, (None, datetime(2020, 1, 1), datetime(2020, 1, 2))),
+            (filter_dataset_by_variable, (None, ['wspd'])),
+        ]:
+            with self.assertRaises(ImportError) as context:
+                fn(*args)
+            self.assertIn("xarray is required for OpenDAP support", str(context.exception))
 
 if __name__ == '__main__':
     unittest.main()

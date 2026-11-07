@@ -96,12 +96,52 @@ class RequestHandler(metaclass=Singleton):
         self._backoff_factor = backoff_factor
         self._debug = debug
         self._verify_https = verify_https
+        self._closed = False
         self._session = self._create_session()
 
     def close(self) -> None:
         """Close the underlying HTTP session."""
         if getattr(self, '_session', None) is not None:
             self._session.close()
+        self._closed = True
+
+    def _reconfigure(
+        self,
+        cache_limit: Optional[int] = None,
+        log: Optional[Callable] = None,
+        delay: Optional[int] = None,
+        retries: Optional[int] = None,
+        backoff_factor: Optional[float] = None,
+        headers: Optional[dict] = None,
+        debug: Optional[bool] = None,
+        verify_https: Optional[bool] = None,
+    ) -> None:
+        """Apply explicit configuration arguments to an already-instantiated singleton."""
+        with self._lock:
+            if cache_limit is not None:
+                self.set_cache_limit(cache_limit)
+            if log is not None:
+                self.log = log
+            if delay is not None:
+                self._delay = delay
+            if headers is not None:
+                self._request_headers = headers
+            if debug is not None:
+                self._debug = debug
+            if verify_https is not None:
+                self._verify_https = verify_https
+            remount = False
+            if retries is not None and retries != self._retries:
+                self._retries = retries
+                remount = True
+            if backoff_factor is not None and backoff_factor != self._backoff_factor:
+                self._backoff_factor = backoff_factor
+                remount = True
+            if remount or getattr(self, '_closed', False) or getattr(self, '_session', None) is None:
+                if getattr(self, '_session', None) is not None and not getattr(self, '_closed', False):
+                    self._session.close()
+                self._session = self._create_session()
+                self._closed = False
 
     def get_cache_limit(self) -> int:
         """Return the current station-level cache limit for NDBC requests."""
@@ -130,6 +170,7 @@ class RequestHandler(metaclass=Singleton):
 
     def has_station(self, station_id: Union[str, int]) -> bool:
         """Determine if the NDBC API already made a request to this station."""
+        station_id = str(station_id).lower()
         with self._lock:
             for s in self.stations:
                 if s.id_ == station_id:
@@ -138,23 +179,23 @@ class RequestHandler(metaclass=Singleton):
 
     def get_station(self, station_id: Union[str, int]) -> Station:
         """Get `RequestCache` with `id_` matching the supplied `station_id`."""
-        if isinstance(station_id, int):
-            station_id = str(station_id)
+        station_id = str(station_id).lower()
         with self._lock:
-            if not self.has_station(station_id):
-                self.log(logging.DEBUG,
-                         station_id=station_id,
-                         message=f'Adding station {station_id} to cache.')
-                self.add_station(station_id=station_id)
             for s in self.stations:
                 if s.id_ == station_id:
                     self.log(logging.DEBUG,
                              station_id=station_id,
                              message=f'Found station {station_id} in cache.')
                     return s
+            self.log(logging.DEBUG,
+                     station_id=station_id,
+                     message=f'Adding station {station_id} to cache.')
+            self.add_station(station_id=station_id)
+            return self.stations[-1]
 
     def add_station(self, station_id: Union[str, int]) -> None:
         """Add new `RequestCache` for the supplied `station_id`."""
+        station_id = str(station_id).lower()
         with self._lock:
             self.stations.append(
                 RequestHandler.Station(station_id=station_id,
@@ -192,6 +233,11 @@ class RequestHandler(metaclass=Singleton):
     def execute_request(self, station_id: Union[str, int], url: str,
                         headers: dict) -> dict:  # pragma: no cover
         """Execute a request with the current headers to NDBC data service."""
+        if getattr(self, '_closed', False) or getattr(self, '_session', None) is None:
+            with self._lock:
+                if getattr(self, '_closed', False) or getattr(self, '_session', None) is None:
+                    self._session = self._create_session()
+                    self._closed = False
         self.log(logging.DEBUG,
                  station_id=station_id,
                  message=f'GET: {url}',

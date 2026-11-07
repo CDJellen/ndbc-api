@@ -1,10 +1,25 @@
 from datetime import datetime
 from typing import List, Union
 
+from ndbc_api.utilities.mode_metadata import COLUMN_UNITS
+
 try:
     import xarray
 except ImportError:
     xarray = None
+
+_XARRAY_IMPORT_ERROR = (
+    'xarray is required for OpenDAP support. If you uninstalled it '
+    'to create a lightweight environment, you must reinstall it to use this feature.'
+)
+
+
+def _attach_variable_units(dataset: 'xarray.Dataset') -> 'xarray.Dataset':
+    """Populate `units` in `var.attrs` for recognized NDBC variables lacking them."""
+    for var_name in dataset.data_vars:
+        if var_name in COLUMN_UNITS and 'units' not in dataset[var_name].attrs:
+            dataset[var_name].attrs['units'] = COLUMN_UNITS[var_name]
+    return dataset
 
 
 def concat_datasets(
@@ -28,16 +43,22 @@ def concat_datasets(
         A xarray.Dataset object containing the joined data.
     """
     if xarray is None:
-        raise ImportError('xarray is required for OpenDAP support.')
+        raise ImportError(_XARRAY_IMPORT_ERROR)
     if not datasets:
         return xarray.Dataset()
     result = xarray.concat(datasets, dim=temporal_dim_name)
     if temporal_dim_name in result.coords or temporal_dim_name in result.dims:
         try:
+            if temporal_dim_name in result.indexes:
+                idx = result.indexes[temporal_dim_name]
+                if getattr(idx, 'has_duplicates', False):
+                    result = result.isel(
+                        {temporal_dim_name: ~idx.duplicated(keep='first')}
+                    )
             result = result.sortby(temporal_dim_name)
         except Exception:
             pass
-    return result
+    return _attach_variable_units(result)
 
 
 def merge_datasets(datasets: List['xarray.Dataset'],) -> 'xarray.Dataset':
@@ -57,7 +78,7 @@ def merge_datasets(datasets: List['xarray.Dataset'],) -> 'xarray.Dataset':
         A xarray.Dataset object containing the merged data.
     """
     if xarray is None:
-        raise ImportError('xarray is required for OpenDAP support.')
+        raise ImportError(_XARRAY_IMPORT_ERROR)
     if not datasets:
         return xarray.Dataset()
 
@@ -65,6 +86,8 @@ def merge_datasets(datasets: List['xarray.Dataset'],) -> 'xarray.Dataset':
     station_groups = {}
     untagged = []
     for ds in datasets:
+        if not ds.data_vars and not ds.coords:
+            continue
         sid = None
         if 'station_id' in ds.coords:
             val = ds.coords['station_id'].values
@@ -76,7 +99,7 @@ def merge_datasets(datasets: List['xarray.Dataset'],) -> 'xarray.Dataset':
         else:
             untagged.append(ds)
 
-    if len(station_groups) > 1:
+    if len(station_groups) >= 1:
         per_station = []
         for sid, stn_ds_list in station_groups.items():
             merged_stn = xarray.merge(stn_ds_list, compat='override')
@@ -89,10 +112,10 @@ def merge_datasets(datasets: List['xarray.Dataset'],) -> 'xarray.Dataset':
         result = xarray.concat(per_station, dim='station_id')
         if untagged:
             result = xarray.merge([result, *untagged], compat='override')
-        return result
+        return _attach_variable_units(result)
 
     result = xarray.merge(datasets, compat='override')
-    return result
+    return _attach_variable_units(result)
 
 
 def filter_dataset_by_time_range(
@@ -112,6 +135,8 @@ def filter_dataset_by_time_range(
     Returns:
         The modified netCDF4 Dataset object with data outside the time range removed.
     """
+    if xarray is None:
+        raise ImportError(_XARRAY_IMPORT_ERROR)
     if temporal_dim_name not in dataset.coords and temporal_dim_name not in dataset.dims:
         return dataset
     filtered_ds = dataset.sel({temporal_dim_name: slice(start_time, end_time)})
@@ -132,6 +157,8 @@ def filter_dataset_by_variable(
     Returns:
         The modified netCDF4 Dataset object with data with variables not in cols removed.
     """
+    if xarray is None:
+        raise ImportError(_XARRAY_IMPORT_ERROR)
     if cols is None:
         return dataset
     return dataset[cols]
