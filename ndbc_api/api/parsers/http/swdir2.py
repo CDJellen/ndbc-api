@@ -3,7 +3,7 @@ from ndbc_api.api.parsers.http._base import BaseParser
 
 class Swdir2Parser(BaseParser):
 
-    NAN_VALUES = [99.0, 999, 999.0, 9999, 9999.0, 'MM']
+    NAN_VALUES = [999, 999.0, 9999, 9999.0, 'MM']
     REVERT_COL_NAMES = [
         'YY',
         'MM',

@@ -58,7 +58,7 @@ jobs:
           poetry install --extras async
       - name: Run async tests
         run: |
-          poetry run python -m pytest tests/test_async_ndbc_api.py tests/test_data_helpers.py tests/utilities/test_async_req_handler.py
+          poetry run python -m pytest tests/test_async_ndbc_api.py tests/test_data_helpers.py tests/utilities/test_async_req_handler.py tests/test_first_principles_rigor.py
   Coverage:
     timeout-minutes: 30
     runs-on: ubuntu-latest

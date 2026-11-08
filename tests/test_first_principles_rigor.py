@@ -10,7 +10,6 @@ import xarray
 from ndbc_api import (
     COLUMN_UNITS,
     MODE_METADATA,
-    AsyncNdbcApi,
     HandlerException,
     NdbcApi,
     NdbcException,
@@ -18,8 +17,14 @@ from ndbc_api import (
     RequestException,
     ResponseException,
     TimestampException,
+    __version__,
     describe_mode,
 )
+
+try:
+    from ndbc_api import AsyncNdbcApi
+except ImportError:
+    AsyncNdbcApi = None
 from ndbc_api.api.dispatch import (
     HTTP_DISPATCH,
     OPENDAP_DISPATCH,
@@ -135,18 +140,24 @@ class TestSentinelDisambiguation:
         assert pd.api.types.is_numeric_dtype(df['SwH'])
         assert pd.api.types.is_numeric_dtype(df['WWH'])
 
-    def test_swdir_and_adcp_preserve_integer_99_deg(self):
+    def test_swdir_and_adcp_preserve_integer_and_float_99_deg(self):
         body = (
-            '#YY  MM DD hh mm 0.033 0.040\n'
-            '2022 01 01 00 00    99   999\n'
+            '#YY  MM DD hh mm 0.033 0.040 0.050\n'
+            '2022 01 01 00 00    99  99.0   999\n'
         )
         swdir_rows = SwdirParser.parse_responses([{'status': 200, 'body': body}], use_timestamp=True)
         swdir2_rows = Swdir2Parser.parse_responses([{'status': 200, 'body': body}], use_timestamp=True)
         adcp_rows = AdcpParser.parse_responses([{'status': 200, 'body': body}], use_timestamp=True)
         assert swdir_rows[0]['0.033'] == 99
-        assert swdir_rows[0]['0.040'] is None
+        assert swdir_rows[0]['0.040'] == 99.0
+        assert swdir_rows[0]['0.050'] is None
         assert swdir2_rows[0]['0.033'] == 99
+        assert swdir2_rows[0]['0.040'] == 99.0
+        assert swdir2_rows[0]['0.050'] is None
         assert adcp_rows[0]['0.033'] == 99
+        assert len(AdcpParser.REVERT_COL_NAMES) == 5 + 38 * 3
+        assert AdcpParser.REVERT_COL_NAMES[-1] == 'SPD38'
+        assert 999 in MODE_METADATA['adcp']['columns']['DIR01']['missing_sentinel']
 
 
 class TestMultiYearMonthlyRequests:
@@ -273,6 +284,8 @@ class TestCacheAndLifecycleRigor:
 
     @pytest.mark.asyncio
     async def test_async_load_cache_roundtrip(self, tmp_path):
+        if AsyncNdbcApi is None:
+            pytest.skip('aiohttp not installed')
         async with AsyncNdbcApi(logging_level=logging.DEBUG, cache_limit=10000) as api:
             sample_cache = {
                 '41001': {
@@ -368,8 +381,9 @@ class TestResearcherExtensions:
         assert stdmet_info['columns']['WVHT']['units'] == 'm'
         assert stdmet_info['columns']['PRES']['units'] == 'hPa'
 
-        async_api = AsyncNdbcApi(logging_level=logging.DEBUG, cache_limit=10000)
-        assert async_api.describe_mode('cwind')['columns']['WSPD']['units'] == 'm/s'
+        if AsyncNdbcApi is not None:
+            async_api = AsyncNdbcApi(logging_level=logging.DEBUG, cache_limit=10000)
+            assert async_api.describe_mode('cwind')['columns']['WSPD']['units'] == 'm/s'
 
         with pytest.raises(RequestException):
             api.describe_mode('nonexistent_mode')
@@ -504,14 +518,15 @@ class TestUnifiedDispatchAndBuildRequests:
         assert any('thredds/fileServer/data/stdmet/tplm2/tplm2h2021.nc' in u for u in od_urls['tplm2']['stdmet'])
 
         # AsyncNdbcApi parity
-        async_api = AsyncNdbcApi(logging_level=logging.DEBUG, cache_limit=10000)
-        async_urls = async_api.build_requests(
-            station_id='tplm2',
-            mode='stdmet',
-            start_time='2022-01-01',
-            end_time='2022-08-10',
-        )
-        assert async_urls == urls
+        if AsyncNdbcApi is not None:
+            async_api = AsyncNdbcApi(logging_level=logging.DEBUG, cache_limit=10000)
+            async_urls = async_api.build_requests(
+                station_id='tplm2',
+                mode='stdmet',
+                start_time='2022-01-01',
+                end_time='2022-08-10',
+            )
+            assert async_urls == urls
 
         with pytest.raises(ValueError):
             api.build_requests(mode='stdmet')
@@ -592,6 +607,8 @@ class TestTemporalRangeValidation:
 
     @pytest.mark.asyncio
     async def test_async_get_data_rejects_inverted_window(self):
+        if AsyncNdbcApi is None:
+            pytest.skip('aiohttp not installed')
         async with AsyncNdbcApi(logging_level=logging.DEBUG, cache_limit=10000) as api:
             with pytest.raises(TimestampException, match='must be <='):
                 await api.get_data(
@@ -686,6 +703,7 @@ class TestStationAndTabularParserHardening:
         assert rows[0]['WSPD'] == 6.4
 
     def test_top_level_package_exports(self):
+        assert __version__ == '0.26.11.07.1'
         assert issubclass(TimestampException, NdbcException)
         assert issubclass(RequestException, NdbcException)
         assert issubclass(ResponseException, NdbcException)
@@ -763,6 +781,7 @@ class TestHighConvictionRefinementsAndExtensions:
         assert list(merged.sel(station_id='41001')['wind_spd'].values) == [12.0, 14.0]
 
     def test_polars_multi_station_deterministic_sort(self):
+        pytest.importorskip('polars')
         accumulated = {
             'stdmet': [
                 [{'timestamp': datetime(2022, 1, 1, 0, 0), 'station_id': 'tplm2', 'WSPD': 5.0}],
@@ -912,19 +931,21 @@ class TestHighConvictionRefinementsAndExtensions:
             with pytest.raises(ValueError):
                 api.radial_search(lat=bad_lat, lon=bad_lon, radius=10)
 
-        async with AsyncNdbcApi(logging_level=logging.DEBUG, cache_limit=10000) as async_api:
-            monkeypatch.setattr(async_api, 'stations', fail_if_called)
-            for bad_lat, bad_lon in [(95.0, 0.0), (0.0, 370.0), (float('nan'), 0.0), ('95.0N', '0.0E')]:
-                with pytest.raises(ValueError):
-                    await async_api.nearest_station(lat=bad_lat, lon=bad_lon)
-                with pytest.raises(ValueError):
-                    await async_api.radial_search(lat=bad_lat, lon=bad_lon, radius=10)
+        if AsyncNdbcApi is not None:
+            async with AsyncNdbcApi(logging_level=logging.DEBUG, cache_limit=10000) as async_api:
+                monkeypatch.setattr(async_api, 'stations', fail_if_called)
+                for bad_lat, bad_lon in [(95.0, 0.0), (0.0, 370.0), (float('nan'), 0.0), ('95.0N', '0.0E')]:
+                    with pytest.raises(ValueError):
+                        await async_api.nearest_station(lat=bad_lat, lon=bad_lon)
+                    with pytest.raises(ValueError):
+                        await async_api.radial_search(lat=bad_lat, lon=bad_lon, radius=10)
 
     def test_vestige_aliases_and_mode_list_parity(self):
         api = NdbcApi(logging_level=logging.DEBUG, cache_limit=10000)
-        async_api = AsyncNdbcApi(logging_level=logging.DEBUG, cache_limit=10000)
-        assert api.get_modes(use_opendap=False) == async_api.get_modes(use_opendap=False)
-        assert api.get_modes(use_opendap=True) == async_api.get_modes(use_opendap=True)
+        if AsyncNdbcApi is not None:
+            async_api = AsyncNdbcApi(logging_level=logging.DEBUG, cache_limit=10000)
+            assert api.get_modes(use_opendap=False) == async_api.get_modes(use_opendap=False)
+            assert api.get_modes(use_opendap=True) == async_api.get_modes(use_opendap=True)
         assert hasattr(BaseParser, '_read_response')
         assert hasattr(BaseParser, '_read_response_fallback')
         assert hasattr(MetadataParser, '_meta_from_response')
@@ -979,6 +1000,7 @@ class TestHighConvictionRefinementsAndExtensions:
         assert list(merged.sel(station_id='tplm2')['wind_spd'].values) == [5.0, 6.0]
 
     def test_polars_column_selection_raises_on_missing_column(self):
+        pytest.importorskip('polars')
         rows = [{'timestamp': datetime(2022, 1, 1, 0, 0), 'WSPD': 5.0, 'GST': 7.0}]
         pl_df = handle_data(rows, as_df=False, as_pl=True)
         selected = handle_data(pl_df, as_df=False, as_pl=True, cols=['WSPD'])
@@ -1039,6 +1061,25 @@ class TestHighConvictionRefinementsAndExtensions:
         assert rows[0]['WD'] == 180
         assert rows[0]['BAR'] == 1015.2
 
+        # Multi-era supl PRESS -> PRES coalescing
+        supl_legacy = (
+            'YY MM DD hh PRESS PTIME WSPD WDIR WTIME\n'
+            '98 05 15 12 1011.4 1150 10.2  180  1155\n'
+        )
+        supl_modern = (
+            '#YY  MM DD hh mm PRES PTIME WSPD WDIR WTIME\n'
+            '2020 05 15 12 00 1008.2 1150 12.1 190 1155\n'
+        )
+        supl_rows = SuplParser.parse_responses(
+            [
+                {'status': 200, 'body': supl_legacy},
+                {'status': 200, 'body': supl_modern},
+            ],
+            use_timestamp=True,
+        )
+        assert supl_rows[0]['PRES'] == 1011.4
+        assert supl_rows[1]['PRES'] == 1008.2
+
         # Selecting canonical cols=['WDIR', 'PRES'] on a legacy-only dataset succeeds
         legacy_only = StdmetParser.parse_responses(
             [{'status': 200, 'body': legacy_body}],
@@ -1057,6 +1098,7 @@ class TestHighConvictionRefinementsAndExtensions:
         assert list(pd_sel.columns) == ['WDIR', 'PRES']
         assert pd_sel.iloc[0]['WDIR'] == 180
 
+        pytest.importorskip('polars')
         pl_raw = handle_data(legacy_only, as_df=False, as_pl=True)
         pl_sel = handle_data(pl_raw, as_df=False, as_pl=True, cols=['WDIR', 'PRES'])
         assert 'WDIR' in pl_sel.columns
@@ -1107,7 +1149,7 @@ class TestHighConvictionRefinementsAndExtensions:
         assert rows[0]['timestamp'] == datetime(2022, 1, 1, 0, 0)
 
         # 2. handle_accumulate_data returns empty pl.DataFrame when as_pl=True and empty
-        import polars as pl
+        pl = pytest.importorskip('polars')
 
         empty_pl = handle_accumulate_data({'stdmet': []}, as_df=False, as_pl=True)
         assert isinstance(empty_pl, pl.DataFrame)

@@ -356,7 +356,7 @@ MODE_METADATA: Dict[str, Dict[str, Any]] = {
                     'name': f'Depth Bin {i}',
                     'units': 'm',
                     'description': f'Depth (meters) of ADCP bin {i}.',
-                    'missing_sentinel': ['MM'],
+                    'missing_sentinel': [999, 999.0, 9999, 9999.0, 'MM'],
                 }
                 for i in range(1, 39)
             },
@@ -365,7 +365,7 @@ MODE_METADATA: Dict[str, Dict[str, Any]] = {
                     'name': f'Current Direction Bin {i}',
                     'units': 'degT',
                     'description': f'Direction ocean current is flowing toward in bin {i} (degrees clockwise from true North).',
-                    'missing_sentinel': ['MM'],
+                    'missing_sentinel': [999, 999.0, 9999, 9999.0, 'MM'],
                 }
                 for i in range(1, 39)
             },
@@ -374,7 +374,7 @@ MODE_METADATA: Dict[str, Dict[str, Any]] = {
                     'name': f'Current Speed Bin {i}',
                     'units': 'cm/s',
                     'description': f'Current speed (cm/s) in bin {i}.',
-                    'missing_sentinel': ['MM'],
+                    'missing_sentinel': [999, 999.0, 9999, 9999.0, 'MM'],
                 }
                 for i in range(1, 39)
             },

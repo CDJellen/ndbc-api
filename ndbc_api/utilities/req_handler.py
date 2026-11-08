@@ -46,7 +46,7 @@ class RequestHandler(metaclass=Singleton):
         logger (:obj:`logging.Logger`): The logger at which to register HTTP
             request and response status codes and headers used for debug
             purposes.
-        delay (:int:): The HTTP(s) request delay parameter, in seconds.
+        delay (:int:): The HTTP(s) request delay parameter, in milliseconds.
         retries (:int:): The number of times to retry a request to the NDBC data
             service.
         backoff_factor (:float:): The back-off parameter, used in conjunction with

@@ -1,5 +1,6 @@
 """ .. include:: ../README.md """
 __docformat__ = 'restructuredtext'
+__version__ = '0.26.11.07.1'
 
 from ndbc_api.exceptions import (
     HandlerException,
@@ -19,6 +20,7 @@ from ndbc_api.utilities.mode_metadata import (
 )
 
 __all__ = [
+    '__version__',
     'NdbcApi',
     'NdbcException',
     'TimestampException',

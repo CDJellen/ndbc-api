@@ -3,7 +3,7 @@ from io import StringIO
 from typing import Any, Dict, List, Set, Tuple
 
 from ndbc_api.exceptions import ParserException
-from ndbc_api.utilities.mode_metadata import COLUMN_UNITS
+from ndbc_api.utilities.mode_metadata import COLUMN_UNITS, LEGACY_COLUMN_ALIASES
 
 
 try:
@@ -14,12 +14,10 @@ except ImportError:
 
 class BaseParser:
 
-    HEADER_PREFIX = '#'
     NAN_VALUES = ['MM']
     COLUMN_NAN_VALUES: Dict[str, Set[Any]] = {}
     DATE_PARSER = '%Y %m %d %H %M'
     PARSE_DATES = [0, 1, 2, 3, 4]
-    INDEX_COL = False
     REVERT_COL_NAMES = []
 
     @classmethod
@@ -60,17 +58,21 @@ class BaseParser:
             unique_components.sort(key=lambda x: x.get('timestamp') or datetime.min)
             components = unique_components
         if len(all_cols) > 0 and components:
-            coalesce_wdir = 'WDIR' in seen_cols and 'WD' in seen_cols
-            coalesce_pres = 'PRES' in seen_cols and 'BAR' in seen_cols
+            coalesce_pairs = [
+                (canonical, alias)
+                for canonical, aliases in LEGACY_COLUMN_ALIASES.items()
+                if canonical in seen_cols
+                for alias in aliases
+                if alias in seen_cols
+            ]
             for row in components:
                 if len(row) < len(all_cols):
                     for col in all_cols:
                         if col not in row:
                             row[col] = None
-                if coalesce_wdir and row.get('WDIR') is None and row.get('WD') is not None:
-                    row['WDIR'] = row['WD']
-                if coalesce_pres and row.get('PRES') is None and row.get('BAR') is not None:
-                    row['PRES'] = row['BAR']
+                for canonical, alias in coalesce_pairs:
+                    if row.get(canonical) is None and row.get(alias) is not None:
+                        row[canonical] = row[alias]
         return components
 
     @classmethod
