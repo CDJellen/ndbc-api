@@ -26,11 +26,11 @@ Attributes:
         handler.
 """
 import logging
-import pickle
+import os
 
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta
-from typing import Any, List, Sequence, Tuple, Union, Dict, Optional, TYPE_CHECKING
+from typing import Any, List, Sequence, Tuple, Union, Dict, Optional
 
 try:
     import pandas as pd
@@ -45,28 +45,35 @@ try:
 except ImportError:
     xarray = None
 
+from .api.dispatch import (
+    HTTP_DISPATCH,
+    OPENDAP_DISPATCH,
+    build_requests as _build_requests_impl,
+)
 from .api.handlers.http.data import DataHandler
 from .api.handlers.http.stations import StationsHandler
 from .config import (DEFAULT_CACHE_LIMIT, HTTP_BACKOFF_FACTOR, HTTP_DEBUG,
                      HTTP_DELAY, HTTP_RETRY, LOGGER_NAME, VERIFY_HTTPS)
 from .exceptions import (HandlerException, ParserException, RequestException,
-                         ResponseException)
+                         ResponseException, TimestampException)
 from .utilities.req_handler import RequestHandler
 from .utilities.singleton import Singleton
 from .utilities.log_formatter import LogFormatter
+from .utilities.mode_metadata import describe_mode as _describe_mode_impl
 from .utilities.data_helpers import (
     parse_station_id as _parse_station_id_impl,
     handle_timestamp as _handle_timestamp_impl,
     enforce_timerange as _enforce_timerange_impl,
     handle_data as _handle_data_impl,
     handle_accumulate_data as _handle_accumulate_data_impl,
+    extract_realtime_modes as _extract_realtime_modes_impl,
+    summarize_historical_modes as _summarize_historical_modes_impl,
+    filter_station_deployments as _filter_station_deployments_impl,
+    dump_handler_cache as _dump_handler_cache_impl,
+    load_handler_cache as _load_handler_cache_impl,
 )
 from .api.handlers.opendap.data import OpenDapDataHandler
 from .utilities.opendap.dataset import filter_dataset_by_variable, filter_dataset_by_time_range
-from .api.requests.http.active_stations import ActiveStationsRequest
-from .api.requests.http.historical_stations import HistoricalStationsRequest
-from .api.parsers.http.active_stations import ActiveStationsParser
-from .api.parsers.http.historical_stations import HistoricalStationsParser
 
 
 class NdbcApi(metaclass=Singleton):
@@ -113,6 +120,11 @@ class NdbcApi(metaclass=Singleton):
         """Initializes the singleton `NdbcApi`, sets associated handlers."""
         self.cache_limit = cache_limit
         self.headers = headers or {}
+        self._delay = delay
+        self._retries = retries
+        self._backoff_factor = backoff_factor
+        self._verify_https = verify_https
+        self._debug = debug
         self._handler = self._get_request_handler(
             cache_limit=self.cache_limit,
             delay=delay,
@@ -127,7 +139,22 @@ class NdbcApi(metaclass=Singleton):
         self._opendap_data_api = OpenDapDataHandler
         self.configure_logging(level=logging_level, filename=filename)
 
-    def dump_cache(self, dest_fp: Union[str, None] = None) -> Union[dict, None]:
+    def __enter__(self) -> 'NdbcApi':
+        """Enter the runtime context related to the `NdbcApi` instance."""
+        if getattr(self, '_handler', None) is not None and getattr(self._handler, '_closed', False):
+            self._handler._reconfigure()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
+        """Exit the runtime context and close the underlying HTTP session."""
+        self.close()
+
+    def close(self) -> None:
+        """Close the underlying HTTP session."""
+        if getattr(self, '_handler', None) is not None:
+            self._handler.close()
+
+    def dump_cache(self, dest_fp: Union[str, os.PathLike, None] = None) -> Union[dict, None]:
         """Dump the request cache to dict or the specified filepath.
 
         Dump the request, response pairs stored in the `NdbcApi`'s
@@ -143,37 +170,48 @@ class NdbcApi(metaclass=Singleton):
             The cached request, response pairs as a `dict`, or `None` if a
             `dest_fp` is specified when calling the method.
         """
-        data = dict()
-        ids = [r.id_ for r in self._handler.stations]
-        caches = [r.reqs.cache for r in self._handler.stations]
-        if ids:
-            for station_id, cache in zip(ids, caches):
-                data[station_id] = dict()
-                reqs = cache.keys()
-                for req in reqs:
-                    resp = cache[req].v
-                    data[station_id][req] = resp
-        if dest_fp:
-            with open(dest_fp, 'wb') as f:
-                pickle.dump(data, f)
-        else:
-            return data
+        return _dump_handler_cache_impl(
+            getattr(self, '_handler', None),
+            dest_fp=dest_fp,
+        )
+
+    def load_cache(self, src: Union[dict, str, os.PathLike]) -> None:
+        """Load cached request/response pairs from a `dict` or pickle filepath.
+
+        Counterpart to `dump_cache`. Populates the per-station LRU caches
+        so subsequent offline or repeated queries hit the cache without
+        network I/O.
+
+        Args:
+            src: A `dict` mapping `station_id` to `{url: response_dict}` as
+                returned by `dump_cache`, or a filepath (`str` or `Path`)
+                to a pickled cache dictionary.
+
+        Raises:
+            ValueError: If `src` is not a `dict` or a pickle file containing
+                a `dict`.
+        """
+        _load_handler_cache_impl(getattr(self, '_handler', None), src=src)
 
     def clear_cache(self) -> None:
-        """Clear the request cache and create a new handler."""
-        del self._handler
+        """Clear the request cache and reset handler state."""
+        if getattr(self, '_handler', None) is not None:
+            with self._handler._lock:
+                self._handler.stations.clear()
         self._handler = self._get_request_handler(
             cache_limit=self.cache_limit,
-            delay=HTTP_DELAY,
-            retries=HTTP_RETRY,
-            backoff_factor=HTTP_BACKOFF_FACTOR,
+            delay=getattr(self, '_delay', HTTP_DELAY),
+            retries=getattr(self, '_retries', HTTP_RETRY),
+            backoff_factor=getattr(self, '_backoff_factor', HTTP_BACKOFF_FACTOR),
             headers=self.headers,
-            debug=HTTP_DEBUG,
-            verify_https=VERIFY_HTTPS,
+            debug=getattr(self, '_debug', HTTP_DEBUG),
+            verify_https=getattr(self, '_verify_https', VERIFY_HTTPS),
         )
+        self._handler.set_cache_limit(self.cache_limit)
 
     def set_cache_limit(self, new_limit: int) -> None:
         """Set the cache limit for the API's request cache."""
+        self.cache_limit = new_limit
         self._handler.set_cache_limit(cache_limit=new_limit)
 
     def get_cache_limit(self) -> int:
@@ -186,10 +224,12 @@ class NdbcApi(metaclass=Singleton):
 
     def update_headers(self, new: dict) -> None:
         """Add new headers to the request handler."""
+        self.headers.update(new)
         self._handler.update_headers(new)
 
     def set_headers(self, request_headers: dict) -> None:
         """Reset the request headers using the new supplied headers."""
+        self.headers = request_headers
         self._handler.set_headers(request_headers)
 
     def configure_logging(self, level=logging.WARNING, filename=None) -> None:
@@ -206,6 +246,8 @@ class NdbcApi(metaclass=Singleton):
 
         for handler in self.logger.handlers[:]:
             self.logger.removeHandler(handler)
+            if isinstance(handler, logging.FileHandler):
+                handler.close()
 
         if filename:
             handler = logging.FileHandler(filename)
@@ -244,7 +286,6 @@ class NdbcApi(metaclass=Singleton):
             log_data[k] = v
         self.logger.log(level, log_data)
 
-
     def stations(self, as_df: bool = True, as_pl: bool = False) -> Any:
         """Get all stations and station metadata from the NDBC.
 
@@ -267,11 +308,9 @@ class NdbcApi(metaclass=Singleton):
                 responses from the NDBC data service.
         """
         try:
-            req = ActiveStationsRequest.build_request()
-            resp = self._handler.handle_request('stn_active', req)
-            data = ActiveStationsParser.parse_response(resp, use_timestamp=False)
+            data = self._stations_api.stations(handler=self._handler)
             return self._handle_data(data, as_df=as_df, as_pl=as_pl, cols=None)
-        except (ResponseException, ValueError, KeyError) as e:
+        except (ResponseException, ValueError, KeyError, AttributeError) as e:
             raise ResponseException('Failed to handle returned data.') from e
 
     def historical_stations(self,
@@ -300,50 +339,70 @@ class NdbcApi(metaclass=Singleton):
                 responses from the NDBC data service.
         """
         try:
-            req = HistoricalStationsRequest.build_request()
-            resp = self._handler.handle_request('stn_historical', req)
-            data = HistoricalStationsParser.parse_response(resp, use_timestamp=False)
+            data = self._stations_api.historical_stations(handler=self._handler)
             return self._handle_data(data, as_df=as_df, as_pl=as_pl, cols=None)
-        except (ResponseException, ValueError, KeyError) as e:
+        except (ResponseException, ValueError, KeyError, AttributeError) as e:
             raise ResponseException('Failed to handle returned data.') from e
 
     def nearest_station(
         self,
         lat: Union[str, float, None] = None,
         lon: Union[str, float, None] = None,
-    ) -> str:
-        """Get nearest station to the specified lat/lon.
+        met: Optional[bool] = None,
+        currents: Optional[bool] = None,
+        waterquality: Optional[bool] = None,
+        dart: Optional[bool] = None,
+        owner: Optional[str] = None,
+        program: Optional[str] = None,
+        station_type: Optional[str] = None,
+        k: int = 1,
+    ) -> Union[str, List[str]]:
+        """Get nearest station(s) to the specified lat/lon with optional capability filters.
 
         Use the NDBC data service's current station data to determine the
         nearest station to the specified latitude and longitude (either as
-        `float` or as DD.dd[E/W] strings).
+        `float` or as DD.dd[N/S/E/W] strings), optionally filtering by sensor
+        capabilities or station metadata.
 
         Args:
-            lat: The latitude of interest, used to determine the closest
-                maintained station to the given position.
-            lon: The longitude of interest, used to determine the closest
-                maintained station to the given position.
+            lat: The latitude of interest.
+            lon: The longitude of interest.
+            met: Optional filter for `'Includes Meteorology'`.
+            currents: Optional filter for `'Includes Currents'`.
+            waterquality: Optional filter for `'Includes Water Quality'`.
+            dart: Optional filter for `'DART Program'`.
+            owner: Optional case-insensitive substring filter for `'Owner'`.
+            program: Optional case-insensitive substring filter for `'Program'`.
+            station_type: Optional case-insensitive substring filter for `'Type'`.
+            k: Number of nearest stations to return. Defaults to `1` (returns a
+                `str` station ID); when `k > 1`, returns a `List[str]`.
 
         Returns:
-            The station id (e.g. `'tplm2'` or `'41001'`) of the nearest station
-            with active measurements to the specified lat/lon pair.
+            The station ID (when `k == 1`) or list of station IDs (when `k > 1`).
 
         Raises:
-            ValueError: The latitude and longitude were not both specified when
-                querying for the closest station.
+            ValueError: If `lat` and `lon` are not both specified, or `k < 1`.
         """
-        if not (lat and lon):
+        if lat is None or lon is None:
             raise ValueError('lat and lon must be specified.')
+        if k < 1:
+            raise ValueError('k must be >= 1.')
+        lat_f = StationsHandler.LAT_MAP(lat)
+        lon_f = StationsHandler.LON_MAP(lon)
         df = self.stations(as_df=False, as_pl=False)
-        if isinstance(lat, str):
-            lat = StationsHandler.LAT_MAP(lat)
-        if isinstance(lon, str):
-            lon = StationsHandler.LON_MAP(lon)
-        try:
-            closest = StationsHandler._nearest(df, lat, lon)
-        except (TypeError, KeyError, ValueError) as e:
-            raise ParserException from e
-        return closest.get('Station', 'UNK')
+        return self._stations_api.nearest_station(
+            lat=lat_f,
+            lon=lon_f,
+            met=met,
+            currents=currents,
+            waterquality=waterquality,
+            dart=dart,
+            owner=owner,
+            program=program,
+            station_type=station_type,
+            k=k,
+            stations=df,
+        )
 
     def radial_search(
         self,
@@ -353,36 +412,44 @@ class NdbcApi(metaclass=Singleton):
         units: str = 'km',
         as_df: bool = True,
         as_pl: bool = False,
+        met: Optional[bool] = None,
+        currents: Optional[bool] = None,
+        waterquality: Optional[bool] = None,
+        dart: Optional[bool] = None,
+        owner: Optional[str] = None,
+        program: Optional[str] = None,
+        station_type: Optional[str] = None,
+        limit: Optional[int] = None,
     ) -> Any:
         """Get all stations within radius units of the specified lat/lon.
 
         Use the NDBC data service's current station data to determine the
         stations within radius of the specified latitude and longitude
-        (passed either as `float` or as DD.dd[E/W] strings).
+        (passed either as `float` or as DD.dd[N/S/E/W] strings), optionally
+        filtered by sensor capabilities or station metadata.
 
         Args:
-            lat (float): The latitude of interest, used to determine the maintained
-                stations within radius units of the given position.
-            lon (float): The longitude of interest, used to determine the maintained
-                stations within radius units of the given position.
-            radius (float): The radius in the specified units to search for stations
-                within.
-            units (str: 'nm', 'km', or 'mi'): The units of the radius, either 'nm', 'km', or 'mi'.
+            lat (float): The latitude of interest.
+            lon (float): The longitude of interest.
+            radius (float): The radius in the specified units to search within.
+            units (str: 'nm', 'km', or 'mi'): The units of the radius.
             as_df: Flag indicating whether to return current station data as a
                 `pandas.DataFrame` if set to `True` or as a `dict` if `False`.
             as_pl: Flag indicating whether to return current station data as a
                 `polars.DataFrame` if set to `True`.
+            met: Optional filter for `'Includes Meteorology'`.
+            currents: Optional filter for `'Includes Currents'`.
+            waterquality: Optional filter for `'Includes Water Quality'`.
+            dart: Optional filter for `'DART Program'`.
+            owner: Optional case-insensitive substring filter for `'Owner'`.
+            program: Optional case-insensitive substring filter for `'Program'`.
+            station_type: Optional case-insensitive substring filter for `'Type'`.
+            limit: Optional maximum number of closest stations to return.
 
         Returns:
-            A `pandas.DataFrame`, `polars.DataFrame`, or dict of the stations within the specified radius of
-            the given lat/lon pair.
-
-        Raises:
-            ValueError: The latitude and longitude were not both specified when
-                querying for the closest station, or the radius or units are
-                invalid.
+            A `pandas.DataFrame`, `polars.DataFrame`, or dict of the stations within the specified radius.
         """
-        if not (lat and lon):
+        if lat is None or lon is None:
             raise ValueError('lat and lon must be specified.')
         if units not in StationsHandler.UNITS:
             raise ValueError(
@@ -391,21 +458,91 @@ class NdbcApi(metaclass=Singleton):
         if radius < 0:
             raise ValueError(
                 f'Invalid radius: {radius}, must be non-negative.')
-        if units == 'nm':
-            radius = radius * 1.852
-        elif units == 'mi':
-            radius = radius * 1.60934
-
+        if limit is not None and limit < 1:
+            raise ValueError('limit must be >= 1.')
+        lat_f = StationsHandler.LAT_MAP(lat)
+        lon_f = StationsHandler.LON_MAP(lon)
         df = self.stations(as_df=False, as_pl=False)
-        if isinstance(lat, str):
-            lat = StationsHandler.LAT_MAP(lat)
-        if isinstance(lon, str):
-            lon = StationsHandler.LON_MAP(lon)
-        try:
-            stations_in_radius = StationsHandler._radial_search(df, lat, lon, radius)
-            return self._handle_data(stations_in_radius, as_df=as_df, as_pl=as_pl, cols=None)
-        except (TypeError, KeyError, ValueError) as e:
-            raise ParserException from e
+        stations_in_radius = self._stations_api.radial_search(
+            lat=lat_f,
+            lon=lon_f,
+            radius=radius,
+            units=units,
+            met=met,
+            currents=currents,
+            waterquality=waterquality,
+            dart=dart,
+            owner=owner,
+            program=program,
+            station_type=station_type,
+            limit=limit,
+            stations=df,
+        )
+        return self._handle_data(stations_in_radius, as_df=as_df, as_pl=as_pl, cols=None)
+
+    def station_deployments(
+        self,
+        station_id: Union[str, int],
+        start_time: Any = None,
+        end_time: Any = None,
+        as_df: bool = True,
+        as_pl: bool = False,
+    ) -> Any:
+        """Get historical deployment and sensor height records for a station.
+
+        Queries `stationmetadata.xml` (via `historical_stations`) and filters
+        to deployments for `station_id`, optionally restricted to deployments
+        overlapping `[start_time, end_time]`.
+
+        Args:
+            station_id: The NDBC station ID (e.g. `'tplm2'` or `41001`).
+            start_time: Optional start of the time window.
+            end_time: Optional end of the time window.
+            as_df: Flag indicating whether to return deployment data as a
+                `pandas.DataFrame` if set to `True` or as a `list` of `dict`
+                records if `False`.
+            as_pl: Flag indicating whether to return deployment data as a
+                `polars.DataFrame` if set to `True`.
+
+        Returns:
+            Deployment records containing `'Start Date'`, `'End Date'`,
+            `'Anemometer Height'`, `'Hull Type'`, `'Lat'`, `'Lon'`, and
+            `'Elevation'`.
+        """
+        records = self.historical_stations(as_df=False, as_pl=False)
+        filtered = _filter_station_deployments_impl(
+            records=records,
+            station_id=station_id,
+            start_time=start_time,
+            end_time=end_time,
+        )
+        return self._handle_data(filtered, as_df=as_df, as_pl=as_pl, cols=None)
+
+    def explain_station(self, station_id: Union[str, int]) -> Dict[str, Any]:
+        """Return a unified dossier of metadata, realtime modes, and historical coverage for a station.
+
+        Args:
+            station_id: The NDBC station ID (e.g. `'tplm2'` or `41001`).
+
+        Returns:
+            A `dict` containing `'station_id'`, `'metadata'`, `'realtime_modes'`,
+            and `'historical_modes'`.
+        """
+        sid = self._parse_station_id(station_id)
+        meta = self.station(station_id=sid, as_df=False, as_pl=False)
+        rt_modes = self.available_realtime(station_id=sid, full_response=False)
+        hist_modes = self.available_historical(
+            station_id=sid,
+            full_response=False,
+            as_df=False,
+            as_pl=False,
+        )
+        return {
+            'station_id': sid,
+            'metadata': meta,
+            'realtime_modes': rt_modes,
+            'historical_modes': hist_modes,
+        }
 
     def station(self,
                 station_id: Union[str, int],
@@ -498,20 +635,15 @@ class NdbcApi(metaclass=Singleton):
                                               cols=None)
 
             # Parse the modes from the full response
-            _modes = self.get_modes()
-            station_modes = set()
-            for k in full_data:
-                for m in _modes:
-                    if m in full_data[k]['description']:
-                        station_modes.add(m)
-            return list(station_modes)
+            return _extract_realtime_modes_impl(full_data, self.get_modes())
         except (ResponseException, ValueError, KeyError) as e:
             raise ResponseException('Failed to handle returned data.') from e
 
     def available_historical(self,
                              station_id: Union[str, int],
                              as_df: bool = False,
-                             as_pl: bool = False) -> Any:
+                             as_pl: bool = False,
+                             full_response: bool = True) -> Any:
         """Get the available historical measurements for a station.
 
         This method queries the NDBC station webpage for historical, quality
@@ -524,6 +656,9 @@ class NdbcApi(metaclass=Singleton):
                 defaults to `False`, and a `dict` is returned.
             as_pl: Whether to return station-level data as a `polars.DataFrame`,
                 defaults to `False`.
+            full_response: If `True` (default), return the full nested dictionary of
+                historical URLs. If `False`, return a dictionary mapping canonical
+                `ndbc-api` mode names to their available historical periods.
 
         Returns:
             The available historical measurements for the specified station,
@@ -538,16 +673,66 @@ class NdbcApi(metaclass=Singleton):
         try:
             data = self._stations_api.historical(handler=self._handler,
                                                  station_id=station_id)
+            if not full_response:
+                summary = _summarize_historical_modes_impl(data, self.get_modes())
+                if not as_df and not as_pl:
+                    return summary
+                return self._handle_data(summary, as_df=as_df, as_pl=as_pl, cols=None)
             return self._handle_data(data, as_df=as_df, as_pl=as_pl, cols=None)
         except (ResponseException, ValueError, KeyError) as e:  # pragma: no cover
             raise ResponseException('Failed to handle returned data.') from e
+
+    def build_requests(
+        self,
+        station_id: Union[int, str, None] = None,
+        mode: Union[str, None] = None,
+        start_time: Union[str, datetime, None] = None,
+        end_time: Union[str, datetime, None] = None,
+        use_opendap: bool = False,
+        as_xarray_dataset: Optional[bool] = None,
+        station_ids: Union[Sequence[Union[int, str]], None] = None,
+        modes: Union[List[str], None] = None,
+    ) -> Union[List[str], Dict[str, Any]]:
+        """Build the ordered list of NDBC/THREDDS archive URLs for a query without network I/O.
+
+        Args:
+            station_id: The NDBC station ID (e.g. `'tplm2'` or `41001`).
+            mode: The measurement mode (e.g. `'stdmet'` or `'cwind'`).
+            start_time: Start of the time range (defaults to 30 days ago).
+            end_time: End of the time range (defaults to current time).
+            use_opendap: If `True`, generate THREDDS/OpenDAP NetCDF URLs.
+            as_xarray_dataset: An alias for `use_opendap`.
+            station_ids: Sequence of NDBC station IDs for multi-station queries.
+            modes: List of measurement modes for multi-mode queries.
+
+        Returns:
+            Ordered list of request URLs (when `station_id` and `mode` are given)
+            or nested `dict` keyed by station/mode for batch queries.
+
+        Raises:
+            ValueError: If station or mode arguments are missing or mutually
+                exclusive.
+            RequestException: If `mode` is not supported.
+            TimestampException: If `start_time` or `end_time` is invalid or
+                `start_time > end_time`.
+        """
+        return _build_requests_impl(
+            station_id=station_id,
+            mode=mode,
+            start_time=start_time,
+            end_time=end_time,
+            use_opendap=use_opendap,
+            as_xarray_dataset=as_xarray_dataset,
+            station_ids=station_ids,
+            modes=modes,
+        )
 
     def get_data(
         self,
         station_id: Union[int, str, None] = None,
         mode: Union[str, None] = None,
-        start_time: Union[str, datetime] = datetime.now() - timedelta(days=30),
-        end_time: Union[str, datetime] = datetime.now(),
+        start_time: Union[str, datetime, None] = None,
+        end_time: Union[str, datetime, None] = None,
         use_timestamp: bool = True,
         as_df: bool = True,
         as_pl: bool = False,
@@ -614,15 +799,27 @@ class NdbcApi(metaclass=Singleton):
             HandlerException: There was an error in handling the returned data
                 as a `dict` or `pandas.DataFrame`.
         """
+        now = datetime.now()
+        if start_time is None:
+            start_time = now - timedelta(days=30)
+        if end_time is None:
+            end_time = now
+
         if use_opendap is not None:
             as_xarray_dataset = use_opendap
+
+        if as_xarray_dataset and xarray is None:
+            raise ImportError(
+                'xarray is required for OpenDAP support. If you uninstalled it '
+                'to create a lightweight environment, you must reinstall it to use this feature.'
+            )
 
         if as_pl:
             as_df = False
         as_df = as_df and not as_xarray_dataset
 
         self.log(logging.DEBUG,
-                 message=f"`get_data` called with arguments: {locals()}")
+                 message=f'`get_data` called with arguments: {locals()}')
 
         if station_id is None and station_ids is None:
             raise ValueError('Both `station_id` and `station_ids` are `None`.')
@@ -643,6 +840,13 @@ class NdbcApi(metaclass=Singleton):
         if mode is not None and modes is not None:
             raise ValueError('`mode` and `modes` cannot both be specified.')
 
+        start_dt = self._handle_timestamp(start_time)
+        end_dt = self._handle_timestamp(end_time)
+        if start_dt > end_dt:
+            raise TimestampException(
+                f'`start_time` ({start_dt}) must be <= `end_time` ({end_dt}).'
+            )
+
         handle_station_ids: List[Union[int, str]] = []
         handle_modes: List[str] = []
 
@@ -655,61 +859,79 @@ class NdbcApi(metaclass=Singleton):
         if modes is not None:
             handle_modes.extend(modes)
 
-        for mode in handle_modes:
-            if mode not in self.get_modes(use_opendap=as_xarray_dataset):
-                raise RequestException(f"Mode {mode} is not available.")
+        for m in handle_modes:
+            if m not in self.get_modes(use_opendap=as_xarray_dataset):
+                raise RequestException(f'Mode {m} is not available.')
 
         self.log(logging.INFO,
-                 message=(f"Processing request for station_ids "
-                          f"{handle_station_ids} and modes "
-                          f"{handle_modes}"))
+                 message=(f'Processing request for station_ids '
+                          f'{handle_station_ids} and modes '
+                          f'{handle_modes}'))
 
         # accumulated_data records the handled response and parsed station_id
         # as a tuple, with the data as the first value and the id as the second.
         accumulated_data: Dict[str, List[Any]] = {}
-        for mode in handle_modes:
-            accumulated_data[mode] = []
+        for m in handle_modes:
+            accumulated_data[m] = []
+            if not handle_station_ids:
+                continue
 
             with ThreadPoolExecutor(
-                    max_workers=len(handle_station_ids)) as station_executor:
-                station_futures = {}
-                for station_id in handle_station_ids:
-                    station_futures[station_id] = station_executor.submit(
+                    max_workers=min(32, max(1, len(handle_station_ids)))) as station_executor:
+                future_to_station = {
+                    station_executor.submit(
                         self._handle_get_data,
-                        mode=mode,
-                        station_id=station_id,
-                        start_time=start_time,
-                        end_time=end_time,
+                        mode=m,
+                        station_id=sid,
+                        start_time=start_dt,
+                        end_time=end_dt,
                         use_timestamp=use_timestamp,
                         as_df=as_df,
                         as_pl=as_pl,
                         cols=cols,
                         use_opendap=as_xarray_dataset,
-                    )
+                    ): sid
+                    for sid in handle_station_ids
+                }
 
-                for future in as_completed(station_futures.values()):
+                for future in as_completed(future_to_station):
+                    req_sid = future_to_station[future]
                     try:
-                        station_data, station_id = future.result()
+                        station_data, parsed_sid = future.result()
                         self.log(
                             level=logging.DEBUG,
-                            station_id=station_id,
-                            message=
-                            f"Successfully processed request for station_id {station_id}"
+                            station_id=parsed_sid,
+                            message=(
+                                f'Successfully processed request for station_id {parsed_sid}'
+                            ),
                         )
                         if not as_xarray_dataset:
                             # station_data is a list of dicts
                             for row in station_data:
-                                row['station_id'] = station_id
-                        accumulated_data[mode].append(station_data)
+                                row['station_id'] = parsed_sid
+                            accumulated_data[m].append(station_data)
+                        elif (
+                            xarray is not None
+                            and isinstance(station_data, xarray.Dataset)
+                        ):
+                            if len(handle_station_ids) > 1:
+                                if not station_data.data_vars and not station_data.coords:
+                                    continue
+                                station_data = station_data.assign_coords(
+                                    station_id=parsed_sid
+                                )
+                            accumulated_data[m].append(station_data)
+                        else:
+                            accumulated_data[m].append(station_data)
                     except (RequestException, ResponseException,
                             HandlerException) as e:  # pragma: no cover
                         self.log(
                             level=logging.WARN,
-                            station_id=station_id,
+                            station_id=req_sid,
                             message=(
-                                f"Failed to process request for station_id "
-                                f"{station_id} with error: {e}"))
-        self.log(logging.INFO, message="Finished processing request.")
+                                f'Failed to process request for station_id '
+                                f'{req_sid} with error: {e}'))
+        self.log(logging.INFO, message='Finished processing request.')
         return self._handle_accumulate_data(
             accumulated_data,
             as_df=as_df,
@@ -734,10 +956,24 @@ class NdbcApi(metaclass=Singleton):
             use_opendap = as_xarray_dataset
 
         if use_opendap:
-            return [
-                v for v in vars(self._opendap_data_api) if not v.startswith('_')
-            ]
-        return [v for v in vars(self._data_api) if not v.startswith('_')]
+            return list(OPENDAP_DISPATCH.keys())
+        return list(HTTP_DISPATCH.keys())
+
+    def describe_mode(self, mode: Optional[str] = None) -> Dict[str, Any]:
+        """Return structured metadata, column units, and sentinel values for NDBC modes.
+
+        Args:
+            mode: Optional mode name (e.g. `'stdmet'` or `'cwind'`). If `None`,
+                returns a dictionary describing all supported modes.
+
+        Returns:
+            A `dict` containing the mode's description, column schemas (name,
+            units, description, missing sentinels), and endpoint availability.
+
+        Raises:
+            RequestException: If `mode` is not a recognized NDBC mode.
+        """
+        return _describe_mode_impl(mode)
 
     @staticmethod
     def save_xarray_dataset(dataset: 'xarray.Dataset', output_filepath: str,
@@ -755,8 +991,8 @@ class NdbcApi(metaclass=Singleton):
         """
         if xarray is None:
             raise ImportError(
-                "xarray is required for OpenDAP support. If you uninstalled it "
-                "to create a lightweight environment, you must reinstall it to use this feature."
+                'xarray is required for OpenDAP support. If you uninstalled it '
+                'to create a lightweight environment, you must reinstall it to use this feature.'
             )
         if not isinstance(dataset, xarray.Dataset):
             raise ValueError(
@@ -767,6 +1003,50 @@ class NdbcApi(metaclass=Singleton):
         dataset.to_netcdf(output_filepath, **kwargs)  # pragma: no cover
 
     """ PRIVATE """
+
+    def _reconfigure(
+        self,
+        logging_level: Optional[int] = None,
+        filename: Any = None,
+        cache_limit: Optional[int] = None,
+        headers: Optional[dict] = None,
+        delay: Optional[int] = None,
+        retries: Optional[int] = None,
+        backoff_factor: Optional[float] = None,
+        verify_https: Optional[bool] = None,
+        debug: Optional[bool] = None,
+    ) -> None:
+        """Apply explicit configuration arguments to an already-instantiated singleton."""
+        if cache_limit is not None:
+            self.set_cache_limit(cache_limit)
+        if headers is not None:
+            self.set_headers(headers)
+        if delay is not None:
+            self._delay = delay
+            if self._handler is not None:
+                self._handler._delay = delay
+        if retries is not None:
+            self._retries = retries
+        if backoff_factor is not None:
+            self._backoff_factor = backoff_factor
+        if verify_https is not None:
+            self._verify_https = verify_https
+        if debug is not None:
+            self._debug = debug
+        if self._handler is not None:
+            self._handler._reconfigure(
+                cache_limit=cache_limit,
+                log=self.log,
+                delay=delay,
+                retries=retries,
+                backoff_factor=backoff_factor,
+                headers=headers,
+                debug=debug,
+                verify_https=verify_https,
+            )
+        if logging_level is not None or filename is not None:
+            lvl = logging_level if logging_level is not None else self.logger.level
+            self.configure_logging(level=lvl, filename=filename)
 
     def _get_request_handler(
         self,
@@ -846,6 +1126,10 @@ class NdbcApi(metaclass=Singleton):
     ) -> Tuple[Any, str]:
         start_time = self._handle_timestamp(start_time)
         end_time = self._handle_timestamp(end_time)
+        if start_time > end_time:
+            raise TimestampException(
+                f'`start_time` ({start_time}) must be <= `end_time` ({end_time}).'
+            )
         station_id = self._parse_station_id(station_id)
         if use_opendap:
             data_api_call = getattr(self._opendap_data_api, mode, None)  # pragma: no cover

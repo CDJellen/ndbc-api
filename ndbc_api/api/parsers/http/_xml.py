@@ -24,4 +24,4 @@ class XMLParser(BaseParser):
             return ET.ElementTree(root)
         except Exception as e:
             raise ParserException(
-                "failed to obtain XML root from response body") from e
+                'failed to obtain XML root from response body') from e

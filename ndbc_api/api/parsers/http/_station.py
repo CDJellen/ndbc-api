@@ -31,10 +31,16 @@ class StationParser:
     def _build_available_measurements(
             cls, line_items: List[bs4.element.Tag]) -> dict:
         # unpack nested lists
-        nested = [li for li in line_items for li in li.find_all('li')]
+        nested = [sub_li for li in line_items for sub_li in li.find_all('li')]
         nested = [
-            li for li in nested
-            if li.get('href') is not None and 'plot' not in li.get('href')
+            sub_li for sub_li in nested
+            if (
+                (sub_li.get('href') is not None and 'plot' not in sub_li.get('href'))
+                or (
+                    sub_li.find('a', href=True) is not None
+                    and 'plot' not in (sub_li.find('a', href=True).get('href') or '')
+                )
+            )
         ]
         line_items = [li for li in line_items if len(li.find_all('li')) == 0]
         line_items.extend(nested)

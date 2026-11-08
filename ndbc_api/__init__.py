@@ -1,22 +1,43 @@
-"""A Python API for the National Data Buoy Center.
+""" .. include:: ../README.md """
+__docformat__ = 'restructuredtext'
+__version__ = '0.26.11.07.1'
 
-The ``ndbc-api`` package provides two top-level API classes:
-
-* :class:`NdbcApi` — synchronous API (always available).
-* :class:`AsyncNdbcApi` — async API backed by ``aiohttp``.
-  Requires the ``async`` extra::
-
-      pip install ndbc-api[async]
-"""
-__docformat__ = "restructuredtext"
-
+from ndbc_api.exceptions import (
+    HandlerException,
+    NdbcException,
+    ParserException,
+    RequestException,
+    ResponseException,
+    TimestampException,
+)
 from ndbc_api.ndbc_api import NdbcApi
+from ndbc_api.utilities.mode_metadata import (
+    CANONICAL_COLUMN_MAP,
+    COLUMN_UNITS,
+    LEGACY_COLUMN_ALIASES,
+    MODE_METADATA,
+    describe_mode,
+)
 
-__all__ = ["NdbcApi"]
+__all__ = [
+    '__version__',
+    'NdbcApi',
+    'NdbcException',
+    'TimestampException',
+    'RequestException',
+    'ResponseException',
+    'ParserException',
+    'HandlerException',
+    'describe_mode',
+    'MODE_METADATA',
+    'COLUMN_UNITS',
+    'LEGACY_COLUMN_ALIASES',
+    'CANONICAL_COLUMN_MAP',
+]
 
 try:
     from ndbc_api.async_ndbc_api import AsyncNdbcApi as AsyncNdbcApi
 
-    __all__.append("AsyncNdbcApi")
+    __all__.append('AsyncNdbcApi')
 except ImportError:  # aiohttp not installed
     pass

@@ -1,7 +1,5 @@
 from typing import List
 
-
-
 from ndbc_api.api.parsers.opendap._base import BaseParser
 
 
@@ -13,5 +11,5 @@ class PwindParser(BaseParser):
     @classmethod
     def nc_from_responses(cls,
                           responses: List[dict],
-                          use_timestamp: bool = False) -> 'xarray.Dataset':
+                          use_timestamp: bool = False) -> 'xarray.Dataset':  # noqa: F821
         return super(PwindParser, cls).nc_from_responses(responses, use_timestamp=use_timestamp)

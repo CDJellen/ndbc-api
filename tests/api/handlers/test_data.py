@@ -31,6 +31,19 @@ TEST_STN_SWDIR = '41001'
 TEST_STN_SWDIR2 = '41001'
 TEST_STN_SWR1 = '41001'
 TEST_STN_SWR2 = '41001'
+TEST_REQUESTS = {
+    'adcp': AdcpRequest,
+    'cwind': CwindRequest,
+    'ocean': OceanRequest,
+    'spec': SpecRequest,
+    'stdmet': StdmetRequest,
+    'supl': SuplRequest,
+    'swden': SwdenRequest,
+    'swdir': SwdirRequest,
+    'swdir2': Swdir2Request,
+    'swr1': Swr1Request,
+    'swr2': Swr2Request,
+}
 TEST_LOG = partial(logging.getLogger('TestDataHandler').log, msg="")
 
 

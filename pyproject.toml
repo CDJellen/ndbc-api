@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "ndbc-api"
-version = "0.26.07.25.2"
+version = "0.26.11.07.1"
 description = "A Python API for the National Data Buoy Center."
 authors = ["cdjellen <cdjellen@gmail.com>"]
 license = "MIT"
@@ -29,7 +29,6 @@ polars = {version = ">=0.20.0", optional = true}
 numpy = ">=1.26.3,<3"
 scipy = ">=1.7.3"
 beautifulsoup4 = ">=4.0.0,<5"
-html5lib = ">=1.1"
 xarray = ">=2022.6.0"
 h5netcdf = ">=1.6.1"
 aiohttp = {version = ">=3.9.0", optional = true}

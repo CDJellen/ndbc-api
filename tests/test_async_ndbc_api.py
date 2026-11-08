@@ -722,14 +722,19 @@ async def test_handler_delay_fires():
         sleep_calls.append(seconds)
         # Don't actually sleep — just record the call
 
-    with patch('ndbc_api.utilities.async_req_handler.asyncio.sleep',
-               side_effect=mock_sleep):
-        async with handler:
-            await handler.execute_request(
-                station_id='test',
-                url='https://www.ndbc.noaa.gov/test',
-                headers={},
-            )
+    from aioresponses import aioresponses as aioresponses_ctx
+
+    url = 'https://www.ndbc.noaa.gov/test'
+    with aioresponses_ctx() as mocked:
+        mocked.get(url, status=200, body='ok')
+        with patch('ndbc_api.utilities.async_req_handler.asyncio.sleep',
+                   side_effect=mock_sleep):
+            async with handler:
+                await handler.execute_request(
+                    station_id='test',
+                    url=url,
+                    headers={},
+                )
 
     # The delay should have been applied (delay_ms / 1000)
     assert any(abs(s - delay_ms / 1000) < 0.001 for s in sleep_calls), \
@@ -850,17 +855,10 @@ async def test_e2e_stdmet_via_aioresponses(read_responses):
     assert all(r.get('status') == 200 for r in responses)
 
     # Parse through the real parser (validates full pipeline)
-    try:
-        df = StdmetParser.df_from_responses(
-            responses=responses, use_timestamp=True)
-        assert isinstance(df, pd.DataFrame)
-        # Should have rows if the fixture data is valid
-        assert len(df) >= 0  # May be empty for some fixtures
-    except Exception:
-        # If parsing fails due to fixture format, that's acceptable
-        # for this integration test — the key assertion is that
-        # the handler correctly fetched and cached the responses
-        pass
+    df = StdmetParser.df_from_responses(
+        responses=responses, use_timestamp=True)
+    assert isinstance(df, pd.DataFrame)
+    assert len(df) > 0
 
 
 # ---------------------------------------------------------------------------

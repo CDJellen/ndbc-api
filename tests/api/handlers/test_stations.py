@@ -9,6 +9,7 @@ from ndbc_api.api.requests.http.station_historical import HistoricalRequest
 from ndbc_api.api.requests.http.station_metadata import MetadataRequest
 from ndbc_api.api.requests.http.station_realtime import RealtimeRequest
 from ndbc_api.api.requests.http.active_stations import ActiveStationsRequest
+from ndbc_api.api.requests.http.historical_stations import HistoricalStationsRequest
 from ndbc_api.exceptions import ResponseException
 from ndbc_api.utilities.req_handler import RequestHandler
 from tests.api.handlers._base import mock_register_uri
@@ -30,6 +31,13 @@ def request_handler():
                          delay=1,
                          retries=1,
                          backoff_factor=0.5)
+
+
+@pytest.fixture(autouse=True)
+def _reset_request_handler_cache(request_handler):
+    request_handler.stations.clear()
+    yield
+    request_handler.stations.clear()
 
 
 @pytest.mark.private
@@ -117,7 +125,70 @@ def test_stations(
         got.set_index('station_id', inplace=True)
     pd.testing.assert_frame_equal(want, got, check_dtype=False)
     with pytest.raises(ResponseException):
-        _ = stations_handler.metadata(
+        _ = stations_handler.stations(
             handler=None,
-            station_id=TEST_STN,
         )
+
+
+@pytest.mark.private
+@pytest.mark.usefixtures('mock_socket')
+def test_historical_stations(stations_handler, request_handler, mock_socket):
+    _ = mock_socket
+    req = HistoricalStationsRequest.build_request()
+    xml_body = (
+        '<?xml version="1.0" encoding="utf-8"?>'
+        '<stations created="2023-01-01T00:00:00UTC" count="1">'
+        '<station id="41001" name="EAST HATTERAS" owner="NDBC" pgm="NDBC" type="buoy">'
+        '<history start="1976-06-02" stop="" lat="34.7" lng="-72.7" elev="0" met="y" hull="6N" anemom_height="5.0" />'
+        '</station>'
+        '</stations>'
+    )
+    mock_register_uri([req], [{'status': 200, 'body': xml_body}])
+    got = stations_handler.historical_stations(handler=request_handler)
+    assert isinstance(got, list)
+    assert len(got) == 1
+    assert got[0]['Station'] == '41001'
+    with pytest.raises(ResponseException):
+        _ = stations_handler.historical_stations(handler=None)
+
+
+@pytest.mark.private
+@pytest.mark.usefixtures('mock_socket')
+def test_nearest_station_and_radial_search(stations_handler, request_handler, mock_socket):
+    _ = mock_socket
+    req = ActiveStationsRequest.build_request()
+    xml_body = (
+        '<?xml version="1.0" encoding="utf-8"?>'
+        '<stations created="2023-01-01T00:00:00UTC" count="2">'
+        '<station id="tplm2" lat="38.898" lon="-76.437" name="Thomas Point" owner="NOS" pgm="NOS" type="fixed" met="y" currents="n" waterquality="n" dart="n" />'
+        '<station id="41001" lat="34.700" lon="-72.700" name="East Hatteras" owner="NDBC" pgm="NDBC" type="buoy" met="n" currents="y" waterquality="n" dart="n" />'
+        '</stations>'
+    )
+    mock_register_uri([req], [{'status': 200, 'body': xml_body}])
+
+    nearest = stations_handler.nearest_station(
+        handler=request_handler, lat='38.88N', lon='76.43W'
+    )
+    assert nearest == 'tplm2'
+
+    nearest_k2 = stations_handler.nearest_station(
+        handler=request_handler, lat='38.88N', lon='76.43W', k=2
+    )
+    assert nearest_k2 == ['tplm2', '41001']
+
+    nearest_currents = stations_handler.nearest_station(
+        handler=request_handler, lat='38.88N', lon='76.43W', currents=True
+    )
+    assert nearest_currents == '41001'
+
+    radial = stations_handler.radial_search(
+        handler=request_handler,
+        lat='38.88N',
+        lon='76.43W',
+        radius=50,
+        units='nm',
+        limit=1,
+    )
+    assert len(radial) == 1
+    assert radial[0]['Station'] == 'tplm2'
+    assert 'distance' in radial[0]

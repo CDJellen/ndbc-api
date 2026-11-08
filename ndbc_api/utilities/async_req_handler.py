@@ -1,36 +1,42 @@
-"""Async request handler for the NDBC API.
+"""Handles async requests to the NDBC, caching responses for each station.
 
-Mirrors :class:`RequestHandler` using ``aiohttp.ClientSession`` for
-non-blocking I/O.  Shares the same :class:`RequestCache` and
-:class:`Station` patterns as its synchronous counterpart.
+This module defines the `AsyncRequestHandler`, which mirrors `RequestHandler`
+using `aiohttp.ClientSession` for non-blocking I/O. It shares the same
+`RequestCache` and `Station` patterns as its synchronous counterpart.
 
-Example::
-
+Example:
+    ```python3
     async with AsyncRequestHandler(cache_limit=36, ...) as handler:
         resp = await handler.execute_request(
             station_id='tplm2', url='https://...', headers={}
         )
+    ```
+
+Attributes:
+    stations (:obj:`list`): A list of `Station`s to which requests have
+        been made.
 """
 import asyncio
 import logging
-from typing import Dict, List, Union, Callable
+from typing import Callable, Dict, List, Union
 
 import aiohttp
 
+from ndbc_api.exceptions import RequestException
 from .req_cache import RequestCache
 
 
 class AsyncRequestHandler:
-    """Async counterpart to :class:`RequestHandler`.
+    """Async counterpart to `RequestHandler`.
 
-    Uses ``aiohttp.ClientSession`` for non-blocking HTTP and reuses the
-    synchronous :class:`RequestCache` for per-station LRU caching.
+    Uses `aiohttp.ClientSession` for non-blocking HTTP and reuses the
+    synchronous `RequestCache` for per-station LRU caching.
 
-    This class is **not** a singleton — callers manage its lifecycle
-    explicitly via ``async with``.
+    This class is not a singleton — callers manage its lifecycle
+    explicitly via `async with`.
 
     Attributes:
-        stations: A list of cached ``Station`` objects.
+        stations (:obj:`list`): A list of cached `Station` objects.
     """
 
     class Station:
@@ -67,8 +73,6 @@ class AsyncRequestHandler:
         self._station_locks: Dict[str, asyncio.Lock] = {}
         self._session: aiohttp.ClientSession = None
 
-    # --- context manager ---------------------------------------------------
-
     async def __aenter__(self) -> 'AsyncRequestHandler':
         connector = aiohttp.TCPConnector(
             ssl=self._verify_https,
@@ -83,8 +87,6 @@ class AsyncRequestHandler:
             await self._session.close()
             self.log(logging.DEBUG, message='Closed async session.')
 
-    # --- public cache helpers ----------------------------------------------
-
     def get_cache_limit(self) -> int:
         """Return the current station-level cache limit."""
         return self._cache_limit
@@ -92,6 +94,8 @@ class AsyncRequestHandler:
     def set_cache_limit(self, cache_limit: int) -> None:
         """Set a new station-level cache limit."""
         self._cache_limit = cache_limit
+        for s in self.stations:
+            s.reqs.set_capacity(cache_limit)
 
     def get_headers(self) -> dict:
         """Return the current request headers."""
@@ -106,41 +110,40 @@ class AsyncRequestHandler:
         self._request_headers = request_headers
 
     def has_station(self, station_id: Union[str, int]) -> bool:
-        """Check if we have a cache for this station."""
+        """Determine if the NDBC API already made a request to this station."""
+        station_id = str(station_id).lower()
         for s in self.stations:
             if s.id_ == station_id:
                 return True
         return False
 
     def get_station(self, station_id: Union[str, int]) -> 'Station':
-        """Get or create a :class:`Station` cache entry."""
-        if isinstance(station_id, int):
-            station_id = str(station_id)
-        if not self.has_station(station_id):
-            self.log(logging.DEBUG,
-                     station_id=station_id,
-                     message=f'Adding station {station_id} to cache.')
-            self.add_station(station_id=station_id)
+        """Get `RequestCache` with `id_` matching the supplied `station_id`."""
+        station_id = str(station_id).lower()
         for s in self.stations:
             if s.id_ == station_id:
                 return s
+        self.log(logging.DEBUG,
+                 station_id=station_id,
+                 message=f'Adding station {station_id} to cache.')
+        self.add_station(station_id=station_id)
+        return self.stations[-1]
 
     def add_station(self, station_id: Union[str, int]) -> None:
-        """Create a new :class:`Station` cache entry."""
+        """Add new `RequestCache` for the supplied `station_id`."""
+        station_id = str(station_id).lower()
         self.stations.append(
             AsyncRequestHandler.Station(station_id=station_id,
                                         cache_limit=self._cache_limit))
-
-    # --- async I/O ---------------------------------------------------------
 
     async def handle_requests(self, station_id: Union[str, int],
                               reqs: List[str]) -> List[dict]:
         """Handle a batch of requests for one station, sequentially.
 
         Requests within a single station are processed one at a time
-        (mirroring the synchronous handler).  Concurrency *across*
-        stations is achieved at the ``AsyncNdbcApi`` level via
-        ``asyncio.gather``.
+        (mirroring the synchronous handler). Concurrency across
+        stations is achieved at the `AsyncNdbcApi` level via
+        `asyncio.gather`.
         """
         self.log(
             logging.INFO,
@@ -155,12 +158,11 @@ class AsyncRequestHandler:
                              req: str) -> dict:
         """Check cache, fetch on miss, return response dict.
 
-        Uses a per-station ``asyncio.Lock`` so that concurrent
-        coroutines requesting the same URL don't both fire the HTTP
+        Uses a per-station `asyncio.Lock` so that concurrent
+        coroutines requesting the same URL do not both fire the HTTP
         request.
         """
-        if isinstance(station_id, int):
-            station_id = str(station_id)
+        station_id = str(station_id).lower()
         if station_id not in self._station_locks:
             self._station_locks[station_id] = asyncio.Lock()
 
@@ -185,15 +187,14 @@ class AsyncRequestHandler:
         """Execute an HTTP GET with retry, exponential backoff, and throttle.
 
         Acquires the concurrency semaphore before making the request
-        so that at most ``max_connections`` requests are in-flight
-        globally.  Also sleeps ``delay`` ms before each request
+        so that at most `max_connections` requests are in-flight
+        globally. Also sleeps `delay` ms before each request
         to throttle request rate (mirroring the sync handler).
         """
         self.log(logging.DEBUG,
                  station_id=station_id,
                  message=f'GET: {url}',
                  extra_data={'headers': headers})
-
 
         last_exc = None
         for attempt in range(self._retries + 1):
@@ -234,5 +235,4 @@ class AsyncRequestHandler:
         self.log(logging.ERROR,
                  station_id=station_id,
                  message=f'All {self._retries} retries exhausted for {url}')
-        from ndbc_api.exceptions import RequestException
-        raise RequestException(f"Max retries exceeded for {url}") from last_exc
+        raise RequestException(f'Max retries exceeded for {url}') from last_exc

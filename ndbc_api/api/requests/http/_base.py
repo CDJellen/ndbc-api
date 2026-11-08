@@ -35,6 +35,8 @@ class BaseRequest(CoreRequest):
             )
         return cls._build_request_realtime(station_id=station_id)
 
+    """ PRIVATE """
+
     @classmethod
     def _build_request_historical(
         cls,
@@ -77,8 +79,13 @@ class BaseRequest(CoreRequest):
 
         # handle month requests
         if end_time.year == months_req_year:
+            start_month = (
+                int(start_time.month)
+                if start_time.year == months_req_year
+                else 1
+            )
             for hist_month in range(
-                    int(start_time.month),
+                    start_month,
                     min(int(end_time.month), int(last_avail_month)) + 1):
                 reqs.append(req_hist_helper_month(months_req_year, hist_month))
             if int(last_avail_month) <= (end_time.month):
